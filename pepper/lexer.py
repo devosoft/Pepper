@@ -42,6 +42,7 @@ def t_error(t):
 
 lexer = lex.lex()
 
+
 def main():
     ilines = []
     for line in sys.stdin:

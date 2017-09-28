@@ -1,0 +1,2 @@
+test:
+				 PYTHONPATH=`pwd` pytest

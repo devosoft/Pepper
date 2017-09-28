@@ -3,5 +3,4 @@
 #  Released under the MIT Software license; see LICENSE
 #
 
-
-pass
+from . import lexer

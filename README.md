@@ -26,4 +26,12 @@ The preprocessor symbol table will be shared between c-style macros and Pepper c
 
 ## Dependencies
 
-Python ply
+ply, pytest
+
+## To test
+
+`make test` or
+
+ ```
+ PYTHONPATH=`pwd` pytest
+ ```
