@@ -33,4 +33,13 @@ There are a couple things complicating our journey to build a preprocessor. Firs
 
 There's also the new functionality that we're going to build out, specifically the ability to include snippets of python in preprocessor directives that will be executed at compile time with a shared namespace to access the symbol table used by the standard preprocessor macros. These python directives will be capable of emitting output that will be copied into the program.
 
-Something important to note is that we have no intention of making it possible to define a macro in python that will be executed during runtime.
+Something important to note is that we have no intention of making it possible to define a macro in python that will be executed during runtime--that kind of cross-language weirdness is out of scope. We're just looking to crank up the power of C++ macros, basically.
+
+So, in summary:
+
+ 1. Fetch and copy-paste any `#include`d files
+ 2. Handle the logical/flow control preprocessor directives
+
+     a. Include/remove code as dictated (`#ifdef` and the like)
+
+ 3. Remove comments

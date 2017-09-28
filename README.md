@@ -23,3 +23,7 @@ any output from them will be inserted into the processed file.
 Python code will not be callable once compiled.
 
 The preprocessor symbol table will be shared between c-style macros and Pepper calls.
+
+## Dependencies
+
+Python ply
