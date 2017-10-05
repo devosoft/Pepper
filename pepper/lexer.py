@@ -3,14 +3,20 @@ import sys
 import ply.lex as lex
 
 tokens = [
-    'PREPROCESSOR_DIRECTIVE',
+    'PEPPER_DIRECTIVE',
+    'C_PREPROCESSOR_DIRECTIVE',
     'COMMENT',
     'NEWLINE',
     'CODE',
 ]
 
 
-def t_PREPROCESSOR_DIRECTIVE(t):
+def t_PEPPER_DIRECTIVE(t):
+    r'\#py.*'
+    return t
+
+
+def t_C_PREPROCESSOR_DIRECTIVE(t):
     r'\#.*'
     return t
 
@@ -49,7 +55,7 @@ def main():
         ilines.append(line)
         #lexer.input(line)
 
-    # terribly inefficient, but we needed
+    # terribly inefficient, but needed
     lexer.input("".join(ilines))
 
     arcade = []
