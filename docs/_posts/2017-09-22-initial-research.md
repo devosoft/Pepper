@@ -4,6 +4,7 @@ title:  "Initial research"
 date:   2017-09-22 12:00:00 -0400
 categories: devblog research jgf
 ---
+_written by [Jake Fenton](https://github.com/bocajnotnef)_
 
 Before beginning this project I've been assembling some prior work to try and get a handle on what this project will entail. To that end, I initially searched for existing C/C++ preprocessors written in Python. While I found [several](https://stackoverflow.com/questions/4350764/implementation-of-a-c-pre-processor-in-python-or-javascript) [projects](http://jinja.pocoo.org/docs/2.9/) that somehow combined python and C/C++ preprocessing they were, for the most part, somehow inserting C/C++ preprocessor stuff into python and not actually a preprocessor written in python.
 
