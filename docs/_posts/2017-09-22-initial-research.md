@@ -23,7 +23,7 @@ So, thankfully, this means the concerns of this project don't extend to the full
 
 Also, thank you to the designers of C++ for providing a wonderful lexical tree all ready to go on page 426.
 
-![provided lexical diagram](./assets/provided_lexical_tree.png)
+![provided lexical diagram](/assets/provided_lexical_tree.png)
 
 That'll be useful when I'm hacking together my Ply and Lexx setup.
 

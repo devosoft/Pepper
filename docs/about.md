@@ -4,6 +4,7 @@ title: About
 permalink: /about/
 ---
 
+
 Pepper is the brainchild of Dr. Charles Ofria.
 
 The end goal is to have a piece of c++ code that looks like:
