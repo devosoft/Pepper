@@ -4,8 +4,27 @@ title: About
 permalink: /about/
 ---
 
-This is a simple Jekyll theme. You can find out more info about customizing your Jekyll theme, as well as basic Jekyll usage documentation at [jekyllrb.com](http://jekyllrb.com/).  Plus, you can find a lot of themes at [jekyllthemes.org](http://jekyllthemes.org/)
+Pepper is the brainchild of Dr. Charles Ofria.
 
-You can find the source code for this theme at: <data data-icon="ei-sc-github"></data>  [jekyll-simple](https://github.com/wild-flame/jekyll-simple)
+The end goal is to have a piece of c++ code that looks like:
 
-You can find the source code for Jekyll at <data data-icon="ei-sc-github"></data>  [jekyll](https://github.com/jekyll/jekyll)
+```
+#define SHARED_NAMESPACE;
+
+#py if(pepper.SHARED_NAMESPACE):
+#py     pepper.GREETING = "Hello from Pepper, world!"
+
+#include <iostream>
+
+void main() {
+    std::cout << GREETING << std::endl;
+}
+```
+
+The current general plan is that python blocks will be executed as the program is processed and
+any output from them will be inserted into the processed file.
+
+Python code will not be callable once compiled.
+
+The preprocessor symbol table will be shared between c-style macros and Pepper calls.
+

@@ -39,7 +39,9 @@ So, in summary:
 
  1. Fetch and copy-paste any `#include`d files
  2. Handle the logical/flow control preprocessor directives
-
      a. Include/remove code as dictated (`#ifdef` and the like)
+ 3. Expand macros
+ 4. Remove comments
+ 5. Pass the token stream, with diagnostic/location metadata, to compiler
 
- 3. Remove comments
+I'll start with sketching out a basic lexer setup and then expand it with tests.
