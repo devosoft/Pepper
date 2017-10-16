@@ -3,48 +3,44 @@ import sys
 import ply.lex as lex
 
 tokens = [
-    'PEPPER_DIRECTIVE',
-    'C_PREPROCESSOR_DIRECTIVE',
-    'COMMENT',
-    'NEWLINE',
-    'CODE',
+    'IDENTIFIER',
+    'PREPROCESSING_NUMBER',
+    'STRING_LITERAL',
+    'PUNCTUATOR',
+    'WHITESPACE',
+    'OTHER',
 ]
 
 
-def t_PEPPER_DIRECTIVE(t):
-    r'\#py.*'
+def t_IDENTIFIER(t):
+    r'[_a-zA-Z][_a-zA-Z0-9]*'
     return t
 
 
-def t_C_PREPROCESSOR_DIRECTIVE(t):
-    r'\#.*'
+def t_PREPROCESSING_NUMBER(t):
+    r'\.?[0-9]([0-9]|(e\+)|(e\-)|(E\+)|(E\-)|(p\+)|(p\-)|(P\+)|(P\-)|[a-zA-Z])*'
     return t
 
 
-def t_COMMENT(t):
-    r'\//.*|/\*.*\*/'
+def t_STRING_LITERAL(t):
+    r"""('((\\['"tn])|[^'"\\])*')|("((\\['"tn])|[^'"\\])*")"""
     return t
 
 
-def t_NEWLINE(t):
-    r'\n+'
-    t.lexer.lineno += len(t.value)
+def t_PUNCTUATOR(t):
+    r"""[{}:;,?%&*<>=#/!]|[\[\]\(\)\.\^\-\|\+]"""
+    return t
 
 
 def t_WHITESPACE(t):
-    r'[ \t]+'
-    #return t
-    pass
-
-
-def t_CODE(t):
-    r'.+'
+    r"[\t\n ]"
     return t
 
 
 def t_error(t):
     print("Unknown token on line {}: {}".format(t.lexer.lineno, t.value[0]))
     exit(1)
+
 
 lexer = lex.lex()
 
@@ -53,7 +49,7 @@ def main():
     ilines = []
     for line in sys.stdin:
         ilines.append(line)
-        #lexer.input(line)
+        # lexer.input(line)
 
     # terribly inefficient, but needed
     lexer.input("".join(ilines))
@@ -65,9 +61,6 @@ def main():
         if not tok:
             break  # end of file reached
         arcade.append(tok)
-
-
-    ignore = ['COMMENT', 'WHITESPACE']
 
     print(arcade)
 
@@ -82,6 +75,7 @@ def main():
             print('Blew up trying to access type of {}'.format(token))
 
     return 0
+
 
 if __name__ == '__main__':
     main()
