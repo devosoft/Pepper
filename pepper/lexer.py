@@ -2,6 +2,10 @@
 import sys
 import ply.lex as lex
 
+literals = ['+', '-', '*', '/', '(', ')',
+            '=', ',', '{', '}', '[', ']',
+            '.', ';', '!', '#', '<', '>', ':']
+
 tokens = [
     'IDENTIFIER',
     'PREPROCESSING_NUMBER',
@@ -27,13 +31,21 @@ def t_STRING_LITERAL(t):
     return t
 
 
-def t_PUNCTUATOR(t):
-    r"""[{}:;,?%&*<>=#/!]|[\[\]\(\)\.\^\-\|\+]"""
+# def t_PUNCTUATOR(t):
+#     r"""[{}:;,?%&*<>=#/!]|[\[\]\(\)\.\^\-\|\+]"""
+#     return t
+
+
+# TODO: maybe convert this to a t_ignore() rule for improved lexing performance
+def t_NEWLINE(t):
+    "[\n]"
+    t.type = 'WHITESPACE'
+    t.lexer.lineno += 1  # the lexer doesn't know what consistutes a 'line' unless we tell it
     return t
 
 
 def t_WHITESPACE(t):
-    r"[\t\n ]"
+    r"[\t ]"
     return t
 
 
@@ -64,9 +76,15 @@ def main():
 
     print(arcade)
 
+    ignore = ['WHITESPACE']
+
     for token in arcade:
         try:
-            if token.type != 'UNKNOWN':
+            if token.type in ignore:
+                continue
+            elif token.type in literals:
+                print("ASCII_LITERAL: {}".format(token.value))
+            elif token.type != 'UNKNOWN':
                 print("{}: {}".format(token.type, token.value))
             else:
                 print("Unknown token in input: {}".format(token.value))
