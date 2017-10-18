@@ -6,6 +6,12 @@ literals = ['+', '-', '*', '/', '(', ')',
             '=', ',', '{', '}', '[', ']',
             '.', ';', '!', '#', '<', '>', ':']
 
+
+PREPROCESSING_KEYWORDS = [
+    'include',
+    'define'
+]
+
 tokens = [
     'IDENTIFIER',
     'PREPROCESSING_NUMBER',
@@ -14,6 +20,20 @@ tokens = [
     'WHITESPACE',
     'OTHER',
 ]
+
+tokens.extend(["PREPROCESSING_KEYWORD_{}".format(i.upper()) for i in PREPROCESSING_KEYWORDS])
+
+print("tokens defined, {}".format(tokens))
+
+
+def t_PREPROCESSING_KEYWORD_INCLUDE(t):
+    r'include'
+    return t
+
+
+def t_PREPROCESSING_KEYWORD_DEFINE(t):
+    r'define'
+    return t
 
 
 def t_IDENTIFIER(t):

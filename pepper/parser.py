@@ -5,30 +5,47 @@ import ply.yacc as yacc
 import lexer
 from lexer import tokens
 
+
 def p_program(p):
     """
     program : statements
     """
+
 
 def p_statements_empty(p):
     """
     statements:
     """
 
+
 def p_statements_nonempty(p):
     """
     statements: statements statement
     """
 
+
 def p_statement_rules(p):
     """
-    statement   : PEPPER_DIRECTIVE
-                | PEPPER_DIRECTIVE
-                | C_PREPROCESSOR_DIRECTIVE
-                | COMMENT
-                | NEWLINE
-                | CODE
+    statement   : pepper_directive
+                | cpp_code
     """
+
+
+def p_pepper_directive(p):
+    """
+    pepper_directive: # pepper_keyword expression
+    """
+
+
+def p_pepper_keyword(p):
+    """
+    pepper_keyword  : PREPROCESSING_KEYWORD_INCLUDE
+                    | PREPROCESSING_KEYWORD_DEFINE
+    """
+
+# TODO: expression expansions
+# TODO: cpp code expansion
+
 
 def parse(source, debug_mode=False):
     if debug_mode:
@@ -37,17 +54,18 @@ def parse(source, debug_mode=False):
         parser = yacc.yacc(debug=True)
     else:
         parser = yacc.yacc(debug=False, errorlog=yacc.NullLogger())
-    parse_tree = parser.parse(source, lexer=ac_lexer.lexer)
+    parse_tree = parser.parse(source, lexer=lexer)
 
     if debug_mode:
         print("Parse Successful!", file=sys.stderr)
     return parse_tree
 
+
 def main():
     ilines = []
     for line in sys.stdin:
         ilines.append(line)
-        #lexer.input(line)
+        # lexer.input(line)
 
     # terribly inefficient, but needed
     concatenated_input = "".join(ilines)
