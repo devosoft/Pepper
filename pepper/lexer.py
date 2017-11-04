@@ -30,7 +30,7 @@ tokens = [
 
 tokens.extend(["PREPROCESSING_KEYWORD_{}".format(i.upper()) for i in PREPROCESSING_KEYWORDS])
 
-print("tokens defined, {}".format(tokens))
+# print("tokens defined, {}".format(tokens))
 
 
 def t_PREPROCESSING_KEYWORD_INCLUDE(t):
@@ -68,12 +68,12 @@ def t_NEWLINE(t):
     "[\n]"
     t.type = 'WHITESPACE'
     t.lexer.lineno += 1  # the lexer doesn't know what consistutes a 'line' unless we tell it
-    return t
+    pass
 
 
 def t_WHITESPACE(t):
     r"[\t ]"
-    return t
+    pass
 
 
 def t_error(t):

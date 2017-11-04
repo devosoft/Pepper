@@ -4,3 +4,5 @@
 .idea/
 notes.txt
 .vscode
+*/parser.out
+*/parsetab.py
