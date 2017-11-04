@@ -4,7 +4,7 @@ import argparse
 import ply.yacc as yacc
 import abstract_symbol_tree as ast
 from lexer import lexer
-from lexer import tokens
+from lexer import tokens  # NOQA
 
 
 def p_program(p):

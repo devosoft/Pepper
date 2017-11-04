@@ -3,4 +3,6 @@
 #  Released under the MIT Software license; see LICENSE
 #
 
-from . import lexer
+from . import lexer  # NOQA
+from . import parser   # NOQA
+from . import abstract_symbol_tree  # NOQA

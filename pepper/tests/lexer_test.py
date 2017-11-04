@@ -1,5 +1,4 @@
 import pepper.lexer as lexer
-import pepper.parser as parser
 from collections import defaultdict
 
 
