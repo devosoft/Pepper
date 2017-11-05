@@ -77,8 +77,9 @@ setup(
         #   ':python_version=="2.6"': ['argparse'],
     },
     entry_points={
-        # 'console_scripts': [
-        #     'nameless = nameless.cli:main',
-        # ]
+        'console_scripts': [
+            'PepperParse = pepper.parser:main',
+            'PepperLex = pepper.lexer:main'
+        ]
     },
 )
