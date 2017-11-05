@@ -2,9 +2,9 @@
 import sys
 import argparse
 import ply.yacc as yacc
-import abstract_symbol_tree as ast
-from lexer import lexer
-from lexer import tokens  # NOQA
+import pepper.abstract_symbol_tree as ast
+from pepper.lexer import lexer
+from pepper.lexer import tokens  # NOQA
 
 
 def p_program(p):

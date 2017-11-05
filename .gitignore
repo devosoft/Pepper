@@ -6,3 +6,4 @@ notes.txt
 .vscode
 **/parser.out
 **/parsetab.py
+src/Pepper.egg-info/

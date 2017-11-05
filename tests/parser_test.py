@@ -14,6 +14,6 @@ def get_all_tokens(given_lexer):
 
 
 def test_lexer_basic_example():
-    test_lines = open('pepper/tests/test_data/system_include.cpp', 'r').readlines()
+    test_lines = open('tests/test_data/system_include.cpp', 'r').readlines()
     parse_tree = parser.parse("\n".join(test_lines))
     print(parse_tree)

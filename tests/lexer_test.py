@@ -14,7 +14,7 @@ def get_all_tokens(given_lexer):
 
 
 def test_lexer_basic_example():
-    test_lines = open('pepper/tests/test_data/example.cpp', 'r').readlines()
+    test_lines = open('tests/test_data/example.cpp', 'r').readlines()
     lexer.lexer.input('\n'.join(test_lines))
     tokens = get_all_tokens(lexer.lexer)
 
