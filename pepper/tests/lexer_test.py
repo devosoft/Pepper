@@ -18,13 +18,37 @@ def test_lexer_basic_example():
     lexer.lexer.input('\n'.join(test_lines))
     tokens = get_all_tokens(lexer.lexer)
 
-    assert(len(tokens) == 8)
+    assert(len(tokens) == 82)
 
     token_types = defaultdict(int)
 
     for token in tokens:
         token_types[token.type] += 1
 
-    assert(token_types['CODE'] == 4)
-    assert(token_types['C_PREPROCESSOR_DIRECTIVE'] == 2)
-    assert(token_types['PEPPER_DIRECTIVE'] == 2)
+    print(token_types)
+
+    tokens_to_assert = {
+        ',': 1,
+        ';': 2,
+        ':': 8,
+        '.': 3,
+        '(': 4,
+        ')': 4,
+        '[': 1,
+        ']': 1,
+        '{': 1,
+        '}': 1,
+        '#': 4,
+        '+': 1,
+        '<': 13,
+        '=': 2,
+        '>': 1,
+        'IDENTIFIER': 25,
+        'PREPROCESSING_KEYWORD_DEFINE': 1,
+        'PREPROCESSING_KEYWORD_INCLUDE': 1,
+        'PREPROCESSING_NUMBER': 4,
+        'STRING_LITERAL': 4,
+    }
+
+    for token_type, count in tokens_to_assert.items():
+        assert(token_types[token_type] == count)
