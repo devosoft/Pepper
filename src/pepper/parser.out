@@ -1,0 +1,163 @@
+Created by PLY version 3.10 (http://www.dabeaz.com/ply)
+
+Unused terminals:
+
+    WHITESPACE
+    PREPROCESSING_NUMBER
+    PREPROCESSING_KEYWORD_DEFINE
+    OTHER
+    PUNCTUATOR
+
+Grammar
+
+Rule 0     S' -> program
+Rule 1     program -> statements
+Rule 2     statements -> <empty>
+Rule 3     statements -> statements statement
+Rule 4     statement -> pepper_directive
+Rule 5     pepper_directive -> preprocessor_expression
+Rule 6     preprocessor_expression -> include_expression
+Rule 7     include_expression -> # PREPROCESSING_KEYWORD_INCLUDE STRING_LITERAL
+Rule 8     include_expression -> # PREPROCESSING_KEYWORD_INCLUDE < IDENTIFIER >
+
+Terminals, with rules where they appear
+
+#                    : 7 8
+<                    : 8
+>                    : 8
+IDENTIFIER           : 8
+OTHER                : 
+PREPROCESSING_KEYWORD_DEFINE : 
+PREPROCESSING_KEYWORD_INCLUDE : 7 8
+PREPROCESSING_NUMBER : 
+PUNCTUATOR           : 
+STRING_LITERAL       : 7
+WHITESPACE           : 
+error                : 
+
+Nonterminals, with rules where they appear
+
+include_expression   : 6
+pepper_directive     : 4
+preprocessor_expression : 5
+program              : 0
+statement            : 3
+statements           : 1 3
+
+Parsing method: LALR
+
+state 0
+
+    (0) S' -> . program
+    (1) program -> . statements
+    (2) statements -> .
+    (3) statements -> . statements statement
+
+    #               reduce using rule 2 (statements -> .)
+    $end            reduce using rule 2 (statements -> .)
+
+    program                        shift and go to state 1
+    statements                     shift and go to state 2
+
+state 1
+
+    (0) S' -> program .
+
+
+
+state 2
+
+    (1) program -> statements .
+    (3) statements -> statements . statement
+    (4) statement -> . pepper_directive
+    (5) pepper_directive -> . preprocessor_expression
+    (6) preprocessor_expression -> . include_expression
+    (7) include_expression -> . # PREPROCESSING_KEYWORD_INCLUDE STRING_LITERAL
+    (8) include_expression -> . # PREPROCESSING_KEYWORD_INCLUDE < IDENTIFIER >
+
+    $end            reduce using rule 1 (program -> statements .)
+    #               shift and go to state 3
+
+    preprocessor_expression        shift and go to state 4
+    statement                      shift and go to state 5
+    include_expression             shift and go to state 6
+    pepper_directive               shift and go to state 7
+
+state 3
+
+    (7) include_expression -> # . PREPROCESSING_KEYWORD_INCLUDE STRING_LITERAL
+    (8) include_expression -> # . PREPROCESSING_KEYWORD_INCLUDE < IDENTIFIER >
+
+    PREPROCESSING_KEYWORD_INCLUDE shift and go to state 8
+
+
+state 4
+
+    (5) pepper_directive -> preprocessor_expression .
+
+    #               reduce using rule 5 (pepper_directive -> preprocessor_expression .)
+    $end            reduce using rule 5 (pepper_directive -> preprocessor_expression .)
+
+
+state 5
+
+    (3) statements -> statements statement .
+
+    #               reduce using rule 3 (statements -> statements statement .)
+    $end            reduce using rule 3 (statements -> statements statement .)
+
+
+state 6
+
+    (6) preprocessor_expression -> include_expression .
+
+    #               reduce using rule 6 (preprocessor_expression -> include_expression .)
+    $end            reduce using rule 6 (preprocessor_expression -> include_expression .)
+
+
+state 7
+
+    (4) statement -> pepper_directive .
+
+    #               reduce using rule 4 (statement -> pepper_directive .)
+    $end            reduce using rule 4 (statement -> pepper_directive .)
+
+
+state 8
+
+    (7) include_expression -> # PREPROCESSING_KEYWORD_INCLUDE . STRING_LITERAL
+    (8) include_expression -> # PREPROCESSING_KEYWORD_INCLUDE . < IDENTIFIER >
+
+    STRING_LITERAL  shift and go to state 9
+    <               shift and go to state 10
+
+
+state 9
+
+    (7) include_expression -> # PREPROCESSING_KEYWORD_INCLUDE STRING_LITERAL .
+
+    #               reduce using rule 7 (include_expression -> # PREPROCESSING_KEYWORD_INCLUDE STRING_LITERAL .)
+    $end            reduce using rule 7 (include_expression -> # PREPROCESSING_KEYWORD_INCLUDE STRING_LITERAL .)
+
+
+state 10
+
+    (8) include_expression -> # PREPROCESSING_KEYWORD_INCLUDE < . IDENTIFIER >
+
+    IDENTIFIER      shift and go to state 11
+
+
+state 11
+
+    (8) include_expression -> # PREPROCESSING_KEYWORD_INCLUDE < IDENTIFIER . >
+
+    >               shift and go to state 12
+
+
+state 12
+
+    (8) include_expression -> # PREPROCESSING_KEYWORD_INCLUDE < IDENTIFIER > .
+
+    #               reduce using rule 8 (include_expression -> # PREPROCESSING_KEYWORD_INCLUDE < IDENTIFIER > .)
+    $end            reduce using rule 8 (include_expression -> # PREPROCESSING_KEYWORD_INCLUDE < IDENTIFIER > .)
+
