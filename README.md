@@ -35,3 +35,9 @@ ply, pytest
  ```
  PYTHONPATH=`pwd` pytest
  ```
+
+ ## To metric test coverage
+
+ ```
+ py.test --cov-report=html --cov=pepper
+ ```

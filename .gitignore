@@ -6,6 +6,7 @@ dist/
 .idea/
 notes.txt
 .vscode
+htmlcov/
 **/parser.out
 **/parsetab.py
 src/Pepper.egg-info/
