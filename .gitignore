@@ -1,4 +1,6 @@
 .cache/
+.*
+dist/
 **/__pycache__
 *.swp
 .idea/

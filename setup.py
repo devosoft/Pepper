@@ -28,10 +28,10 @@ setup(
     version='0.0.1',
     license='MIT License',
     description='Python-Enhanced PrePreocessor',
-    long_description='%s\n' % (
-        re.compile('^.. start-badges.*^.. end-badges', re.M | re.S).sub('', read('README.md')),
-        # re.sub(':[a-z]+:`~?(.*?)`', r'``\1``', read('CHANGELOG.rst'))
-    ),
+    # long_description='%s\n' % (
+    #     re.compile('^.. start-badges.*^.. end-badges', re.M | re.S).sub('', read('README.md')),
+    #     # re.sub(':[a-z]+:`~?(.*?)`', r'``\1``', read('CHANGELOG.rst'))
+    # ),
     author='Jake Fenton',
     author_email='jake@fenton.io',
     url='https://github.com/Devosoft/Pepper',
@@ -68,7 +68,7 @@ setup(
         # eg: 'keyword1', 'keyword2', 'keyword3',
     ],
     install_requires=[
-        'ply',
+        'ply>=3.10',
         # eg: 'aspectlib==1.1.1', 'six>=1.7',
     ],
     extras_require={
