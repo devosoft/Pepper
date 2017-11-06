@@ -1,4 +1,5 @@
 # Pepper
+[![TravisCI Status](https://api.travis-ci.org/devosoft/Pepper.svg?branch=master)](https://github.com/devosoft/Pepper/)
 
 Pepper is the brainchild of Dr. Charles Ofria.
 
