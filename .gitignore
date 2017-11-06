@@ -10,3 +10,4 @@ htmlcov/
 **/parser.out
 **/parsetab.py
 src/Pepper.egg-info/
+coverage.xml

@@ -27,7 +27,7 @@ before_install:
   - uname -a
   - lsb_release -a
 install:
-  - pip install tox
+  - pip install tox diff_cover
   - virtualenv --version
   - easy_install --version
   - pip --version
