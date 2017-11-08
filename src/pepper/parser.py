@@ -78,6 +78,7 @@ def p_error(p):
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('input_file', type=argparse.FileType('r'), help="The file to parse")
+    parser.add_argument('--debug_mode', action='store_true')
     return parser.parse_args()
 
 
@@ -99,7 +100,7 @@ def main():
     args = get_args()
 
     source = "\n".join(args.input_file.readlines())
-    parse_tree = parse(source, True)
+    parse_tree = parse(source, args.debug_mode)
     print(parse_tree)
 
 

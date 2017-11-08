@@ -1,5 +1,6 @@
 import pepper.parser as parser
 import sys
+import subprocess
 # from collections import defaultdict
 
 
@@ -35,3 +36,16 @@ class TestUnit(object):
             exception_caught = True
         assert(exception_caught)
         print(parse_tree, file=sys.stderr)
+
+
+# import subprocess
+# process = subprocess.Popen(['ls', '-a'], stdout=subprocess.PIPE)
+# out, err = process.communicate()
+# print(out)
+
+class TestSystem(object):
+    def test_parser_command_line_call(self):
+        process = subprocess.Popen(["PepperParse", "./tests/test_data/file_include.cpp"],
+                                   stdout=subprocess.PIPE)
+        out, err = process.communicate()
+        assert(out == b"Node: Statements\n\tNode: PreprocessorInclude\n\t'SomeFile.h'\n")
