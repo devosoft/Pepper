@@ -38,11 +38,6 @@ class TestUnit(object):
         print(parse_tree, file=sys.stderr)
 
 
-# import subprocess
-# process = subprocess.Popen(['ls', '-a'], stdout=subprocess.PIPE)
-# out, err = process.communicate()
-# print(out)
-
 class TestSystem(object):
     def test_parser_command_line_call(self):
         process = subprocess.Popen(["PepperParse", "./tests/test_data/file_include.cpp"],
