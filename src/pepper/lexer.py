@@ -85,7 +85,6 @@ def t_error(t):
 lexer = lex.lex()
 
 
-
 def lex(lines):
     "Takes a single string, containing newlines, that's the entire input"
     # lexer.input("".join(ilines))
