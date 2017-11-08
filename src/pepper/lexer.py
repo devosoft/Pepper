@@ -8,6 +8,7 @@ token stream and build a tree, which will in turn produce actual c++ or c code.
 """
 import sys
 import ply.lex as lex
+import argparse
 
 literals = ['+', '-', '*', '/', '(', ')',
             '=', ',', '{', '}', '[', ']',
@@ -84,14 +85,11 @@ def t_error(t):
 lexer = lex.lex()
 
 
-def main():
-    ilines = []
-    for line in sys.stdin:
-        ilines.append(line)
-        # lexer.input(line)
 
-    # terribly inefficient, but needed
-    lexer.input("".join(ilines))
+def lex(lines):
+    "Takes a single string, containing newlines, that's the entire input"
+    # lexer.input("".join(ilines))
+    lexer.input(lines)
 
     arcade = []
     tok = True
@@ -120,6 +118,19 @@ def main():
             print('Blew up trying to access type of {}'.format(token))
 
     return 0
+
+
+def get_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('input_file', type=argparse.FileType('r'), help="The file to lex")
+    # parser.add_argument('--debug_mode', action='store_true')
+    return parser.parse_args()
+
+
+def main():
+    args = get_args()
+
+    lex(args.input_file.read())
 
 
 if __name__ == '__main__':
