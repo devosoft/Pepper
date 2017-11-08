@@ -1,5 +1,6 @@
 import pepper.lexer as lexer
 from collections import defaultdict
+import subprocess
 
 
 def get_all_tokens(given_lexer):
@@ -57,4 +58,13 @@ class TestUnit(object):
 
 class TestSystem(object):
     def test_lexer_command_line(self):
-        assert(False)
+        process = subprocess.Popen(["PepperLex", "./tests/test_data/file_include.cpp"],
+                                   stdout=subprocess.PIPE)
+        out, err = process.communicate()
+        expected_out = b"""\
+ASCII_LITERAL: #
+PREPROCESSING_KEYWORD_INCLUDE: include
+STRING_LITERAL: 'SomeFile.h'
+"""
+
+        assert(out == expected_out)

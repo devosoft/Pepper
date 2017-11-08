@@ -99,8 +99,6 @@ def lex(lines):
             break  # end of file reached
         arcade.append(tok)
 
-    print(arcade)
-
     ignore = ['WHITESPACE']
 
     for token in arcade:
