@@ -68,7 +68,7 @@ def p_error(p):
     line = 0 if p is None else p.lineno
     print("ERROR(line {}): syntax error".format(line))
     print(p)
-    sys.exit(1)
+    raise Exception
 
 
 # TODO: expression expansions
