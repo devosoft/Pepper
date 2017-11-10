@@ -7,14 +7,7 @@ Welcome to Pepper's documentation!
 ==================================
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+    contributor_documentation/index
+    library_reference/index
+    :maxdepth: 2
+    :caption: Contents:
