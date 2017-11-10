@@ -9,6 +9,7 @@
 coverage.xml
 DiffCovReport.html
 dist/
+docs/sphinx/_build
 htmlcov/
 notes.txt
 src/Pepper.egg-info/
