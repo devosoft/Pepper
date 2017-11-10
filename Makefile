@@ -6,3 +6,6 @@ diff-cover: test
 
 diff-quality:
 	diff-quality --compare-branch=origin/master --violations=flake8 --fail-under=100
+
+doc-html:
+	cd docs/sphinx && make html
