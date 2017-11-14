@@ -10,6 +10,8 @@ In my first programming job, as a freshman at Michigan State, I was told by the 
 
 There's really three things, I think, that are important in a library, from a development perspective. It should have automated tests, it should be readable code and it should have documentation. All of this is important in general but it's absolutely critical if a project is to be open-source and to have outside contributors.
 
+Here's a quick overview of how we use these within Pepper:
+
 ## Testing
 
 I was lucky enough to be introduced to automated testing very early in on in my development career. The [khmer project](https://github.com/dib-lab/khmer), which you'll note is where a lot of these insights come from, made extensive use of automated tests. They had about 80% coverage when I joined the project and above 90% when I left. (Very little of which actually had to do with me, honestly.)
@@ -34,6 +36,12 @@ Enforcing style like this should prevent unreadable, confusing code down the lin
 
 ## Documentation
 
-Currently we don't have automated enforcement for documentation coverage, but there do appear to be packages that will allow for enforcement of that. Currently we have documentation for the master branch being built by [ReadTheDocs](http://readthedocs.io/), though GitHub doesn't view ReadTheDocs as a CI server, which is unfortunate.
+Currently we don't have automated enforcement for documentation coverage, but there do appear to be packages that will allow for enforcement of that. Currently we have documentation for the master branch being built by [ReadTheDocs](http://readthedocs.io/), though GitHub doesn't view ReadTheDocs as a CI server, which is unfortunate. As it stands though, there's a neat little badge on the readme that shows the status of the documentation builder.
+
+Some parts of the documentation are also auto-generated from the docstrings of the source code, making it easy to directly document code and parameters.
 
 Having documentation easily accessible, both for the contributors and for people looking to use the library, is important to keeping the barrier to entry low. This is part of why I maintain this blog alongside the official documentation.
+
+## Next Steps
+
+Now that theres automated enforcement of best practices in place, development can begin in earnest. The project is probably still too immature to attract many outside contributors, but my hope is that with all this infrastructure in place it will be easy for them to join and for the existing team (i.e., me) to trust the contributions they make.
