@@ -1,4 +1,4 @@
-Pepper Library Reference
+Library Reference
 ========================
 
 .. toctree::

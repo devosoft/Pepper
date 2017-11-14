@@ -1,4 +1,4 @@
-Introduction to Pepper
+Introduction
 ======================
 
 Pepper is the brainchild of Dr. Charles Ofria.

@@ -1,4 +1,4 @@
-Pepper Contributor Documentation
+Contributor Documentation
 ================================
 
 .. toctree::
