@@ -42,6 +42,12 @@ Some parts of the documentation are also auto-generated from the docstrings of t
 
 Having documentation easily accessible, both for the contributors and for people looking to use the library, is important to keeping the barrier to entry low. This is part of why I maintain this blog alongside the official documentation.
 
+## Code Review
+
+Thought the use of Github's 'protected branch' system, the Pepper Master branch is restricted, requiring an 'approved administrator' to review code in a pull request before allowing that code to be merged into the codebase. There's also a [contributor checklist](https://pepper.readthedocs.io/en/latest/contributor_documentation/getting_started.html#choosing-an-issue) that contributors are supposed to copy into the comments of a pull request and check off as they complete the parts. This makes sure that contributors go through the steps they're supposed to for their contributions (making sure it's mergable, making sure it's covered by tests, etc) and that the administrators and maintainers of the project make sure people followed the guidelines.
+
+Requiring code review is also a good way to make sure that any written tests are written well, that added documentation makes sense and that any new code actually does what it's supposed to.
+
 ## Next Steps
 
 Now that theres automated enforcement of best practices in place, development can begin in earnest. The project is probably still too immature to attract many outside contributors, but my hope is that with all this infrastructure in place it will be easy for them to join and for the existing team (i.e., me) to trust the contributions they make.
