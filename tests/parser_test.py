@@ -37,10 +37,54 @@ class TestUnit(object):
         assert(exception_caught)
         print(parse_tree, file=sys.stderr)
 
+#  Do you like my super long literals?
+file_include_parse_results = b"""Node: Statements
+\tNode: PreprocessorInclude
+\t'SomeFile.h'
+\tint
+\tmain
+\t(
+\t)
+\t{
+\tint
+\tx
+\t=
+\t3
+\t;
+\tint
+\tsum
+\t=
+\t0
+\t;
+\tfor
+\t(
+\tint
+\ti
+\t=
+\t0
+\t;
+\ti
+\t<
+\tx
+\t;
+\ti
+\t+
+\t+
+\t)
+\t{
+\tsum
+\t+
+\t=
+\ti
+\t;
+\t}
+\t}
+"""
+
 
 class TestSystem(object):
     def test_parser_command_line_call(self):
         process = subprocess.Popen(["PepperParse", "./tests/test_data/file_include.cpp"],
                                    stdout=subprocess.PIPE)
         out, err = process.communicate()
-        assert(out == b"Node: Statements\n\tNode: PreprocessorInclude\n\t'SomeFile.h'\n")
+        assert(out == file_include_parse_results)

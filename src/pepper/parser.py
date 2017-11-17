@@ -64,6 +64,40 @@ def p_include_expression_system(p):
     p[0] = ast.PreprocessorIncludeNode([p[4]], True)
 
 
+def p_statement_to_identifier(p):
+    """
+    statement : IDENTIFIER
+    """
+    p[0] = p[1]
+
+
+def p_statement_to_ascii_literal(p):
+    """
+    statement : '<'
+              | '>'
+              | '+'
+              | '-'
+              | '('
+              | ')'
+              | '%'
+              | '^'
+              | '&'
+              | '*'
+              | '{'
+              | '}'
+              | '['
+              | ']'
+              | '='
+              | ';'
+    """
+    p[0] = p[1]
+
+def p_statement_to_preprocessing_numer(p):
+    """
+    statement : PREPROCESSING_NUMBER
+    """
+    p[0] = p[1]
+
 def p_error(p):
     line = 0 if p is None else p.lineno
     print("ERROR(line {}): syntax error".format(line))
