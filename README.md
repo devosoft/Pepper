@@ -4,6 +4,8 @@
 
 Pepper is the brainchild of Dr. Charles Ofria.
 
+The Pepper documentation is available at [ReadTheDocs](http://pepper.readthedocs.io/en/latest/)
+
 The end goal is to have a piece of c++ code that looks like:
 
 ```
