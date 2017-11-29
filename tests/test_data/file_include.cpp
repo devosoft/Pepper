@@ -7,4 +7,5 @@ int main() {
     for(int i = 0; i < x; i++) {
         sum += i;
     }
+    return sum;
 }

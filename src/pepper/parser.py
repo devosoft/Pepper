@@ -92,11 +92,13 @@ def p_statement_to_ascii_literal(p):
     """
     p[0] = p[1]
 
+
 def p_statement_to_preprocessing_numer(p):
     """
     statement : PREPROCESSING_NUMBER
     """
     p[0] = p[1]
+
 
 def p_error(p):
     line = 0 if p is None else p.lineno

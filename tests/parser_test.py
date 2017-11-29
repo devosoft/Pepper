@@ -37,6 +37,7 @@ class TestUnit(object):
         assert(exception_caught)
         print(parse_tree, file=sys.stderr)
 
+
 #  Do you like my super long literals?
 file_include_parse_results = b"""Node: Statements
 \tNode: PreprocessorInclude
@@ -78,6 +79,9 @@ file_include_parse_results = b"""Node: Statements
 \ti
 \t;
 \t}
+\treturn
+\tsum
+\t;
 \t}
 """
 
