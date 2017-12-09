@@ -40,47 +40,46 @@ class TestUnit(object):
 
 #  Do you like my super long literals?
 file_include_parse_results = b"""Node: Statements
-\tNode: PreprocessorInclude
-\t'SomeFile.h'
-\tint
-\tmain
+\tPreprocessorInclude: 'SomeFile.h'
+\tIdentifier: int
+\tIdentifier: main
 \t(
 \t)
 \t{
-\tint
-\tx
+\tIdentifier: int
+\tIdentifier: x
 \t=
-\t3
+\tPreprocessingNumber: 3
 \t;
-\tint
-\tsum
+\tIdentifier: int
+\tIdentifier: sum
 \t=
-\t0
+\tPreprocessingNumber: 0
 \t;
-\tfor
+\tIdentifier: for
 \t(
-\tint
-\ti
+\tIdentifier: int
+\tIdentifier: i
 \t=
-\t0
+\tPreprocessingNumber: 0
 \t;
-\ti
+\tIdentifier: i
 \t<
-\tx
+\tIdentifier: x
 \t;
-\ti
+\tIdentifier: i
 \t+
 \t+
 \t)
 \t{
-\tsum
+\tIdentifier: sum
 \t+
 \t=
-\ti
+\tIdentifier: i
 \t;
 \t}
-\treturn
-\tsum
+\tIdentifier: return
+\tIdentifier: sum
 \t;
 \t}
 """
