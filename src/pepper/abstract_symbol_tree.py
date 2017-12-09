@@ -28,7 +28,6 @@ class Node():
 
 
 class StatementsNode(Node):
-    # super(StatementsNode, self).__init__("Statements", None, children)
 
     def __init__(self, children=None):
         super(StatementsNode, self).__init__("Statements", children)
@@ -54,3 +53,22 @@ class PreprocessorIncludeNode(Node):
         super(PreprocessorIncludeNode, self).__init__("PreprocessorInclude", children)
         self.system_incude = system_include
         self.target = children[0]
+
+    def __str__(self):
+        return "{}: {}".format(self.name, self.children[0])
+
+
+class IdentifierNode(Node):
+    def __init__(self, children):
+        super(IdentifierNode, self).__init__("Identifier", children)
+
+    def __str__(self):
+        return "{}: {}".format(self.name, self.children[0])
+
+
+class PreprocssingNumberNode(Node):
+    def __init__(self, children):
+        super(PreprocssingNumberNode, self).__init__("PreprocessingNumber", children)
+
+    def __str__(self):
+        return "{}: {}".format(self.name, self.children[0])

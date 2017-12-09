@@ -68,7 +68,7 @@ def p_statement_to_identifier(p):
     """
     statement : IDENTIFIER
     """
-    p[0] = p[1]
+    p[0] = ast.IdentifierNode([p[1]])
 
 
 def p_statement_to_ascii_literal(p):
@@ -97,7 +97,7 @@ def p_statement_to_preprocessing_numer(p):
     """
     statement : PREPROCESSING_NUMBER
     """
-    p[0] = p[1]
+    p[0] = ast.PreprocssingNumberNode([p[1]])
 
 
 def p_error(p):
