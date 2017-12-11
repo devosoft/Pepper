@@ -87,7 +87,8 @@ setup(
     entry_points={
         'console_scripts': [
             'PepperParse = pepper.parser:main',
-            'PepperLex = pepper.lexer:main'
+            'PepperLex = pepper.lexer:main',
+            'Pepper = pepper.preprocessor:main',
         ]
     },
 )
