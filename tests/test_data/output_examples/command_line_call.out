@@ -1,0 +1,100 @@
+Node: Statements
+	PreprocessorInclude:  
+	NewlineNode
+	NewlineNode
+	Identifier: int
+	Whitespace:  
+	Identifier: main
+	ASCIILit: (
+	ASCIILit: )
+	Whitespace:  
+	ASCIILit: {
+	NewlineNode
+	Whitespace:  
+	Whitespace:  
+	Whitespace:  
+	Whitespace:  
+	Identifier: int
+	Whitespace:  
+	Identifier: x
+	Whitespace:  
+	ASCIILit: =
+	Whitespace:  
+	PreprocessingNumber: 3
+	ASCIILit: ;
+	NewlineNode
+	Whitespace:  
+	Whitespace:  
+	Whitespace:  
+	Whitespace:  
+	Identifier: int
+	Whitespace:  
+	Identifier: sum
+	Whitespace:  
+	ASCIILit: =
+	Whitespace:  
+	PreprocessingNumber: 0
+	ASCIILit: ;
+	NewlineNode
+	NewlineNode
+	Whitespace:  
+	Whitespace:  
+	Whitespace:  
+	Whitespace:  
+	Identifier: for
+	ASCIILit: (
+	Identifier: int
+	Whitespace:  
+	Identifier: i
+	Whitespace:  
+	ASCIILit: =
+	Whitespace:  
+	PreprocessingNumber: 0
+	ASCIILit: ;
+	Whitespace:  
+	Identifier: i
+	Whitespace:  
+	ASCIILit: <
+	Whitespace:  
+	Identifier: x
+	ASCIILit: ;
+	Whitespace:  
+	Identifier: i
+	ASCIILit: +
+	ASCIILit: +
+	ASCIILit: )
+	Whitespace:  
+	ASCIILit: {
+	NewlineNode
+	Whitespace:  
+	Whitespace:  
+	Whitespace:  
+	Whitespace:  
+	Whitespace:  
+	Whitespace:  
+	Whitespace:  
+	Whitespace:  
+	Identifier: sum
+	Whitespace:  
+	ASCIILit: +
+	ASCIILit: =
+	Whitespace:  
+	Identifier: i
+	ASCIILit: ;
+	NewlineNode
+	Whitespace:  
+	Whitespace:  
+	Whitespace:  
+	Whitespace:  
+	ASCIILit: }
+	NewlineNode
+	Whitespace:  
+	Whitespace:  
+	Whitespace:  
+	Whitespace:  
+	Identifier: return
+	Whitespace:  
+	Identifier: sum
+	ASCIILit: ;
+	NewlineNode
+	ASCIILit: }

@@ -13,3 +13,4 @@ dist/
 htmlcov/
 notes.txt
 src/Pepper.egg-info/
+*.preprocessed.cc

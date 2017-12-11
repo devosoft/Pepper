@@ -26,6 +26,7 @@ tokens = [
     'STRING_LITERAL',
     'PUNCTUATOR',
     'WHITESPACE',
+    'NEWLINE',
     'OTHER',
 ]
 
@@ -66,15 +67,15 @@ def t_STRING_LITERAL(t):
 
 # TODO: maybe convert this to a t_ignore() rule for improved lexing performance
 def t_NEWLINE(t):
-    "[\n]"
-    t.type = 'WHITESPACE'
+    r"\n"
+    t.type = 'NEWLINE'
     t.lexer.lineno += 1  # the lexer doesn't know what consistutes a 'line' unless we tell it
-    pass
+    return t
 
 
 def t_WHITESPACE(t):
     r"[\t ]"
-    pass
+    return t
 
 
 def t_error(t):
@@ -83,6 +84,7 @@ def t_error(t):
 
 
 lexer = lex.lex()
+ignore = ['WHITESPACE', 'NEWLINE']
 
 
 def lex(lines):
@@ -97,8 +99,6 @@ def lex(lines):
         if not tok:
             break  # end of file reached
         arcade.append(tok)
-
-    ignore = ['WHITESPACE']
 
     for token in arcade:
         try:
@@ -131,4 +131,5 @@ def main():
 
 
 if __name__ == '__main__':
+    print("running lexer as if main was called")
     main()

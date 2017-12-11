@@ -40,48 +40,105 @@ class TestUnit(object):
 
 #  Do you like my super long literals?
 file_include_parse_results = b"""Node: Statements
-\tPreprocessorInclude: 'SomeFile.h'
+\tPreprocessorInclude:
+\tNewlineNode
+\tNewlineNode
 \tIdentifier: int
+\tWhitespace:
 \tIdentifier: main
-\t(
-\t)
-\t{
+\tASCIILit: (
+\tASCIILit: )
+\tWhitespace:
+\tASCIILit: {
+\tNewlineNode
+\tWhitespace:
+\tWhitespace:
+\tWhitespace:
+\tWhitespace:
 \tIdentifier: int
+\tWhitespace:
 \tIdentifier: x
-\t=
+\tWhitespace:
+\tASCIILit: =
+\tWhitespace:
 \tPreprocessingNumber: 3
-\t;
+\tASCIILit: ;
+\tNewlineNode
+\tWhitespace:
+\tWhitespace:
+\tWhitespace:
+\tWhitespace:
 \tIdentifier: int
+\tWhitespace:
 \tIdentifier: sum
-\t=
+\tWhitespace:
+\tASCIILit: =
+\tWhitespace:
 \tPreprocessingNumber: 0
-\t;
+\tASCIILit: ;
+\tNewlineNode
+\tNewlineNode
+\tWhitespace:
+\tWhitespace:
+\tWhitespace:
+\tWhitespace:
 \tIdentifier: for
-\t(
+\tASCIILit: (
 \tIdentifier: int
+\tWhitespace:
 \tIdentifier: i
-\t=
+\tWhitespace:
+\tASCIILit: =
+\tWhitespace:
 \tPreprocessingNumber: 0
-\t;
+\tASCIILit: ;
+\tWhitespace:
 \tIdentifier: i
-\t<
+\tWhitespace:
+\tASCIILit: <
+\tWhitespace:
 \tIdentifier: x
-\t;
+\tASCIILit: ;
+\tWhitespace:
 \tIdentifier: i
-\t+
-\t+
-\t)
-\t{
+\tASCIILit: +
+\tASCIILit: +
+\tASCIILit: )
+\tWhitespace:
+\tASCIILit: {
+\tNewlineNode
+\tWhitespace:
+\tWhitespace:
+\tWhitespace:
+\tWhitespace:
+\tWhitespace:
+\tWhitespace:
+\tWhitespace:
+\tWhitespace:
 \tIdentifier: sum
-\t+
-\t=
+\tWhitespace:
+\tASCIILit: +
+\tASCIILit: =
+\tWhitespace:
 \tIdentifier: i
-\t;
-\t}
+\tASCIILit: ;
+\tNewlineNode
+\tWhitespace:
+\tWhitespace:
+\tWhitespace:
+\tWhitespace:
+\tASCIILit: }
+\tNewlineNode
+\tWhitespace:
+\tWhitespace:
+\tWhitespace:
+\tWhitespace:
 \tIdentifier: return
+\tWhitespace:
 \tIdentifier: sum
-\t;
-\t}
+\tASCIILit: ;
+\tNewlineNode
+\tASCIILit: }
 """
 
 
@@ -90,4 +147,7 @@ class TestSystem(object):
         process = subprocess.Popen(["PepperParse", "./tests/test_data/file_include.cpp"],
                                    stdout=subprocess.PIPE)
         out, err = process.communicate()
-        assert(out == file_include_parse_results)
+        expected_out = None
+        with open('./tests/test_data/output_examples/command_line_call.out', 'rb') as example_file:
+            expected_out = example_file.read()
+        assert(out == expected_out)

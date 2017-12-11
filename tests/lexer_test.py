@@ -1,4 +1,5 @@
 import pepper.lexer as lexer
+from pepper.lexer import ignore as tokens_to_ignore
 from collections import defaultdict
 import subprocess
 
@@ -9,7 +10,8 @@ def get_all_tokens(given_lexer):
         tok = given_lexer.token()
         if not tok:
             break
-        tokens.append(tok)
+        if tok.type not in tokens_to_ignore:
+            tokens.append(tok)
 
     return tokens
 
