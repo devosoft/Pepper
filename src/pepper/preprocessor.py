@@ -23,18 +23,21 @@ def main(args=None):
     if not args:
         args = get_args()
 
-    source = "\n".join(args.input_file.readlines())
+    source = args.input_file.read()
 
-    preprocessed_lines = []
+    preprocessed_lines = [""]
     parser.parse(source).preprocess(preprocessed_lines)
-    output = "\n".join(preprocessed_lines)
+    output = "\n".join(preprocessed_lines) + "\n"
+
+    print("Preprocessed lines:")
+    print(preprocessed_lines)
 
     if args.output_file:
         args.output_file.write(output)
         args.output_file.close()
     else:
         with open(args.input_file.name + ".preprocessed.cc", 'w') as output_file:
-            output_file.write("\n".join(output))
+            output_file.write(output)
 
 
 if __name__ == "__main__":

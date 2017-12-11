@@ -52,21 +52,30 @@ def p_expression(p):
 
 def p_include_expression_file(p):
     """
-    include_expression : '#' PREPROCESSING_KEYWORD_INCLUDE STRING_LITERAL
+    include_expression : '#' PREPROCESSING_KEYWORD_INCLUDE WHITESPACE STRING_LITERAL
     """
     p[0] = ast.PreprocessorIncludeNode([p[3]], False)
 
 
 def p_include_expression_system(p):
     """
-    include_expression : '#' PREPROCESSING_KEYWORD_INCLUDE '<' IDENTIFIER '>'
+    include_expression : '#' PREPROCESSING_KEYWORD_INCLUDE WHITESPACE '<' IDENTIFIER '>'
     """
     p[0] = ast.PreprocessorIncludeNode([p[4]], True)
 
 
-# def p_identifier_with_parentheses(p):
-#     """
-#     """
+def p_whitespace(p):
+    """
+    statement : WHITESPACE
+    """
+    p[0] = ast.WhiteSpaceNode(p[1])
+
+
+def p_newline(p):
+    """
+    statement : NEWLINE
+    """
+    p[0] = ast.NewlineNode("\n")
 
 
 def p_statement_to_identifier(p):
@@ -95,7 +104,7 @@ def p_statement_to_ascii_literal(p):
               | '='
               | ';'
     """
-    p[0] = p[1]
+    p[0] = ast.ASCIILiteralNode(p[1])
 
 
 def p_statement_to_preprocessing_numer(p):
@@ -125,8 +134,6 @@ def get_args():
 
 def parse(source, debug_mode=False):
     if debug_mode:
-        # print("Entering AC parser...", file=sys.stderr)
-        # print("Avaliable tokens are {}".format(tokens), file=sys.stderr)
         parser = yacc.yacc(debug=True)
     else:
         parser = yacc.yacc(debug=False, errorlog=yacc.NullLogger())
@@ -140,8 +147,8 @@ def parse(source, debug_mode=False):
 def main():
     args = get_args()
 
-    source = "\n".join(args.input_file.readlines())
-    parse_tree = parse(source, args.debug_mode)
+    # source = "\n".join(args.input_file.readlines())
+    parse_tree = parse(args.input_file.read(), args.debug_mode)
     print(parse_tree)
 
 

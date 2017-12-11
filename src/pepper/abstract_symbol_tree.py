@@ -23,7 +23,7 @@ class Node():
 
         return "\n".join(lines)
 
-    def preprocess(self, generated_code):
+    def preprocess(self, lines):
         raise NotImplementedError()
 
 
@@ -32,19 +32,15 @@ class StatementsNode(Node):
     def __init__(self, children=None):
         super(StatementsNode, self).__init__("Statements", children)
 
-    def preprocess(self, generated_code):
+    def preprocess(self, lines):
         for child in self.children:
-            child.preprocess(generated_code)
+            child.preprocess(lines)
 
 
 class PreprocessorDirectiveNode(Node):
 
     def __init__(self, children):
         super(PreprocessorDirectiveNode, self).__init__("PreprocessorDirective", children)
-
-    def preprocess(self, generated_code):
-        print("Imagine I preprocessed some stuff")
-        return str(self)
 
 
 class PreprocessorIncludeNode(Node):
@@ -57,6 +53,10 @@ class PreprocessorIncludeNode(Node):
     def __str__(self):
         return "{}: {}".format(self.name, self.children[0])
 
+    def preprocess(self, lines):
+        "This will be a lie for a while. I'll have to fix it later."
+        lines[-1] = lines[-1] + 'static_assert(false, "include node not properly implemented")'
+
 
 class IdentifierNode(Node):
     def __init__(self, children):
@@ -65,6 +65,42 @@ class IdentifierNode(Node):
     def __str__(self):
         return "{}: {}".format(self.name, self.children[0])
 
+    def preprocess(self, lines):
+        lines[-1] = lines[-1] + self.children[0]
+
+
+class NewlineNode(Node):
+    def __init__(self, children):
+        super(NewlineNode, self).__init__("Newline", children)
+
+    def __str__(self):
+        return "NewlineNode"
+
+    def preprocess(self, lines):
+        lines.append("")
+
+
+class WhiteSpaceNode(Node):
+    def __init__(self, children):
+        super(WhiteSpaceNode, self).__init__("Whitespace", children)
+
+    def __str__(self):
+        return "{}: {}".format(self.name, self.children[0])
+
+    def preprocess(self, lines):
+        lines[-1] += self.children[0]
+
+
+class ASCIILiteralNode(Node):
+    def __init__(self, children):
+        super(ASCIILiteralNode, self).__init__('ASCIILit', children)
+
+    def __str__(self):
+        return "{}: {}".format(self.name, self.children[0])
+
+    def preprocess(self, lines):
+        lines[-1] = lines[-1] + self.children[0]
+
 
 class PreprocssingNumberNode(Node):
     def __init__(self, children):
@@ -72,3 +108,6 @@ class PreprocssingNumberNode(Node):
 
     def __str__(self):
         return "{}: {}".format(self.name, self.children[0])
+
+    def preprocess(self, lines):
+        lines[-1] = lines[-1] + self.children[0]
