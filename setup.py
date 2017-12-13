@@ -69,16 +69,17 @@ setup(
     ],
     install_requires=[
         'ply>=3.10',
+        'wheel',
+        'sphinx>=1.6.3',
+        'pytest',
+        'pytest-cov',
+        'tox',
+        'diff_cover',
+        'flake8',
         # eg: 'aspectlib==1.1.1', 'six>=1.7',
     ],
     extras_require={
-        'dev': [
-                'sphinx>=1.6.3',
-                'pytest',
-                'pytest-cov',
-                'tox',
-                'diff_cover',
-                'flake8',
+        'develop': [
              ]
         # eg:
         #   'rst': ['docutils>=0.11'],
