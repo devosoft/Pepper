@@ -5,7 +5,7 @@ It primarily serves as the entry point to Pepper
 """
 import argparse
 import pepper.parser as parser
-
+import os
 
 def get_args():
     parser = argparse.ArgumentParser()
@@ -29,14 +29,11 @@ def main(args=None):
     parser.parse(source).preprocess(preprocessed_lines)
     output = "\n".join(preprocessed_lines) + "\n"
 
-    print("Preprocessed lines:")
-    print(preprocessed_lines)
-
     if args.output_file:
         args.output_file.write(output)
         args.output_file.close()
     else:
-        with open(args.input_file.name + ".preprocessed.cc", 'w') as output_file:
+        with open(os.path.split(args.input_file.name)[1] + ".preprocessed.cc", 'w') as output_file: # NOQA
             output_file.write(output)
 
 
