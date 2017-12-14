@@ -16,10 +16,10 @@ class Node():
             self.children = []
 
     def __str__(self):
-        lines = ["Node: {}".format(self.name)]
+        lines = [f"Node: {self.name}"]
 
         for child in self.children:
-            lines.append("\t{}".format(str(child)))
+            lines.append(f"\t{str(child)}")
 
         return "\n".join(lines)
 
@@ -51,7 +51,7 @@ class PreprocessorIncludeNode(Node):
         self.target = children[0]
 
     def __str__(self):
-        return "{}: {}".format(self.name, self.children[0])
+        return f"{self.name}: {self.children[0]}"
 
     def preprocess(self, lines):
         "This will be a lie for a while. I'll have to fix it later."
@@ -59,17 +59,19 @@ class PreprocessorIncludeNode(Node):
 
 
 class IdentifierNode(Node):
+
     def __init__(self, children):
         super(IdentifierNode, self).__init__("Identifier", children)
 
     def __str__(self):
-        return "{}: {}".format(self.name, self.children[0])
+        return f"{self.name}: {self.children[0]}"
 
     def preprocess(self, lines):
         lines[-1] = lines[-1] + self.children[0]
 
 
 class NewlineNode(Node):
+
     def __init__(self, children):
         super(NewlineNode, self).__init__("Newline", children)
 
@@ -81,33 +83,36 @@ class NewlineNode(Node):
 
 
 class WhiteSpaceNode(Node):
+
     def __init__(self, children):
         super(WhiteSpaceNode, self).__init__("Whitespace", children)
 
     def __str__(self):
-        return "{}: {}".format(self.name, self.children[0])
+        return f"{self.name}: {self.children[0]}"
 
     def preprocess(self, lines):
         lines[-1] += self.children[0]
 
 
 class ASCIILiteralNode(Node):
+
     def __init__(self, children):
         super(ASCIILiteralNode, self).__init__('ASCIILit', children)
 
     def __str__(self):
-        return "{}: {}".format(self.name, self.children[0])
+        return f"{self.name}: {self.children[0]}"
 
     def preprocess(self, lines):
         lines[-1] = lines[-1] + self.children[0]
 
 
 class PreprocssingNumberNode(Node):
+
     def __init__(self, children):
         super(PreprocssingNumberNode, self).__init__("PreprocessingNumber", children)
 
     def __str__(self):
-        return "{}: {}".format(self.name, self.children[0])
+        return f"{self.name}: {self.children[0]}"
 
     def preprocess(self, lines):
         lines[-1] = lines[-1] + self.children[0]

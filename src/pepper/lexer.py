@@ -30,9 +30,7 @@ tokens = [
     'OTHER',
 ]
 
-tokens.extend(["PREPROCESSING_KEYWORD_{}".format(i.upper()) for i in PREPROCESSING_KEYWORDS])
-
-# print("tokens defined, {}".format(tokens))
+tokens.extend([f"PREPROCESSING_KEYWORD_{i.upper()}" for i in PREPROCESSING_KEYWORDS])
 
 
 def t_PREPROCESSING_KEYWORD_INCLUDE(t):
@@ -79,7 +77,7 @@ def t_WHITESPACE(t):
 
 
 def t_error(t):
-    print("Unknown token on line {}: {}".format(t.lexer.lineno, t.value[0]))
+    print(f"Unknown token on line {t.lexer.lineno}: {t.value[0]}")
     exit(1)
 
 
@@ -105,14 +103,14 @@ def lex(lines):
             if token.type in ignore:
                 continue
             elif token.type in literals:
-                print("ASCII_LITERAL: {}".format(token.value))
+                print(f"ASCII_LITERAL: {token.value}")
             elif token.type != 'UNKNOWN':
-                print("{}: {}".format(token.type, token.value))
+                print(f"{token.type}: {token.value}")
             else:
-                print("Unknown token in input: {}".format(token.value))
+                print(f"Unknown token in input: {token.value}")
                 sys.exit(1)
-        except:
-            print('Blew up trying to access type of {}'.format(token))
+        except: # NOQA
+            print(f'Blew up trying to access type of {token}')
 
     return 0
 
