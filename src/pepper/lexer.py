@@ -12,7 +12,7 @@ import argparse
 
 literals = ['+', '-', '*', '/', '(', ')',
             '=', ',', '{', '}', '[', ']',
-            '.', ';', '!', '#', '<', '>', ':']
+            '.', ';', '!', '#', '<', '>', ':', '~']
 
 
 PREPROCESSING_KEYWORDS = [
@@ -129,5 +129,4 @@ def main():
 
 
 if __name__ == '__main__':
-    print("running lexer as if main was called")
     main()
