@@ -57,6 +57,15 @@ class TestUnit(object):
         for token_type, count in tokens_to_assert.items():
             assert(token_types[token_type] == count)
 
+    def test_lexer_unknown_token(self):
+        test_lines = open('tests/test_data/unknown_token.cpp', 'r').readlines()
+        lexer.lexer.input('\n'.join(test_lines))
+        try:
+            tokens = get_all_tokens(lexer.lexer) # NOQA
+            assert(False and "Above line should have filed!")
+        except SystemExit as err:
+            assert(err.code == 1)
+
 
 class TestSystem(object):
     def test_lexer_command_line(self):
@@ -111,3 +120,11 @@ ASCII_LITERAL: }
 """
 
         assert(out == expected_out)
+
+    def test_lexer_unknown_token(self):
+        process = subprocess.Popen(["PepperLex", "./tests/test_data/unknown_token.cpp"],
+                                   stdout=subprocess.PIPE)
+        out, err = process.communicate()
+        expected_out = b"Unknown token on line 1: \xc2\xa9\n"
+        assert(out == expected_out)
+        assert(process.returncode == 1)

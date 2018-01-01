@@ -7,6 +7,7 @@ import argparse
 import pepper.parser as parser
 import os
 
+
 def get_args():
     parser = argparse.ArgumentParser()
 
@@ -33,7 +34,8 @@ def main(args=None):
         args.output_file.write(output)
         args.output_file.close()
     else:
-        with open(os.path.split(args.input_file.name)[1] + ".preprocessed.cc", 'w') as output_file: # NOQA
+        basepath = os.path.split(args.input_file.name)[0]
+        with open(basepath + '/' + os.path.split(args.input_file.name)[1] + ".preprocessed.cc", 'w') as output_file: # NOQA
             output_file.write(output)
 
 
