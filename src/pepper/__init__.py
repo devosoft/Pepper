@@ -6,3 +6,4 @@
 from . import lexer  # NOQA
 from . import parser   # NOQA
 from . import abstract_symbol_tree  # NOQA
+from . import symbol_table  # NOQA
