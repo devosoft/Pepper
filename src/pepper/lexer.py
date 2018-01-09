@@ -85,7 +85,7 @@ lexer = lex.lex()
 ignore = ['WHITESPACE', 'NEWLINE']
 
 
-def lex(lines):
+def lex(lines, debug_mode=False):
     "Takes a single string, containing newlines, that's the entire input"
     # lexer.input("".join(ilines))
     lexer.input(lines)
@@ -101,7 +101,10 @@ def lex(lines):
     for token in arcade:
         try:
             if token.type in ignore:
-                continue
+                if debug_mode:
+                    print(f"(IGNORED:) {token.type}: {token.value}")
+                else:
+                    continue
             elif token.type in literals:
                 print(f"ASCII_LITERAL: {token.value}")
             elif token.type != 'UNKNOWN':
@@ -118,14 +121,14 @@ def lex(lines):
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('input_file', type=argparse.FileType('r'), help="The file to lex")
-    # parser.add_argument('--debug_mode', action='store_true')
+    parser.add_argument('--debug_mode', action='store_true')
     return parser.parse_args()
 
 
 def main():
     args = get_args()
 
-    lex(args.input_file.read())
+    lex(args.input_file.read(), args.debug_mode)
 
 
 if __name__ == '__main__':

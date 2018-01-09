@@ -18,6 +18,9 @@ class MacroExpansion():
             expansion = expansion.replace(self.args[index], str(arg))
         return expansion
 
+    def __str__(self):
+        return f"Macro {self.name} with args {self.args} expanding to '{self.expansion}'"
+
 
 class SymbolTable():
     def __init__(self):

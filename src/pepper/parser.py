@@ -5,35 +5,51 @@ import ply.yacc as yacc
 import pepper.abstract_symbol_tree as ast
 from pepper.lexer import lexer
 from pepper.lexer import tokens  # NOQA
+import pepper.symbol_table as symtable
 
 
 def p_program(p):
     """
-    program : statements
+    program : lines statement
     """
+    p[1].children.append(p[2])
     p[0] = p[1]
 
 
 def p_statements_empty(p):
     """
-    statements :
+    lines :
     """
-    p[0] = ast.StatementsNode()
+    p[0] = ast.LinesNode()
 
 
-def p_statements_nonempty(p):
+def p_lines_nonempty(p):
     """
-    statements : statements statement
+    lines : lines line
     """
-    statements = p[1].children + [p[2]]
-    p[0] = ast.StatementsNode(statements)
+    statements = p[1].children + [p[2], ast.NewlineNode("\n")]
+    p[0] = ast.LinesNode(statements)
 
 
-def p_statement_rules(p):
+def p_line_to_statement(p):
     """
-    statement   : pepper_directive
+    line : statement NEWLINE
     """
     p[0] = p[1]
+
+
+def p_statement_to_pepper_directive(p):
+    """
+    statement : pepper_directive
+    """
+    p[0] = p[1]
+
+
+def p_statement_to_code_expression(p):
+    """
+    statement : code_expressions
+    """
+    p[0] = ast.LinesNode(p[1])
 
 
 def p_pepper_directive(p):
@@ -43,51 +59,96 @@ def p_pepper_directive(p):
     p[0] = p[1]
 
 
-def p_expression(p):
+def p_include_expression(p):
     """
     preprocessor_expression : include_expression
+                            | define_expression
+    """
+    p[0] = p[1]
+
+
+def p_define_expression_no_args(p):
+    """
+    define_expression : '#' PREPROCESSING_KEYWORD_DEFINE WHITESPACE IDENTIFIER WHITESPACE macro_expansion
+    """
+    p[0] = symtable.MacroExpansion(p[4], p[6])
+
+
+def p_include_expression_disambiguation(p):
+    """
+    include_expression : include_expression_file
+                       | include_expression_system
+    """
+    p[0] = p[1]
+
+
+def p_define_expansion(p):
+    """
+    macro_expansion : code_expressions
     """
     p[0] = p[1]
 
 
 def p_include_expression_file(p):
     """
-    include_expression : '#' PREPROCESSING_KEYWORD_INCLUDE WHITESPACE STRING_LITERAL
+    include_expression_file : '#' PREPROCESSING_KEYWORD_INCLUDE WHITESPACE STRING_LITERAL
     """
     p[0] = ast.PreprocessorIncludeNode([p[3]], False)
 
 
 def p_include_expression_system(p):
     """
-    include_expression : '#' PREPROCESSING_KEYWORD_INCLUDE WHITESPACE '<' IDENTIFIER '>'
+    include_expression_system : '#' PREPROCESSING_KEYWORD_INCLUDE WHITESPACE '<' IDENTIFIER '>'
     """
     p[0] = ast.PreprocessorIncludeNode([p[4]], True)
 
 
+def p_expressions_empty(p):
+    """
+    code_expressions :
+    """
+    p[0] = []
+
+
+def p_expressions(p):
+    """
+    code_expressions : code_expressions code_expression
+    """
+    p[0] = p[1]
+    p[0].append(p[2])
+
+
 def p_whitespace(p):
     """
-    statement : WHITESPACE
+    code_expression : WHITESPACE
     """
     p[0] = ast.WhiteSpaceNode(p[1])
 
 
-def p_newline(p):
-    """
-    statement : NEWLINE
-    """
-    p[0] = ast.NewlineNode("\n")
+# def p_newline(p):
+#     """
+#     code_expression : NEWLINE
+#     """
+#     p[0] = ast.NewlineNode("\n")
 
 
 def p_statement_to_identifier(p):
     """
-    statement : IDENTIFIER
+    code_expression : IDENTIFIER
     """
     p[0] = ast.IdentifierNode([p[1]])
 
 
+def p_expression_to_string_lit(p):
+    """
+    code_expression : STRING_LITERAL
+    """
+    p[0] = p[1]
+
+
 def p_statement_to_ascii_literal(p):
     """
-    statement : '<'
+    code_expression : '<'
               | '>'
               | '+'
               | '-'
@@ -109,14 +170,16 @@ def p_statement_to_ascii_literal(p):
 
 def p_statement_to_preprocessing_numer(p):
     """
-    statement : PREPROCESSING_NUMBER
+    code_expression : PREPROCESSING_NUMBER
     """
     p[0] = ast.PreprocssingNumberNode([p[1]])
 
 
 def p_error(p):
-    line = 0 if p is None else p.lineno
-    print(f"ERROR(line {line}): syntax error")
+    if p is None:
+        print("")
+        raise SyntaxError("ERROR--Line unknown. (Did you remember to end your file in a newline?)")
+    print(f"ERROR(line {p.lineno}): syntax error")
     print(p)
     raise Exception
 
