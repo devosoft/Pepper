@@ -1,7 +1,9 @@
 Node: Statements
 	PreprocessorInclude:  
 	NewlineNode
+	Node: Statements
 	NewlineNode
+	Node: Statements
 	Identifier: int
 	Whitespace:  
 	Identifier: main
@@ -10,6 +12,7 @@ Node: Statements
 	Whitespace:  
 	ASCIILit: {
 	NewlineNode
+	Node: Statements
 	Whitespace:  
 	Whitespace:  
 	Whitespace:  
@@ -23,6 +26,7 @@ Node: Statements
 	PreprocessingNumber: 3
 	ASCIILit: ;
 	NewlineNode
+	Node: Statements
 	Whitespace:  
 	Whitespace:  
 	Whitespace:  
@@ -36,7 +40,9 @@ Node: Statements
 	PreprocessingNumber: 0
 	ASCIILit: ;
 	NewlineNode
+	Node: Statements
 	NewlineNode
+	Node: Statements
 	Whitespace:  
 	Whitespace:  
 	Whitespace:  
@@ -66,6 +72,7 @@ Node: Statements
 	Whitespace:  
 	ASCIILit: {
 	NewlineNode
+	Node: Statements
 	Whitespace:  
 	Whitespace:  
 	Whitespace:  
@@ -82,12 +89,14 @@ Node: Statements
 	Identifier: i
 	ASCIILit: ;
 	NewlineNode
+	Node: Statements
 	Whitespace:  
 	Whitespace:  
 	Whitespace:  
 	Whitespace:  
 	ASCIILit: }
 	NewlineNode
+	Node: Statements
 	Whitespace:  
 	Whitespace:  
 	Whitespace:  
@@ -97,4 +106,5 @@ Node: Statements
 	Identifier: sum
 	ASCIILit: ;
 	NewlineNode
+	Node: Statements
 	ASCIILit: }

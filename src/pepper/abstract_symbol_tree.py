@@ -27,10 +27,10 @@ class Node():
         raise NotImplementedError()
 
 
-class StatementsNode(Node):
+class LinesNode(Node):
 
     def __init__(self, children=None):
-        super(StatementsNode, self).__init__("Statements", children)
+        super(LinesNode, self).__init__("Statements", children)
 
     def preprocess(self, lines):
         for child in self.children:
