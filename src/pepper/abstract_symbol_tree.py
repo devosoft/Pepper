@@ -5,6 +5,7 @@ This is the abstract symbol tree for PEPPr.
 The parser will build the actual tree, so this is really more of a library of nodes that may
 be used within the tree.
 """
+import pepper.symbol_table as symtable
 
 
 class Node():
@@ -66,8 +67,14 @@ class IdentifierNode(Node):
     def __str__(self):
         return f"{self.name}: {self.children[0]}"
 
-    def preprocess(self, lines):
-        lines[-1] = lines[-1] + self.children[0]
+    def preprocess(self, lines=None):
+        expansion = self.children[0]
+        if self.children[0] in symtable.TABLE.keys():
+            expansion = symtable.TABLE[self.children[0]].expand()
+        if lines:
+            lines[-1] = lines[-1] + expansion
+        else:
+            return expansion
 
 
 class NewlineNode(Node):
@@ -90,8 +97,11 @@ class WhiteSpaceNode(Node):
     def __str__(self):
         return f"{self.name}: {self.children[0]}"
 
-    def preprocess(self, lines):
-        lines[-1] += self.children[0]
+    def preprocess(self, lines=None):
+        if lines:
+            lines[-1] += self.children[0]
+        else:
+            return self.children[0]
 
 
 class ASCIILiteralNode(Node):
@@ -102,8 +112,11 @@ class ASCIILiteralNode(Node):
     def __str__(self):
         return f"{self.name}: {self.children[0]}"
 
-    def preprocess(self, lines):
-        lines[-1] = lines[-1] + self.children[0]
+    def preprocess(self, lines=None):
+        if lines:
+            lines[-1] = lines[-1] + self.children[0]
+        else:
+            return self.children[0]
 
 
 class PreprocssingNumberNode(Node):
@@ -114,5 +127,8 @@ class PreprocssingNumberNode(Node):
     def __str__(self):
         return f"{self.name}: {self.children[0]}"
 
-    def preprocess(self, lines):
-        lines[-1] = lines[-1] + self.children[0]
+    def preprocess(self, lines=None):
+        if lines:
+            lines[-1] = lines[-1] + self.children[0]
+        else:
+            return self.children[0]

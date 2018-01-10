@@ -2,6 +2,23 @@
 import subprocess
 import shutil
 
+SOURCE_FILE_DIRECTORY = "./tests/test_data/"
+EXAMPLE_OUTPUT_DIRECTORY = "./tests/test_data/output_examples/"
+
+
+def preprocess_and_compare(source, reference, tmpdir):
+    test_dir = tmpdir.mkdir('preprocessor')
+    # copy the test file to the test directory
+    shutil.copy(SOURCE_FILE_DIRECTORY + source, test_dir.realpath())
+
+    process = subprocess.run(["Pepper", f"{test_dir.realpath()}/{source}"], timeout=2,
+                             stdout=subprocess.PIPE)
+    # out, err = process.communicate()
+    assert(process.returncode == 0)
+    with open(f'{EXAMPLE_OUTPUT_DIRECTORY}preprocessed_file_include.cpp', 'r') as expected_file: # NOQA
+        with open(f"{test_dir.realpath()}/{source}.preprocessed.cc") as outfile:
+            assert(outfile.read() == expected_file.read())
+
 
 # bad test now, good test later...?
 class TestSystem:
@@ -14,15 +31,5 @@ class TestSystem:
         with open('tests/test_data/output_examples/preprocessed_file_include.cpp', 'r') as expected_file: # NOQA
             assert(outfile.read() == expected_file.read())
 
-    def test_basic_function_with_defaults(self, tmpdir):
-        test_dir = tmpdir.mkdir('preprocessor')
-        # copy the test file to the test directory
-        shutil.copy("./tests/test_data/file_include.cpp", test_dir.realpath())
-
-        process = subprocess.run(["Pepper", f"{test_dir.realpath()}/file_include.cpp"], timeout=2,
-                                 stdout=subprocess.PIPE)
-        # out, err = process.communicate()
-        assert(process.returncode == 0)
-        with open('tests/test_data/output_examples/preprocessed_file_include.cpp', 'r') as expected_file: # NOQA
-            with open(f"{test_dir.realpath()}/file_include.cpp.preprocessed.cc") as outfile:
-                assert(outfile.read() == expected_file.read())
+    def test_basic_function_with_defaults_refactored(self, tmpdir):
+        preprocess_and_compare('file_include.cpp', 'preprocessed_file_include.cpp', tmpdir)
