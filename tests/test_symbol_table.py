@@ -1,9 +1,13 @@
 import pepper.symbol_table as symtable
-
+import pepper.abstract_symbol_tree as ast
 
 class TestUnit():
     def test_macro_expansion_bad_number_of_args(self):
-        macro = symtable.MacroExpansion('foo', 'alpha + omega', ['alpha', 'omega'])
+        alpha = ast.IdentifierNode(['alpha'])
+        omega = ast.IdentifierNode(['omega'])
+        whitespace = ast.WhiteSpaceNode([' '])
+        plus = ast.ASCIILiteralNode(['+'])
+        macro = symtable.MacroExpansion('foo', [alpha, whitespace, plus, whitespace, omega], ['alpha', 'omega'])
         failed = False
         try:
             macro.expand(args=[])
@@ -16,7 +20,11 @@ class TestUnit():
         assert(failed)
 
     def test_macro_expansion_good_number_of_args(selfself):
-        macro = symtable.MacroExpansion('foo', 'alpha + omega', ['alpha', 'omega'])
+        alpha = ast.IdentifierNode(['alpha'])
+        omega = ast.IdentifierNode(['omega'])
+        whitespace = ast.WhiteSpaceNode([' '])
+        plus = ast.ASCIILiteralNode(['+'])
+        macro = symtable.MacroExpansion('foo', [alpha, whitespace, plus, whitespace, omega], ['alpha', 'omega'])
         expansion = macro.expand(args=[1, 2])
 
         assert(expansion == "1 + 2")

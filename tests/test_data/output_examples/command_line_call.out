@@ -1,6 +1,10 @@
 Node: Statements
 	PreprocessorInclude:  
 	NewlineNode
+	Macro POTATO with args None expanding to '12345'
+	NewlineNode
+	Macro FOO with args None expanding to '12345 > 4578'
+	NewlineNode
 	Node: Statements
 	NewlineNode
 	Node: Statements
