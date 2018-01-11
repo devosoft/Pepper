@@ -93,7 +93,7 @@ def p_include_expression_file(p):
     """
     include_expression_file : '#' PREPROCESSING_KEYWORD_INCLUDE WHITESPACE STRING_LITERAL
     """
-    p[0] = ast.PreprocessorIncludeNode([p[3]], False)
+    p[0] = ast.PreprocessorIncludeNode([p[4]], False)
 
 
 def p_include_expression_system(p):
@@ -143,7 +143,7 @@ def p_expression_to_string_lit(p):
     """
     code_expression : STRING_LITERAL
     """
-    p[0] = p[1]
+    p[0] = ast.StringLiteralNode([p[1]])
 
 
 def p_statement_to_ascii_literal(p):
@@ -164,6 +164,7 @@ def p_statement_to_ascii_literal(p):
               | ']'
               | '='
               | ';'
+              | ':'
     """
     p[0] = ast.ASCIILiteralNode(p[1])
 
