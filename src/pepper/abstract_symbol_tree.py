@@ -77,22 +77,9 @@ class IdentifierNode(Node):
             return expansion
 
 
-class NewlineNode(Node):
-
-    def __init__(self, children):
-        super(NewlineNode, self).__init__("Newline", children)
-
-    def __str__(self):
-        return "NewlineNode"
-
-    def preprocess(self, lines):
-        lines.append("")
-
-
-class WhiteSpaceNode(Node):
-
-    def __init__(self, children):
-        super(WhiteSpaceNode, self).__init__("Whitespace", children)
+class PrimitiveNode(Node):
+    def __init__(self, name, children):
+        super(PrimitiveNode, self).__init__(name, children)
 
     def __str__(self):
         return f"{self.name}: {self.children[0]}"
@@ -104,31 +91,31 @@ class WhiteSpaceNode(Node):
             return self.children[0]
 
 
-class ASCIILiteralNode(Node):
+class NewlineNode(PrimitiveNode):
+
+    def __init__(self, children):
+        super(NewlineNode, self).__init__("Newline", children)
+
+    def __str__(self):
+        return "NewlineNode"
+
+    def preprocess(self, lines):
+        lines.append("")
+
+
+class WhiteSpaceNode(PrimitiveNode):
+
+    def __init__(self, children):
+        super(WhiteSpaceNode, self).__init__("Whitespace", children)
+
+
+class ASCIILiteralNode(PrimitiveNode):
 
     def __init__(self, children):
         super(ASCIILiteralNode, self).__init__('ASCIILit', children)
 
-    def __str__(self):
-        return f"{self.name}: {self.children[0]}"
 
-    def preprocess(self, lines=None):
-        if lines:
-            lines[-1] = lines[-1] + self.children[0]
-        else:
-            return self.children[0]
-
-
-class PreprocssingNumberNode(Node):
+class PreprocssingNumberNode(PrimitiveNode):
 
     def __init__(self, children):
         super(PreprocssingNumberNode, self).__init__("PreprocessingNumber", children)
-
-    def __str__(self):
-        return f"{self.name}: {self.children[0]}"
-
-    def preprocess(self, lines=None):
-        if lines:
-            lines[-1] = lines[-1] + self.children[0]
-        else:
-            return self.children[0]
