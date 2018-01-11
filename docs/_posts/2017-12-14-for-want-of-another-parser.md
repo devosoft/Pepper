@@ -1,7 +1,7 @@
 ---
 layout: post
-title:  "Best Practices"
-date:   2017-11-14 12:00:00 -0400
+title:  "For Want of Another Parser"
+date:   2018-01-11 12:00:00 -0400
 categories: devblog jgf macros parser
 ---
 _written by [Jake Fenton](https://github.com/bocajnotnef)_
