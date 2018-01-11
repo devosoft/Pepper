@@ -1,6 +1,7 @@
 import pepper.symbol_table as symtable
 import pepper.abstract_symbol_tree as ast
 
+
 class TestUnit():
     def test_macro_expansion_bad_number_of_args(self):
         alpha = ast.IdentifierNode(['alpha'])

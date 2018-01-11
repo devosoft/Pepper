@@ -176,9 +176,6 @@ def p_statement_to_preprocessing_numer(p):
 
 
 def p_error(p):
-    if p is None:
-        print("")
-        raise SyntaxError("ERROR--Line unknown. (Did you remember to end your file in a newline?)")
     print(f"ERROR(line {p.lineno}): syntax error")
     print(p)
     raise Exception
