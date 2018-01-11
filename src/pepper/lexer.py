@@ -22,12 +22,13 @@ PREPROCESSING_KEYWORDS = [
 
 tokens = [
     'IDENTIFIER',
-    'PREPROCESSING_NUMBER',
-    'STRING_LITERAL',
-    'PUNCTUATOR',
-    'WHITESPACE',
     'NEWLINE',
     'OTHER',
+    'PREPROCESSING_NUMBER',
+    'PUNCTUATOR',
+    # 'SKIPPED_LINE',
+    'STRING_LITERAL',
+    'WHITESPACE',
 ]
 
 tokens.extend([f"PREPROCESSING_KEYWORD_{i.upper()}" for i in PREPROCESSING_KEYWORDS])
@@ -58,8 +59,8 @@ def t_STRING_LITERAL(t):
     return t
 
 
-# def t_PUNCTUATOR(t):
-#     r"""[{}:;,?%&*<>=#/!]|[\[\]\(\)\.\^\-\|\+]"""
+# def t_SKIPPED_LINE(t):
+#     r"\\\n"
 #     return t
 
 

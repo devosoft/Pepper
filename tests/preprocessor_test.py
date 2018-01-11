@@ -6,10 +6,13 @@ SOURCE_FILE_DIRECTORY = "./tests/test_data/"
 EXAMPLE_OUTPUT_DIRECTORY = "./tests/test_data/output_examples/"
 
 
-def preprocess_and_compare(source, reference, tmpdir):
+def preprocess_and_compare(source, reference, tmpdir, supportfiles=[]):
     test_dir = tmpdir.mkdir('preprocessor')
     # copy the test file to the test directory
     shutil.copy(SOURCE_FILE_DIRECTORY + source, test_dir.realpath())
+
+    for entry in supportfiles:
+        shutil.copy(SOURCE_FILE_DIRECTORY + entry, test_dir.realpath())
 
     process = subprocess.run(["Pepper", f"{test_dir.realpath()}/{source}"], timeout=2,
                              stdout=subprocess.PIPE)
@@ -32,4 +35,4 @@ class TestSystem:
             assert(outfile.read() == expected_file.read())
 
     def test_basic_function_with_defaults_refactored(self, tmpdir):
-        preprocess_and_compare('file_include.cpp', 'preprocessed_file_include.cpp', tmpdir)
+        preprocess_and_compare('file_include.cpp', 'preprocessed_file_include.cpp', tmpdir, ['SomeFile.h'])

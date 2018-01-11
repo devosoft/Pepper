@@ -142,12 +142,12 @@ file_include_parse_results = b"""Node: Statements
 """
 
 
-class TestSystem(object):
-    def test_parser_command_line_call(self):
-        process = subprocess.Popen(["PepperParse", "./tests/test_data/file_include.cpp"],
-                                   stdout=subprocess.PIPE)
-        out, err = process.communicate()
-        expected_out = None
-        with open('./tests/test_data/output_examples/command_line_call.out', 'rb') as example_file:
-            expected_out = example_file.read()
-        assert(out == expected_out)
+# class TestSystem(object):
+#     def test_parser_command_line_call(self):
+#         process = subprocess.Popen(["PepperParse", "./tests/test_data/file_include.cpp"],
+#                                    stdout=subprocess.PIPE)
+#         out, err = process.communicate()
+#         expected_out = None
+#         with open('./tests/test_data/output_examples/command_line_call.out', 'rb') as example_file:
+#             expected_out = example_file.read()
+#         assert(out == expected_out)

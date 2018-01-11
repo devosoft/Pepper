@@ -4,6 +4,7 @@ The Symbol Table module implements a class to track declarations and usages of i
 import sys
 
 TABLE = dict()  # Identifier/argment list length pairs.
+FILE_QUEUE = []
 
 
 class MacroExpansion():
@@ -21,7 +22,13 @@ class MacroExpansion():
         TABLE[self.name] = self
 
     def expand(self, args=None):
-        if self.args is None and args is not None or len(args) != len(self.args):
+        if self.args is None and args is not None:
+            raise SyntaxError(f"Macro {self.name} doesn't take any args, but was given {len(args)}")
+        elif self.args is not None and args is None:
+            raise SyntaxError(f"Macro {self.name} takes {len(self.args)}, but was given none. (Did you forget parens?)")
+        elif self.args is None and args is None:
+            pass
+        elif len(args) != len(self.args):
             raise SyntaxError(f"Wrong number of arguments in macro expansion for {self.name};"
                               f" expected {len(self.args)}, got {len(args)}")
 
