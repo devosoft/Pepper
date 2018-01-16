@@ -12,12 +12,17 @@ import argparse
 
 literals = ['+', '-', '*', '/', '(', ')',
             '=', ',', '{', '}', '[', ']',
-            '.', ';', '!', '#', '<', '>', ':', '~']
+            '.', ';', '!', '<', '>', ':', '~']
 
 
 PREPROCESSING_KEYWORDS = [
     'include',
-    'define'
+    'define',
+    'ifdef',
+    'ifndef',
+    'endif',
+    'else',
+    'py',
 ]
 
 tokens = [
@@ -34,13 +39,38 @@ tokens = [
 tokens.extend([f"PREPROCESSING_KEYWORD_{i.upper()}" for i in PREPROCESSING_KEYWORDS])
 
 
+def t_PREPROCESSING_KEYWORD_PY(t):
+    r"\#py\b"
+    return t
+
+
+def t_PREPROCESSING_KEYWORD_IFDEF(t):
+    r'\#ifdef\b'
+    return t
+
+
+def t_PREPROCESSING_KEYWORD_IFNDEF(t):
+    r'\#ifndef\b'
+    return t
+
+
+def t_PREPROCESSING_KEYWORD_ENDIF(t):
+    r'\#endif\b'
+    return t
+
+
+def t_PREPROCESSING_KEYWORD_ELSE(t):
+    r'\#else\b'
+    return t
+
+
 def t_PREPROCESSING_KEYWORD_INCLUDE(t):
-    r'include'
+    r'\#include\b'
     return t
 
 
 def t_PREPROCESSING_KEYWORD_DEFINE(t):
-    r'define'
+    r'\#define\b'
     return t
 
 
@@ -55,7 +85,7 @@ def t_PREPROCESSING_NUMBER(t):
 
 
 def t_STRING_LITERAL(t):
-    r"""('((\\['"tn])|[^'"\\])*')|("((\\['"tn])|[^'"\\])*")"""
+    r"""('((\\['tn])|[^'\\])*')|("((\\["tn])|[^"\\])*")"""
     return t
 
 
@@ -78,8 +108,7 @@ def t_WHITESPACE(t):
 
 
 def t_error(t):
-    print(f"Unknown token on line {t.lexer.lineno}: {t.value[0]}")
-    exit(1)
+    raise Exception(f"Unknown token on line {t.lexer.lineno}: {t.value[0]}")
 
 
 lexer = lex.lex()

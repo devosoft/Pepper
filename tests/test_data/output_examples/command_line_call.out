@@ -1,5 +1,5 @@
 Node: Statements
-	PreprocessorInclude:  
+	PreprocessorInclude: 'SomeFile.h'
 	NewlineNode
 	Macro POTATO with args None expanding to '12345'
 	NewlineNode
@@ -105,10 +105,60 @@ Node: Statements
 	Whitespace:  
 	Whitespace:  
 	Whitespace:  
+	Identifier: if
+	Whitespace:  
+	ASCIILit: (
+	Identifier: SomeOtherFileIncluded
+	ASCIILit: )
+	Whitespace:  
+	ASCIILit: {
+	NewlineNode
+	Node: Statements
+	Whitespace:  
+	Whitespace:  
+	Whitespace:  
+	Whitespace:  
+	Whitespace:  
+	Whitespace:  
+	Whitespace:  
+	Whitespace:  
 	Identifier: return
 	Whitespace:  
 	Identifier: sum
 	ASCIILit: ;
+	NewlineNode
+	Node: Statements
+	Whitespace:  
+	Whitespace:  
+	Whitespace:  
+	Whitespace:  
+	ASCIILit: }
+	Whitespace:  
+	Identifier: else
+	Whitespace:  
+	ASCIILit: {
+	NewlineNode
+	Node: Statements
+	Whitespace:  
+	Whitespace:  
+	Whitespace:  
+	Whitespace:  
+	Whitespace:  
+	Whitespace:  
+	Whitespace:  
+	Whitespace:  
+	Identifier: return
+	Whitespace:  
+	ASCIILit: -
+	PreprocessingNumber: 1
+	ASCIILit: ;
+	NewlineNode
+	Node: Statements
+	Whitespace:  
+	Whitespace:  
+	Whitespace:  
+	Whitespace:  
+	ASCIILit: }
 	NewlineNode
 	Node: Statements
 	ASCIILit: }

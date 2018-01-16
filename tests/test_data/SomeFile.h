@@ -1,3 +1,4 @@
+#include "SomeOtherFile.h"
 #define SomeFileIncluded true
 #define SomeFileMultilineIncluded true
 

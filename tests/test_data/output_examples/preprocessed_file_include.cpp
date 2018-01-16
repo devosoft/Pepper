@@ -1,4 +1,6 @@
 static_assert(false, "include node not properly implemented")
+static_assert(false, "include node not properly implemented")
+// Macro SomeOtherFileIncluded with args None expanding to 'true'
 // Macro SomeFileIncluded with args None expanding to 'true'
 // Macro SomeFileMultilineIncluded with args None expanding to 'true'
 
@@ -16,5 +18,9 @@ int main() {
     for(int i = 0; i < x; i++) {
         sum += i;
     }
-    return sum;
+    if (true) {
+        return sum;
+    } else {
+        return -1;
+    }
 }
