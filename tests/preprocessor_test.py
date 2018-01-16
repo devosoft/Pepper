@@ -18,7 +18,7 @@ def preprocess_and_compare(source, reference, tmpdir, supportfiles=[]):
                              stdout=subprocess.PIPE)
     # out, err = process.communicate()
     assert(process.returncode == 0)
-    with open(f'{EXAMPLE_OUTPUT_DIRECTORY}preprocessed_file_include.cpp', 'r') as expected_file: # NOQA
+    with open(f'{EXAMPLE_OUTPUT_DIRECTORY}{reference}', 'r') as expected_file: # NOQA
         with open(f"{test_dir.realpath()}/{source}.preprocessed.cc") as outfile:
             assert(outfile.read() == expected_file.read())
 
@@ -36,3 +36,7 @@ class TestSystem:
 
     def test_basic_function_with_defaults_refactored(self, tmpdir):
         preprocess_and_compare('file_include.cpp', 'preprocessed_file_include.cpp', tmpdir, ['SomeFile.h', 'SomeOtherFile.h'])
+
+    def test_ifdef_handling(self, tmpdir):
+        preprocess_and_compare('ifdef.cpp', 'ifdef.cpp.preprocessed.cc', tmpdir)
+

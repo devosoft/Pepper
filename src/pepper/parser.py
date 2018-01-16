@@ -80,19 +80,19 @@ def p_ifdef_expression(p):
     else:
         symtable.IFDEF_STACK.append((p[3], False))
 
-    p[0] = ast.StringLiteralNode([f"\\\\ ifdef expression {p[3]}"])
+    p[0] = ast.StringLiteralNode([f"// ifdef expression {p[3]}"])
 
 
 def p_ifndef_expression(p):
     """
     ifndef_expression : PREPROCESSING_KEYWORD_IFNDEF WHITESPACE IDENTIFIER
     """
-    if p[4] in symtable.TABLE.keys():
+    if p[3] in symtable.TABLE.keys():
         symtable.IFDEF_STACK.append((p[3], False))
     else:
         symtable.IFDEF_STACK.append((p[3], True))
 
-    p[0] = ast.StringLiteralNode([f"\\\\ ifndef expression {p[3]}"])
+    p[0] = ast.StringLiteralNode([f"// ifndef expression {p[3]}"])
 
 
 def p_else_expression(p):
@@ -100,7 +100,7 @@ def p_else_expression(p):
     else_expression : PREPROCESSING_KEYWORD_ELSE
     """
     symtable.IFDEF_STACK[-1] = (symtable.IFDEF_STACK[-1][0], not symtable.IFDEF_STACK[-1][1])
-    p[0] = ast.StringLiteralNode([f"\\\\ else expression "])
+    p[0] = ast.StringLiteralNode([f"// else expression "])
 
 
 def p_endif_expression(p):
@@ -109,7 +109,7 @@ def p_endif_expression(p):
     """
     symtable.IFDEF_STACK.pop()
     print(f"Symtable ifdefstack is now {symtable.IFDEF_STACK}")
-    p[0] = ast.StringLiteralNode([f"\\\\ endif expression "])
+    p[0] = ast.StringLiteralNode([f"// endif expression "])
 
 
 def p_define_expression_no_expansion(p):
