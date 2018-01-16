@@ -38,6 +38,13 @@ def p_line_to_statement(p):
     p[0] = p[1]
 
 
+def p_line_to_comment(p):
+    """
+    line : '/' '/' code_expressions
+    """
+    p[0] = ast.StringLiteralNode("// ignored comments")
+
+
 def p_statement_to_pepper_directive(p):
     """
     statement : pepper_directive
@@ -80,19 +87,19 @@ def p_ifdef_expression(p):
     else:
         symtable.IFDEF_STACK.append((p[3], False))
 
-    p[0] = ast.StringLiteralNode([f"\\\\ ifdef expression {p[3]}"])
+    p[0] = ast.StringLiteralNode([f"// ifdef expression {p[3]}"])
 
 
 def p_ifndef_expression(p):
     """
     ifndef_expression : PREPROCESSING_KEYWORD_IFNDEF WHITESPACE IDENTIFIER
     """
-    if p[4] in symtable.TABLE.keys():
+    if p[3] in symtable.TABLE.keys():
         symtable.IFDEF_STACK.append((p[3], False))
     else:
         symtable.IFDEF_STACK.append((p[3], True))
 
-    p[0] = ast.StringLiteralNode([f"\\\\ ifndef expression {p[3]}"])
+    p[0] = ast.StringLiteralNode([f"// ifndef expression {p[3]}"])
 
 
 def p_else_expression(p):
@@ -100,7 +107,7 @@ def p_else_expression(p):
     else_expression : PREPROCESSING_KEYWORD_ELSE
     """
     symtable.IFDEF_STACK[-1] = (symtable.IFDEF_STACK[-1][0], not symtable.IFDEF_STACK[-1][1])
-    p[0] = ast.StringLiteralNode([f"\\\\ else expression "])
+    p[0] = ast.StringLiteralNode([f"// else expression "])
 
 
 def p_endif_expression(p):
@@ -109,7 +116,7 @@ def p_endif_expression(p):
     """
     symtable.IFDEF_STACK.pop()
     print(f"Symtable ifdefstack is now {symtable.IFDEF_STACK}")
-    p[0] = ast.StringLiteralNode([f"\\\\ endif expression "])
+    p[0] = ast.StringLiteralNode([f"// endif expression "])
 
 
 def p_define_expression_no_expansion(p):
@@ -152,7 +159,7 @@ def p_include_expression_system(p):
     """
     include_expression_system : PREPROCESSING_KEYWORD_INCLUDE WHITESPACE '<' IDENTIFIER '>'
     """
-    p[0] = ast.PreprocessorIncludeNode([p[3]], True)
+    p[0] = ast.PreprocessorIncludeNode([p[4]], True)
 
 
 def p_expressions_empty(p):
@@ -175,13 +182,6 @@ def p_whitespace(p):
     code_expression : WHITESPACE
     """
     p[0] = ast.WhiteSpaceNode(p[1])
-
-
-# def p_newline(p):
-#     """
-#     code_expression : NEWLINE
-#     """
-#     p[0] = ast.NewlineNode("\n")
 
 
 def p_statement_to_identifier(p):
@@ -217,6 +217,9 @@ def p_statement_to_ascii_literal(p):
               | '='
               | ';'
               | ':'
+              | '#'
+              | ','
+              | '.'
     """
     p[0] = ast.ASCIILiteralNode(p[1])
 
