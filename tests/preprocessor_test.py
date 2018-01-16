@@ -35,8 +35,8 @@ class TestSystem:
             assert(outfile.read() == expected_file.read())
 
     def test_basic_function_with_defaults_refactored(self, tmpdir):
-        preprocess_and_compare('file_include.cpp', 'preprocessed_file_include.cpp', tmpdir, ['SomeFile.h', 'SomeOtherFile.h'])
+        preprocess_and_compare('file_include.cpp', 'preprocessed_file_include.cpp',
+                               tmpdir, ['SomeFile.h', 'SomeOtherFile.h'])
 
     def test_ifdef_handling(self, tmpdir):
         preprocess_and_compare('ifdef.cpp', 'ifdef.cpp.preprocessed.cc', tmpdir)
-
