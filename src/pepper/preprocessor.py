@@ -41,7 +41,6 @@ def main(args=None):
             output = parser.parse(parser_input).preprocess(preprocessed_lines)
             parser_input = ""
 
-
     # source = args.input_file.read()
 
     # parser.parse(source).preprocess(preprocessed_lines)

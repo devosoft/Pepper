@@ -7,7 +7,6 @@ be used within the tree.
 """
 import pepper.symbol_table as symtable
 import os
-import sys
 
 
 class Node():
@@ -59,9 +58,10 @@ class PreprocessorIncludeNode(Node):
 
     def preprocess(self, lines):
         "This will be a lie for a while. I'll have to fix it later."
+
         lines[-1] = lines[-1] + 'static_assert(false, "include node not properly implemented")'
         symtable.FILE_QUEUE.append(open(os.path.split(symtable.FILE_QUEUE[-1].name)[0]
-                                        + '/' + self.target, 'r')) # NOQA
+                                        + '/' + self.target, 'r'))
 
 
 class IdentifierNode(Node):
