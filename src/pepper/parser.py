@@ -177,13 +177,6 @@ def p_whitespace(p):
     p[0] = ast.WhiteSpaceNode(p[1])
 
 
-# def p_newline(p):
-#     """
-#     code_expression : NEWLINE
-#     """
-#     p[0] = ast.NewlineNode("\n")
-
-
 def p_statement_to_identifier(p):
     """
     code_expression : IDENTIFIER
