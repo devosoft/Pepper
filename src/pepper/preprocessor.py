@@ -32,18 +32,17 @@ def main(args=None):
     preprocessed_lines = [""]
 
     while len(symtable.FILE_QUEUE):
-        if len(symtable.IFDEF_STACK) == 0:
-            parser_input += symtable.FILE_QUEUE[-1].readline()
-        elif symtable.IFDEF_STACK[-1][1]:
-            parser_input += symtable.FILE_QUEUE[-1].readline()
-        else:
-            symtable.FILE_QUEUE[-1].readline() # toss the line, we're in a 'deny' ifdef
+        parser_input += symtable.FILE_QUEUE[-1].readline()
         if not len(parser_input):
             symtable.FILE_QUEUE.pop()
             if len(symtable.FILE_QUEUE):
                 preprocessed_lines.append("")
         elif not parser_input.endswith(r"\\n"):
-            output = parser.parse(parser_input).preprocess(preprocessed_lines)
+            tree = parser.parse(parser_input)
+            if len(symtable.IFDEF_STACK) == 0 or symtable.IFDEF_STACK[-1][1]:
+                output = tree.preprocess(preprocessed_lines)
+            else:
+                pass  # toss the line, we're in a 'deny' ifdef
             parser_input = ""
 
     # source = args.input_file.read()
