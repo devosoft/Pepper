@@ -5,6 +5,7 @@ import sys
 
 TABLE = dict()  # Identifier/argment list length pairs.
 FILE_QUEUE = []
+IFDEF_STACK = []
 
 
 class MacroExpansion():

@@ -32,7 +32,12 @@ def main(args=None):
     preprocessed_lines = [""]
 
     while len(symtable.FILE_QUEUE):
-        parser_input += symtable.FILE_QUEUE[-1].readline()
+        if len(symtable.IFDEF_STACK) == 0:
+            parser_input += symtable.FILE_QUEUE[-1].readline()
+        elif symtable.IFDEF_STACK[-1][1]:
+            parser_input += symtable.FILE_QUEUE[-1].readline()
+        else:
+            symtable.FILE_QUEUE[-1].readline() # toss the line, we're in a 'deny' ifdef
         if not len(parser_input):
             symtable.FILE_QUEUE.pop()
             if len(symtable.FILE_QUEUE):
