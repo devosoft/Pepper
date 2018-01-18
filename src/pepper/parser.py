@@ -38,6 +38,13 @@ def p_line_to_statement(p):
     p[0] = p[1]
 
 
+def p_line_to_comment(p):
+    """
+    line : '/' '/' code_expressions
+    """
+    p[0] = ast.StringLiteralNode("// ignored comments")
+
+
 def p_statement_to_pepper_directive(p):
     """
     statement : pepper_directive
@@ -152,7 +159,7 @@ def p_include_expression_system(p):
     """
     include_expression_system : PREPROCESSING_KEYWORD_INCLUDE WHITESPACE '<' IDENTIFIER '>'
     """
-    p[0] = ast.PreprocessorIncludeNode([p[3]], True)
+    p[0] = ast.PreprocessorIncludeNode([p[4]], True)
 
 
 def p_expressions_empty(p):
@@ -210,6 +217,9 @@ def p_statement_to_ascii_literal(p):
               | '='
               | ';'
               | ':'
+              | '#'
+              | ','
+              | '.'
     """
     p[0] = ast.ASCIILiteralNode(p[1])
 
