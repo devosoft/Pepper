@@ -12,7 +12,8 @@ import argparse
 
 literals = ['+', '-', '*', '/', '(', ')',
             '=', ',', '{', '}', '[', ']',
-            '.', ';', '!', '<', '>', ':', '~']
+            '.', ';', '!', '<', '>', ':', '~',
+            '@', '#', '&', "'"]
 
 
 PREPROCESSING_KEYWORDS = [
@@ -34,6 +35,7 @@ tokens = [
     # 'SKIPPED_LINE',
     'STRING_LITERAL',
     'WHITESPACE',
+    'LONG_COMMENT'
 ]
 
 tokens.extend([f"PREPROCESSING_KEYWORD_{i.upper()}" for i in PREPROCESSING_KEYWORDS])
@@ -42,6 +44,16 @@ tokens.extend([f"PREPROCESSING_KEYWORD_{i.upper()}" for i in PREPROCESSING_KEYWO
 def t_PREPROCESSING_KEYWORD_PY(t):
     r"\#py\b"
     return t
+
+
+def t_COMMENT(t):
+    r"\s//.*\n"
+    pass
+
+
+def t_COMMENT_NO_WHITESPACE(t):
+    r"//.*\n"
+    pass
 
 
 def t_PREPROCESSING_KEYWORD_IFDEF(t):
@@ -88,6 +100,11 @@ def t_STRING_LITERAL(t):
     r"""('((\\['tn])|[^'\\])*')|("((\\["tn])|[^"\\])*")"""
     return t
 
+
+def t_LONG_COMMENT(t):
+    r"\/\*(.|\n)*?\*\/"
+    t.lexer.lineno += t.value.count("\n")
+    return t
 
 # def t_SKIPPED_LINE(t):
 #     r"\\\n"
