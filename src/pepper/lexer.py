@@ -9,12 +9,19 @@ token stream and build a tree, which will in turn produce actual c++ or c code.
 import sys
 import ply.lex as lex
 import argparse
+import pepper.symbol_table as symtable
 
-literals = ['+', '-', '*', '/', '(', ')',
+DEFAULT_LITERALS = ['+', '-', '*', '/', '(', ')',
             '=', ',', '{', '}', '[', ']',
             '.', ';', '!', '<', '>', ':', '~',
             '@', '#', '&', "'"]
 
+
+literals = DEFAULT_LITERALS
+
+states = [
+    ('comment', 'exclusive')
+]
 
 PREPROCESSING_KEYWORDS = [
     'include',
@@ -101,10 +108,32 @@ def t_STRING_LITERAL(t):
     return t
 
 
-def t_LONG_COMMENT(t):
-    r"\/\*(.|\n)*?\*\/"
-    t.lexer.lineno += t.value.count("\n")
+def t_LONG_COMMENT_START(t):
+    r"\/\*"
+    t.lexer.begin('comment')
+    pass
+
+
+def t_comment_BLOCK_COMMENT_END(t):
+    r"\*\/"
+    t.lexer.begin('INITIAL')  # reset to initial state
+    pass
+
+
+def t_comment_ignore_anything_else(t):
+    r".+?"
+    pass
+
+
+def t_comment_NEWLINE(t):
+    r'\n'
+    t.lexer.lineno += 1  # the lexer doesn't know what consistutes a 'line' unless we tell it
     return t
+
+
+def t_comment_error(t):
+    raise Exception(f"Unknown token on line {t.lexer.lineno}: {t.value[0]}")
+
 
 # def t_SKIPPED_LINE(t):
 #     r"\\\n"
