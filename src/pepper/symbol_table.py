@@ -8,6 +8,7 @@ TABLE = dict()  # Identifier/argment list length pairs.
 FILE_QUEUE = []
 IFDEF_STACK = []
 SYSTEM_INCLUDE_PATHS = []
+HANGING_BLOCK_COMMENT_START = False
 
 LINUX_DEFAULTS = [
     "/usr/include/c++/7",

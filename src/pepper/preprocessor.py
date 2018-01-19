@@ -31,8 +31,12 @@ def main(args=None):
 
     preprocessed_lines = [""]
 
+
+
     while len(symtable.FILE_QUEUE):
         parser_input += symtable.FILE_QUEUE[-1].readline()
+
+
         if not len(parser_input):
             symtable.FILE_QUEUE.pop()
             if len(symtable.FILE_QUEUE):
