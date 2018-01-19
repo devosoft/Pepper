@@ -110,14 +110,12 @@ def t_STRING_LITERAL(t):
 
 def t_LONG_COMMENT_START(t):
     r"\/\*"
-    print("beginning comment state")
     t.lexer.begin('comment')
     pass
 
 
 def t_comment_BLOCK_COMMENT_END(t):
     r"\*\/"
-    print("Returning to initial state")
     t.lexer.begin('INITIAL')  # reset to initial state
     pass
 
