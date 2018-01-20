@@ -12,14 +12,15 @@ import argparse
 import pepper.symbol_table as symtable
 
 DEFAULT_LITERALS = ['+', '-', '*', '/', '(', ')',
-            '=', ',', '{', '}', '[', ']',
-            '.', ';', '!', '<', '>', ':', '~',
-            '@', '#', '&', "'"]
+                    '=', ',', '{', '}', '[', ']',
+                    '.', ';', '!', '<', '>', ':', '~',
+                    '@', '#', '&', "'"]
 
 
 literals = DEFAULT_LITERALS
 
 states = [
+    # recall there's also the default INITIAL state
     ('comment', 'exclusive')
 ]
 
@@ -42,7 +43,8 @@ tokens = [
     # 'SKIPPED_LINE',
     'STRING_LITERAL',
     'WHITESPACE',
-    'LONG_COMMENT'
+    'LONG_COMMENT',
+    'SYSTEM_INCLUDE_LITERAL'
 ]
 
 tokens.extend([f"PREPROCESSING_KEYWORD_{i.upper()}" for i in PREPROCESSING_KEYWORDS])
@@ -93,6 +95,11 @@ def t_PREPROCESSING_KEYWORD_DEFINE(t):
     return t
 
 
+def t_SYSTEM_INCLUDE_LITERAL(t):
+    r"""<[^\'\"<>]*?>"""
+    return t
+
+
 def t_IDENTIFIER(t):
     r'[_a-zA-Z][_a-zA-Z0-9]*'
     return t
@@ -106,6 +113,7 @@ def t_PREPROCESSING_NUMBER(t):
 def t_STRING_LITERAL(t):
     r"""('((\\['tn])|[^'\\])*')|("((\\["tn])|[^"\\])*")"""
     return t
+
 
 
 def t_LONG_COMMENT_START(t):
@@ -133,11 +141,6 @@ def t_comment_NEWLINE(t):
 
 def t_comment_error(t):
     raise Exception(f"Unknown token on line {t.lexer.lineno}: {t.value[0]}")
-
-
-# def t_SKIPPED_LINE(t):
-#     r"\\\n"
-#     return t
 
 
 # TODO: maybe convert this to a t_ignore() rule for improved lexing performance

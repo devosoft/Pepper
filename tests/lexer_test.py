@@ -22,7 +22,7 @@ class TestUnit(object):
         lexer.lexer.input('\n'.join(test_lines))
         tokens = get_all_tokens(lexer.lexer)
 
-        assert(len(tokens) == 78)
+        assert(len(tokens) == 76)
 
         token_types = defaultdict(int)
 
@@ -44,14 +44,14 @@ class TestUnit(object):
             '}': 1,
             '#': 0,
             '+': 1,
-            '<': 13,
+            '<': 12,
             '=': 2,
-            '>': 1,
-            'IDENTIFIER': 23,
+            'IDENTIFIER': 22,
             'PREPROCESSING_KEYWORD_DEFINE': 1,
             'PREPROCESSING_KEYWORD_INCLUDE': 1,
             'PREPROCESSING_NUMBER': 4,
             'STRING_LITERAL': 4,
+            'SYSTEM_INCLUDE_LITERAL': 1
         }
 
         for token_type, count in tokens_to_assert.items():
