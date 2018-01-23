@@ -172,7 +172,7 @@ def p_statement_to_preprocessing_numer(p):
     """
     code_expression : PREPROCESSING_NUMBER
     """
-    p[0] = ast.PreprocssingNumberNode([p[1]])
+    p[0] = ast.PreprocessingNumberNode([p[1]])
 
 
 def p_error(p):

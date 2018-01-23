@@ -115,7 +115,7 @@ class ASCIILiteralNode(PrimitiveNode):
         super(ASCIILiteralNode, self).__init__('ASCIILit', children)
 
 
-class PreprocssingNumberNode(PrimitiveNode):
+class PreprocessingNumberNode(PrimitiveNode):
 
     def __init__(self, children):
         super(PreprocssingNumberNode, self).__init__("PreprocessingNumber", children)
