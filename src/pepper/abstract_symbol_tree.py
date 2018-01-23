@@ -53,7 +53,7 @@ class PreprocessorIncludeNode(Node):
     def __init__(self, children, system_include=False):
         super(PreprocessorIncludeNode, self).__init__("PreprocessorInclude", children)
         self.system_include = system_include
-        self.target = children[0]
+        self.target = children[0][1:-1]
 
     def __str__(self):
         return f"{self.name}: {self.children[0]}"
@@ -82,7 +82,7 @@ class PreprocessorIncludeNode(Node):
 
         else:
             symtable.FILE_QUEUE.append(open(os.path.split(symtable.FILE_QUEUE[-1].name)[0]
-                                            + '/' + self.target[1:-1], 'r'))
+                                            + '/' + self.target, 'r'))
 
 
 class IdentifierNode(Node):

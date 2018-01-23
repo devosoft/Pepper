@@ -157,9 +157,9 @@ def p_include_expression_file(p):
 
 def p_include_expression_system(p):
     """
-    include_expression_system : PREPROCESSING_KEYWORD_INCLUDE WHITESPACE '<' IDENTIFIER '>'
+    include_expression_system : PREPROCESSING_KEYWORD_INCLUDE WHITESPACE SYSTEM_INCLUDE_LITERAL
     """
-    p[0] = ast.PreprocessorIncludeNode([p[4]], True)
+    p[0] = ast.PreprocessorIncludeNode([p[3]], True)
 
 
 def p_expressions_empty(p):

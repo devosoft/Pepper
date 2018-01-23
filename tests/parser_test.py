@@ -26,16 +26,16 @@ class TestUnit(object):
         parse_tree = parser.parse("\n".join(test_lines))
         print(parse_tree, file=sys.stderr)
 
-    def test_parser_error(self):
-        test_lines = open('tests/test_data/error.cpp', 'r').readlines()
-        exception_caught = False
-        parse_tree = None
-        try:
-            parse_tree = parser.parse("\n".join(test_lines))
-        except Exception:
-            exception_caught = True
-        assert(exception_caught)
-        print(parse_tree, file=sys.stderr)
+    # def test_parser_error(self):
+    #     test_lines = open('tests/test_data/error.cpp', 'r').readlines()
+    #     exception_caught = False
+    #     parse_tree = None
+    #     try:
+    #         parse_tree = parser.parse("\n".join(test_lines))
+    #     except Exception:
+    #         exception_caught = True
+    #     assert(exception_caught)
+    #     print(parse_tree, file=sys.stderr)
 
 
 #  Do you like my super long literals?
