@@ -59,26 +59,21 @@ class PreprocessorIncludeNode(Node):
         return f"{self.name}: {self.children[0]}"
 
     def search_system_includes(filename):
-        print(f"Searching for {filename}")
         for system_path in symtable.SYSTEM_INCLUDE_PATHS:
             candidate = Path(f"{system_path}/{filename}")
-            print(f"Checking {candidate}")
             if candidate.exists() and candidate.is_file():
                 return candidate
 
-        return False
+        raise OSError(f"Could not find file {filename} in defined system include paths: "
+                      f"{symtable.SYSTEM_INCLUDE_PATHS}")
 
     def preprocess(self, lines):
         "This will be a lie for a while. I'll have to fix it later."
 
         lines[-1] = lines[-1] + 'static_assert(false, "include node not properly implemented")'
-        print(f"including {self.target}")
         if self.system_include:
             found_path = PreprocessorIncludeNode.search_system_includes(self.target)
-            if found_path:
-                symtable.FILE_QUEUE.append(open(found_path, 'r'))
-            else:
-                raise OSError(f"Could not find file {self.target} in defined system include path")
+            symtable.FILE_QUEUE.append(open(found_path, 'r'))
 
         else:
             symtable.FILE_QUEUE.append(open(os.path.split(symtable.FILE_QUEUE[-1].name)[0]

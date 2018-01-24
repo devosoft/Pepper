@@ -1,4 +1,5 @@
 #! /usr/bin/env python3
+# flake8: noqa E501
 import sys
 import argparse
 import ply.yacc as yacc
@@ -36,13 +37,6 @@ def p_line_to_statement(p):
     line : statement NEWLINE
     """
     p[0] = p[1]
-
-
-def p_line_to_comment(p):
-    """
-    line : '/' '/' code_expressions
-    """
-    p[0] = ast.StringLiteralNode("// ignored comments")
 
 
 def p_statement_to_pepper_directive(p):
@@ -115,7 +109,6 @@ def p_endif_expression(p):
     endif_expression : PREPROCESSING_KEYWORD_ENDIF
     """
     symtable.IFDEF_STACK.pop()
-    print(f"Symtable ifdefstack is now {symtable.IFDEF_STACK}")
     p[0] = ast.StringLiteralNode([f"// endif expression "])
 
 

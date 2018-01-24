@@ -7,6 +7,7 @@ import argparse
 import pepper.parser as parser
 import os
 import pepper.symbol_table as symtable
+from pathlib import Path
 
 
 def get_args():
@@ -18,6 +19,12 @@ def get_args():
                         type=argparse.FileType('w'),
                         help='the filename to write to')
 
+    parser.add_argument('-S',
+                        '--sys_include',
+                        help="path to add to the system include paths",
+                        action="append",
+                        type=Path)
+
     return parser.parse_args()
 
 
@@ -25,17 +32,18 @@ def main(args=None):
     if not args:
         args = get_args()
 
+    if args.sys_include:
+        for p in args.sys_include:
+            symtable.SYSTEM_INCLUDE_PATHS.append(p)
+
     symtable.FILE_QUEUE.append(open(args.input_file, 'r'))
 
     parser_input = ""
 
     preprocessed_lines = [""]
 
-
-
     while len(symtable.FILE_QUEUE):
         parser_input += symtable.FILE_QUEUE[-1].readline()
-
 
         if not len(parser_input):
             symtable.FILE_QUEUE.pop()

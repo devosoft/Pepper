@@ -9,7 +9,6 @@ token stream and build a tree, which will in turn produce actual c++ or c code.
 import sys
 import ply.lex as lex
 import argparse
-import pepper.symbol_table as symtable
 
 DEFAULT_LITERALS = ['+', '-', '*', '/', '(', ')',
                     '=', ',', '{', '}', '[', ']',
@@ -56,12 +55,12 @@ def t_PREPROCESSING_KEYWORD_PY(t):
 
 
 def t_COMMENT(t):
-    r"\s//.*\n"
+    r"\s//.*"
     pass
 
 
 def t_COMMENT_NO_WHITESPACE(t):
-    r"//.*\n"
+    r"//.*"
     pass
 
 
@@ -113,7 +112,6 @@ def t_PREPROCESSING_NUMBER(t):
 def t_STRING_LITERAL(t):
     r"""('((\\['tn])|[^'\\])*')|("((\\["tn])|[^"\\])*")"""
     return t
-
 
 
 def t_LONG_COMMENT_START(t):
