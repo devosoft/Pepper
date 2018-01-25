@@ -21,7 +21,6 @@ class TestUnit(object):
         test_lines = open('tests/test_data/example.cpp', 'r').readlines()
         lexer.lexer.input('\n'.join(test_lines))
         tokens = get_all_tokens(lexer.lexer)
-
         assert(len(tokens) == 76)
 
         token_types = defaultdict(int)
