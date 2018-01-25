@@ -10,36 +10,92 @@ import sys
 import ply.lex as lex
 import argparse
 
-literals = ['+', '-', '*', '/', '(', ')',
-            '=', ',', '{', '}', '[', ']',
-            '.', ';', '!', '#', '<', '>', ':', '~']
+DEFAULT_LITERALS = ['+', '-', '*', '/', '(', ')',
+                    '=', ',', '{', '}', '[', ']',
+                    '.', ';', '!', '<', '>', ':', '~',
+                    '@', '#', '&', "'"]
 
+
+literals = DEFAULT_LITERALS
+
+states = [
+    # recall there's also the default INITIAL state
+    ('comment', 'exclusive')
+]
 
 PREPROCESSING_KEYWORDS = [
     'include',
-    'define'
+    'define',
+    'ifdef',
+    'ifndef',
+    'endif',
+    'else',
+    'py',
 ]
 
 tokens = [
     'IDENTIFIER',
-    'PREPROCESSING_NUMBER',
-    'STRING_LITERAL',
-    'PUNCTUATOR',
-    'WHITESPACE',
     'NEWLINE',
     'OTHER',
+    'PREPROCESSING_NUMBER',
+    'PUNCTUATOR',
+    # 'SKIPPED_LINE',
+    'STRING_LITERAL',
+    'WHITESPACE',
+    'LONG_COMMENT',
+    'SYSTEM_INCLUDE_LITERAL'
 ]
 
 tokens.extend([f"PREPROCESSING_KEYWORD_{i.upper()}" for i in PREPROCESSING_KEYWORDS])
 
 
+def t_PREPROCESSING_KEYWORD_PY(t):
+    r"\#py\b"
+    return t
+
+
+def t_COMMENT(t):
+    r"\s//.*"
+    pass
+
+
+def t_COMMENT_NO_WHITESPACE(t):
+    r"//.*"
+    pass
+
+
+def t_PREPROCESSING_KEYWORD_IFDEF(t):
+    r'\#ifdef\b'
+    return t
+
+
+def t_PREPROCESSING_KEYWORD_IFNDEF(t):
+    r'\#ifndef\b'
+    return t
+
+
+def t_PREPROCESSING_KEYWORD_ENDIF(t):
+    r'\#endif\b'
+    return t
+
+
+def t_PREPROCESSING_KEYWORD_ELSE(t):
+    r'\#else\b'
+    return t
+
+
 def t_PREPROCESSING_KEYWORD_INCLUDE(t):
-    r'include'
+    r'\#include\b'
     return t
 
 
 def t_PREPROCESSING_KEYWORD_DEFINE(t):
-    r'define'
+    r'\#define\b'
+    return t
+
+
+def t_SYSTEM_INCLUDE_LITERAL(t):
+    r"""<[^\'\"<>]*?>"""
     return t
 
 
@@ -54,13 +110,35 @@ def t_PREPROCESSING_NUMBER(t):
 
 
 def t_STRING_LITERAL(t):
-    r"""('((\\['"tn])|[^'"\\])*')|("((\\['"tn])|[^'"\\])*")"""
+    r"""('((\\['tn])|[^'\\])*')|("((\\["tn])|[^"\\])*")"""
     return t
 
 
-# def t_PUNCTUATOR(t):
-#     r"""[{}:;,?%&*<>=#/!]|[\[\]\(\)\.\^\-\|\+]"""
-#     return t
+def t_LONG_COMMENT_START(t):
+    r"\/\*"
+    t.lexer.begin('comment')
+    pass
+
+
+def t_comment_BLOCK_COMMENT_END(t):
+    r"\*\/"
+    t.lexer.begin('INITIAL')  # reset to initial state
+    pass
+
+
+def t_comment_ignore_anything_else(t):
+    r".+?"
+    pass
+
+
+def t_comment_NEWLINE(t):
+    r'\n'
+    t.lexer.lineno += 1  # the lexer doesn't know what consistutes a 'line' unless we tell it
+    return t
+
+
+def t_comment_error(t):
+    raise Exception(f"Unknown token on line {t.lexer.lineno}: {t.value[0]}")
 
 
 # TODO: maybe convert this to a t_ignore() rule for improved lexing performance
@@ -77,8 +155,7 @@ def t_WHITESPACE(t):
 
 
 def t_error(t):
-    print(f"Unknown token on line {t.lexer.lineno}: {t.value[0]}")
-    exit(1)
+    raise Exception(f"Unknown token on line {t.lexer.lineno}: {t.value[0]}")
 
 
 lexer = lex.lex()

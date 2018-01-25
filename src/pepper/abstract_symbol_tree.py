@@ -6,6 +6,9 @@ The parser will build the actual tree, so this is really more of a library of no
 be used within the tree.
 """
 import pepper.symbol_table as symtable
+import os
+
+from pathlib import Path
 
 
 class Node():
@@ -34,6 +37,7 @@ class LinesNode(Node):
         super(LinesNode, self).__init__("Statements", children)
 
     def preprocess(self, lines):
+
         for child in self.children:
             child.preprocess(lines)
 
@@ -48,15 +52,32 @@ class PreprocessorIncludeNode(Node):
 
     def __init__(self, children, system_include=False):
         super(PreprocessorIncludeNode, self).__init__("PreprocessorInclude", children)
-        self.system_incude = system_include
-        self.target = children[0]
+        self.system_include = system_include
+        self.target = children[0][1:-1]
 
     def __str__(self):
         return f"{self.name}: {self.children[0]}"
 
+    def search_system_includes(filename):
+        for system_path in symtable.SYSTEM_INCLUDE_PATHS:
+            candidate = Path(f"{system_path}/{filename}")
+            if candidate.exists() and candidate.is_file():
+                return candidate
+
+        raise OSError(f"Could not find file {filename} in defined system include paths: "
+                      f"{symtable.SYSTEM_INCLUDE_PATHS}")
+
     def preprocess(self, lines):
         "This will be a lie for a while. I'll have to fix it later."
+
         lines[-1] = lines[-1] + 'static_assert(false, "include node not properly implemented")'
+        if self.system_include:
+            found_path = PreprocessorIncludeNode.search_system_includes(self.target)
+            symtable.FILE_QUEUE.append(open(found_path, 'r'))
+
+        else:
+            symtable.FILE_QUEUE.append(open(os.path.split(symtable.FILE_QUEUE[-1].name)[0]
+                                            + '/' + self.target, 'r'))
 
 
 class IdentifierNode(Node):
@@ -113,6 +134,12 @@ class ASCIILiteralNode(PrimitiveNode):
 
     def __init__(self, children):
         super(ASCIILiteralNode, self).__init__('ASCIILit', children)
+
+
+class StringLiteralNode(PrimitiveNode):
+
+    def __init__(self, children):
+        super(StringLiteralNode, self).__init__('StringLit', children)
 
 
 class PreprocessingNumberNode(PrimitiveNode):

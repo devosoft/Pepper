@@ -1,4 +1,5 @@
 #! /usr/bin/env python3
+# flake8: noqa E501
 import sys
 import argparse
 import ply.yacc as yacc
@@ -63,15 +64,66 @@ def p_include_expression(p):
     """
     preprocessor_expression : include_expression
                             | define_expression
+                            | ifdef_expression
+                            | ifndef_expression
+                            | endif_expression
+                            | else_expression
     """
     p[0] = p[1]
 
 
+def p_ifdef_expression(p):
+    """
+    ifdef_expression : PREPROCESSING_KEYWORD_IFDEF WHITESPACE IDENTIFIER
+    """
+    if p[3] in symtable.TABLE.keys():
+        symtable.IFDEF_STACK.append((p[3], True))
+    else:
+        symtable.IFDEF_STACK.append((p[3], False))
+
+    p[0] = ast.StringLiteralNode([f"// ifdef expression {p[3]}"])
+
+
+def p_ifndef_expression(p):
+    """
+    ifndef_expression : PREPROCESSING_KEYWORD_IFNDEF WHITESPACE IDENTIFIER
+    """
+    if p[3] in symtable.TABLE.keys():
+        symtable.IFDEF_STACK.append((p[3], False))
+    else:
+        symtable.IFDEF_STACK.append((p[3], True))
+
+    p[0] = ast.StringLiteralNode([f"// ifndef expression {p[3]}"])
+
+
+def p_else_expression(p):
+    """
+    else_expression : PREPROCESSING_KEYWORD_ELSE
+    """
+    symtable.IFDEF_STACK[-1] = (symtable.IFDEF_STACK[-1][0], not symtable.IFDEF_STACK[-1][1])
+    p[0] = ast.StringLiteralNode([f"// else expression "])
+
+
+def p_endif_expression(p):
+    """
+    endif_expression : PREPROCESSING_KEYWORD_ENDIF
+    """
+    symtable.IFDEF_STACK.pop()
+    p[0] = ast.StringLiteralNode([f"// endif expression "])
+
+
+def p_define_expression_no_expansion(p):
+    """
+    define_expression : PREPROCESSING_KEYWORD_DEFINE WHITESPACE IDENTIFIER
+    """
+    p[0] = symtable.MacroExpansion(p[3], [ast.IdentifierNode(["true"])])
+
+
 def p_define_expression_no_args(p):
     """
-    define_expression : '#' PREPROCESSING_KEYWORD_DEFINE WHITESPACE IDENTIFIER WHITESPACE macro_expansion
+    define_expression : PREPROCESSING_KEYWORD_DEFINE WHITESPACE IDENTIFIER WHITESPACE macro_expansion
     """
-    p[0] = symtable.MacroExpansion(p[4], p[6])
+    p[0] = symtable.MacroExpansion(p[3], p[5])
 
 
 def p_include_expression_disambiguation(p):
@@ -91,16 +143,16 @@ def p_define_expansion(p):
 
 def p_include_expression_file(p):
     """
-    include_expression_file : '#' PREPROCESSING_KEYWORD_INCLUDE WHITESPACE STRING_LITERAL
+    include_expression_file : PREPROCESSING_KEYWORD_INCLUDE WHITESPACE STRING_LITERAL
     """
     p[0] = ast.PreprocessorIncludeNode([p[3]], False)
 
 
 def p_include_expression_system(p):
     """
-    include_expression_system : '#' PREPROCESSING_KEYWORD_INCLUDE WHITESPACE '<' IDENTIFIER '>'
+    include_expression_system : PREPROCESSING_KEYWORD_INCLUDE WHITESPACE SYSTEM_INCLUDE_LITERAL
     """
-    p[0] = ast.PreprocessorIncludeNode([p[4]], True)
+    p[0] = ast.PreprocessorIncludeNode([p[3]], True)
 
 
 def p_expressions_empty(p):
@@ -125,13 +177,6 @@ def p_whitespace(p):
     p[0] = ast.WhiteSpaceNode(p[1])
 
 
-# def p_newline(p):
-#     """
-#     code_expression : NEWLINE
-#     """
-#     p[0] = ast.NewlineNode("\n")
-
-
 def p_statement_to_identifier(p):
     """
     code_expression : IDENTIFIER
@@ -143,7 +188,7 @@ def p_expression_to_string_lit(p):
     """
     code_expression : STRING_LITERAL
     """
-    p[0] = p[1]
+    p[0] = ast.StringLiteralNode([p[1]])
 
 
 def p_statement_to_ascii_literal(p):
@@ -164,6 +209,10 @@ def p_statement_to_ascii_literal(p):
               | ']'
               | '='
               | ';'
+              | ':'
+              | '#'
+              | ','
+              | '.'
     """
     p[0] = ast.ASCIILiteralNode(p[1])
 
