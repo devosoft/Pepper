@@ -25,6 +25,7 @@ def read(*names, **kwargs):
 
 setup(
     name='Pepper',
+    packages = ['Pepper'], # this must be the same as the name above
     version='0.0.1',
     license='MIT License',
     description='Python-Enhanced PrePreocessor',
