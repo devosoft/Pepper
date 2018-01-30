@@ -14,7 +14,7 @@ Installing Pepper
     `Python Packaging reference <https://packaging.python.org/tutorials/installing-packages/>`__ to make sure everything gets set up right.
  #. Run `pip install -e . dev` in the Pepper repository folder. This will install pepper in editable mode, where the installed package points to
     the work directory containing the source files of the package. This will allow you to make changes to the local source files without having to
-    re-install the package to test them. This also installes the 'dev' dependencies, which include things like the test runner, coverage hooks,
+    re-install the package to test them. This also installes the dependencies, which include things like the test runner, coverage hooks,
     documentation generator and so on.
  #. Run `make test`. This will run the automated tests against the installed package. The tests should all pass.
 
