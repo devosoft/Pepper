@@ -25,7 +25,6 @@ def read(*names, **kwargs):
 
 setup(
     name='Pepper',
-    packages = ['Pepper'], # this must be the same as the name above
     version='0.0.1',
     license='MIT License',
     description='Python-Enhanced PrePreocessor',
@@ -36,6 +35,7 @@ setup(
     author='Jake Fenton',
     author_email='jake@fenton.io',
     url='https://github.com/Devosoft/Pepper',
+    download_url='https://github.com/devosoft/Pepper/archive/0.0.1.tar.gz',
     packages=find_packages('src'),
     package_dir={'': 'src'},
     py_modules=[splitext(basename(path))[0] for path in glob('src/*.py')],
