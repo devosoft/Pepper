@@ -17,7 +17,7 @@ LINUX_DEFAULTS = [
     "/usr/lib/gcc/x86_64-linux-gnu/7/include",
     "/usr/local/include",
     "/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed",
-    "/usr/include/x86_s4-linux-gnu",
+    "/usr/include/x86_64-linux-gnu",
     "/usr/include"
 ]
 

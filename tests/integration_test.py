@@ -4,7 +4,7 @@ import shutil
 
 SOURCE_FILE_DIRECTORY = "./tests/test_data/"
 EXAMPLE_OUTPUT_DIRECTORY = "./tests/test_data/output_examples/"
-CXX_FLAG = "clang"
+CXX_FLAG = "g++"
 
 
 class TestSystem:
@@ -20,8 +20,8 @@ class TestSystem:
 
         pepper_executable = test_dir.realpath() + "/no_preprocessing_statements.pepper"
 
-        #run compiler using C++ 17 standard
-        process = sp.run([CXX_FLAG, "-std=c++1z","-o" , pepper_executable ,test_dir_path],
+        #run compiler using C++ 11 standard
+        process = sp.run([CXX_FLAG, "-std=c++11","-o" , pepper_executable ,test_dir_path],
                          stdout=sp.PIPE, stderr= sp.PIPE)
         assert(process.returncode == 0)
 
@@ -33,7 +33,7 @@ class TestSystem:
 
         # run normal compilation stage
         compile_executable = test_dir.realpath() + "no_preprocessing_statements." + CXX_FLAG
-        process = sp.run(['g++', "-std=c++1z","-o" , compile_executable , initial_file],
+        process = sp.run([CXX_FLAG, "-std=c++11","-o" , compile_executable , initial_file],
                          stdout=sp.PIPE, stderr= sp.PIPE)
         assert(process.returncode == 0)
 
