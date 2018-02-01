@@ -56,7 +56,8 @@ def main(args=None):
     while len(symtable.FILE_STACK):
         if symtable.EXPANDED_MACRO:
             symtable.EXPANDED_MACRO = False
-            parser_input = "\n" + preprocessed_lines[-2] + "\n"  # lexer eats the newlines, have to re-add them
+            # lexer eats the newlines, have to re-add them
+            parser_input = "\n" + preprocessed_lines[-2] + "\n"
             preprocessed_lines = preprocessed_lines[:-2]
         else:
             parser_input += symtable.FILE_STACK[-1].readline()
