@@ -1,3 +1,6 @@
+# This file is a part of the Pepper project, https://github.com/devosoft/Pepper
+# (C) Michigan State University, under the MIT License
+# See LICENSE.txt for more information
 
 """
 This is the abstract symbol tree for PEPPr.
@@ -73,10 +76,10 @@ class PreprocessorIncludeNode(Node):
         lines[-1] = lines[-1] + 'static_assert(false, "include node not properly implemented")'
         if self.system_include:
             found_path = PreprocessorIncludeNode.search_system_includes(self.target)
-            symtable.FILE_QUEUE.append(open(found_path, 'r'))
+            symtable.FILE_STACK.append(open(found_path, 'r'))
 
         else:
-            symtable.FILE_QUEUE.append(open(os.path.split(symtable.FILE_QUEUE[-1].name)[0]
+            symtable.FILE_STACK.append(open(os.path.split(symtable.FILE_STACK[-1].name)[0]
                                             + '/' + self.target, 'r'))
 
 

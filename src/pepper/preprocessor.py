@@ -1,8 +1,14 @@
+
+# This file is a part of the Pepper project, https://github.com/devosoft/Pepper
+# (C) Michigan State University, under the MIT License
+# See LICENSE.txt for more information
+
 """
 This module contains the functions necessary to run only the preprocessor
 
 It primarily serves as the entry point to Pepper
 """
+
 import argparse
 import pepper.parser as parser
 import os
@@ -36,18 +42,18 @@ def main(args=None):
         for p in args.sys_include:
             symtable.SYSTEM_INCLUDE_PATHS.append(p)
 
-    symtable.FILE_QUEUE.append(open(args.input_file, 'r'))
+    symtable.FILE_STACK.append(open(args.input_file, 'r'))
 
     parser_input = ""
 
     preprocessed_lines = [""]
 
-    while len(symtable.FILE_QUEUE):
-        parser_input += symtable.FILE_QUEUE[-1].readline()
+    while len(symtable.FILE_STACK):
+        parser_input += symtable.FILE_STACK[-1].readline()
 
         if not len(parser_input):
-            symtable.FILE_QUEUE.pop()
-            if len(symtable.FILE_QUEUE):
+            symtable.FILE_STACK.pop()
+            if len(symtable.FILE_STACK):
                 preprocessed_lines.append("")
         elif not parser_input.endswith(r"\\n"):
             tree = parser.parse(parser_input)

@@ -1,3 +1,7 @@
+# This file is a part of the Pepper project, https://github.com/devosoft/Pepper
+# (C) Michigan State University, under the MIT License
+# See LICENSE.txt for more information
+
 import pepper.lexer as lexer
 from pepper.lexer import ignore as tokens_to_ignore
 from collections import defaultdict

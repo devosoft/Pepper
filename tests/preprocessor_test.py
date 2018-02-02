@@ -1,4 +1,7 @@
-# import pepper.preprocessor as preproc
+# This file is a part of the Pepper project, https://github.com/devosoft/Pepper
+# (C) Michigan State University, under the MIT License
+# See LICENSE.txt for more information
+
 import subprocess
 import shutil
 import sys

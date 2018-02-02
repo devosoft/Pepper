@@ -1,11 +1,16 @@
 #! /usr/bin/env python3
 
+# This file is a part of the Pepper project, https://github.com/devosoft/Pepper
+# (C) Michigan State University, under the MIT License
+# See LICENSE.txt for more information
+
 """
 This is the lexer for PEPPr
 
 It's responsible for tokenizing the incoming character stream. The Parser will ingest the
 token stream and build a tree, which will in turn produce actual c++ or c code.
 """
+
 import sys
 import ply.lex as lex
 import argparse
