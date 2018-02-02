@@ -11,6 +11,7 @@ It primarily serves as the entry point to Pepper
 
 import argparse
 import pepper.parser as parser
+from pepper import __version__
 import os
 import pepper.symbol_table as symtable
 from pathlib import Path
@@ -24,6 +25,10 @@ def get_args():
                         '-o',
                         type=argparse.FileType('w'),
                         help='the filename to write to')
+
+    parser.add_argument('--version', help="output Pepper's version and halt.",
+                        action='version',
+                        version=f"Pepper {__version__}")
 
     parser.add_argument('-S',
                         '--sys_include',
