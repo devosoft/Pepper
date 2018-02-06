@@ -7,7 +7,7 @@ CXX_FLAG = "g++"
 
 
 class TestSystem:
-    def test_no_preprocessing_statements(self,tmpdir):
+    def test_no_preprocessing_statements(self, tmpdir):
         curr_file = "/no_preprocessing_statements."
         test_dir = tmpdir.mkdir('compiled')
         initial_file = SOURCE_FILE_DIRECTORY + curr_file + "cpp"
@@ -21,7 +21,7 @@ class TestSystem:
 
         # run compiler using C++ 11 standard
         process = sp.run([CXX_FLAG, "-std=c++11", "-Wall", "-o", pepper_executable, test_file_path],
-                         stdout=sp.PIPE, stderr= sp.PIPE)
+                         stdout=sp.PIPE, stderr=sp.PIPE)
         assert(process.returncode == 0)
 
         # run executable
@@ -35,6 +35,6 @@ class TestSystem:
         assert(process.returncode == 0)
 
         compile_process = sp.Popen([compile_executable], stdout=sp.PIPE, stderr=sp.PIPE)
-        c_out,c_err = compile_process.communicate()
+        c_out, c_err = compile_process.communicate()
 
         assert(p_out == c_out)
