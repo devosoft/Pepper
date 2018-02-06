@@ -21,14 +21,14 @@ LINUX_DEFAULTS = [
     "/usr/include"
 ]
 
-MAC_DEFAULTS = {
+MAC_DEFAULTS = [
     "/usr/local/include",
     "/Library/Developer/CommandLineTools/usr/include/c++/v1",
     "/Library/Developer/CommandLineTools/usr/lib/clang/9.0.0/include",
     "/Library/Developer/CommandLineTools/usr/include",
     "/usr/include"
 
-}
+]
 
 if platform.system() == "Linux":
     SYSTEM_INCLUDE_PATHS = LINUX_DEFAULTS
