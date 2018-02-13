@@ -1,0 +1,4 @@
+include README.md
+include LICENSE.txt
+include versioneer.py
+include src/pepper/_version.py

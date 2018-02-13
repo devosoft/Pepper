@@ -1,15 +1,23 @@
+# This file is a part of the Pepper project, https://github.com/devosoft/Pepper
+# (C) Michigan State University, under the MIT License
+# See LICENSE.txt for more information
+
 """
 The Symbol Table module implements a class to track declarations and usages of identifiers
 """
 import sys
 import platform
 
+#: The global symboltable
 TABLE = dict()  # Identifier/argment list length pairs.
-FILE_QUEUE = []
+#: The stack of files we're reading from
+FILE_STACK = []
+#: The stack of ifdef/ifndef/if control structures we're processing
 IFDEF_STACK = []
+#: The list of paths to search when doing a system include
 SYSTEM_INCLUDE_PATHS = []
-HANGING_BLOCK_COMMENT_START = False
 
+#: The default linux paths to search for includes-
 LINUX_DEFAULTS = [
     "/usr/include/c++/7",
     "/usr/include/x86_64-linux-gnu/c++/7",
@@ -37,6 +45,7 @@ elif platform.system() == "Darwin":
     SYSTEM_INCLUDE_PATHS = MAC_DEFAULTS
 
 class MacroExpansion():
+    "Expands an identifier into a macro expansion, possibly with arguments"
     def __init__(self, name, expansion, args=None):
         self.name = name
         self.expansion = ""

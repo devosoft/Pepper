@@ -5,7 +5,8 @@ from __future__ import absolute_import
 from __future__ import print_function
 
 import io
-# import re
+import versioneer
+
 from glob import glob
 from os.path import basename
 from os.path import dirname
@@ -25,7 +26,8 @@ def read(*names, **kwargs):
 
 setup(
     name='Pepper',
-    version='0.0.1',
+    version=versioneer.get_version(),
+    cmdclass=versioneer.get_cmdclass(),
     license='MIT License',
     description='Python-Enhanced PrePreocessor',
     # long_description='%s\n' % (
@@ -69,14 +71,15 @@ setup(
         # eg: 'keyword1', 'keyword2', 'keyword3',
     ],
     install_requires=[
-        'ply>=3.10',
-        'wheel',
-        'sphinx>=1.6.3',
-        'pytest',
-        'pytest-cov',
-        'tox',
         'diff_cover',
         'flake8',
+        'ply>=3.10',
+        'pytest-cov',
+        'pytest',
+        'sphinx>=1.6.3',
+        'tox',
+        'versioneer',
+        'wheel',
         # eg: 'aspectlib==1.1.1', 'six>=1.7',
     ],
     extras_require={

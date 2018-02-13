@@ -1,4 +1,16 @@
 #! /usr/bin/env python3
+
+# This file is a part of the Pepper project, https://github.com/devosoft/Pepper
+# (C) Michigan State University, under the MIT License
+# See LICENSE.txt for more information
+
+"""
+This is the Parser module for Pepper
+
+This module impelements the grammar for the preprocessor language, comprised of tokens from the Lexer module.
+This module implements a main function, but this is only for debugging and will be removed on release.
+"""
+
 # flake8: noqa E501
 import sys
 import argparse
