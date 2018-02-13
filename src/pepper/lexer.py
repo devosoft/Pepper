@@ -35,6 +35,7 @@ PREPROCESSING_KEYWORDS = [
     'ifndef',
     'endif',
     'else',
+    'if',
     'py',
 ]
 
@@ -83,6 +84,9 @@ def t_PREPROCESSING_KEYWORD_ENDIF(t):
     r'\#endif\b'
     return t
 
+
+def t_PREPROCESSING_KEYWORD_IF(t):
+    r'\#if\b'
 
 def t_PREPROCESSING_KEYWORD_ELSE(t):
     r'\#else\b'
