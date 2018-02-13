@@ -22,7 +22,7 @@ Only in the GNU compiler, you can actually avoid changing the file name with usi
 
 Based on a global variable 'CXX_FLAG' which I'm hoping in the future to read the environment variable for it 
 when it's being ran for either G++ or Clang. I don't see there being a huge need to support MSVC compilers, 
-but wht do I know. 
+but what do I know. 
 ~~~
 CXX_FLAG -Wall -std=c++17 -o output some_file.ii
 ~~~
