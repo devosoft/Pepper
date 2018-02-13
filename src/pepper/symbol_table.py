@@ -45,6 +45,10 @@ if platform.system() == "Linux":
 elif platform.system() == "Darwin":
     SYSTEM_INCLUDE_PATHS = MAC_DEFAULTS
 
+class PepperSyntaxError(Exception):
+    pass
+
+
 class MacroExpansion():
     "Expands an identifier into a macro expansion, possibly with arguments"
     def __init__(self, name, expansion, args=None):
@@ -52,7 +56,10 @@ class MacroExpansion():
         self.expansion = ""
 
         for item in expansion:
-            self.expansion += item.preprocess()
+            try:
+                self.expansion += item.preprocess()
+            except AttributeError:
+                continue
         self.args = args
 
         if self.name in TABLE.keys():

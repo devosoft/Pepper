@@ -52,7 +52,6 @@ class TestUnit:
             assert("Could not find file FileThatDoesNotExist.h in defined system include paths:" in str(err)) # NOQA
 
 
-
 # bad test now, good test later...?
 class TestSystem:
     def test_basic_function(self, tmpdir):
@@ -86,3 +85,6 @@ class TestSystem:
 
     def test_nested_macro_expansion(self, tmpdir):
         preprocess_and_compare('multiple_macros.cpp', 'multiple_macros.cpp.preprocessed.cc', tmpdir)
+
+    def test_function_and_macro_calls(self, tmpdir):
+        preprocess_and_compare('function_and_macro_calls.cpp', 'function_and_macro_calls.cpp.preprocessed.cc', tmpdir)

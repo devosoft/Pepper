@@ -138,6 +138,50 @@ def p_define_expression_no_args(p):
     p[0] = symtable.MacroExpansion(p[3], p[5])
 
 
+def p_define_expression_some_args(p):
+    """
+    define_expression : PREPROCESSING_KEYWORD_DEFINE WHITESPACE IDENTIFIER '(' identifier_list ')'  WHITESPACE macro_expansion
+    """
+    print(f"wtf: {[r for r in p]}")
+    print(f"doing a thing, {p[3]}, {p[8]}, {p[5]}")
+    p[0] = symtable.MacroExpansion(p[3], p[8], args=p[5])
+
+def p_identifier_list_singleton(p):
+    """
+    identifier_list : IDENTIFIER
+    """
+    p[0] = [p[1]]
+
+
+def p_identifier_list_empty(p):
+    """
+    identifier_list :
+    """
+    p[0] = []
+
+
+def p_identifier_list_multiple(p):
+    """
+    identifier_list : identifier_list ',' maybe_space IDENTIFIER
+    """
+    p[0] = p[1]
+    p[0].append(p[4])
+
+
+def p_maybe_whitespace_none(p):
+    """
+    maybe_space :
+    """
+    p[0] = ast.WhiteSpaceNode([""])
+
+
+def p_maybe_whitespace_some(p):
+    """
+    maybe_space : WHITESPACE
+    """
+    p[0] = ast.WhiteSpaceNode([p[1]])
+
+
 def p_include_expression_disambiguation(p):
     """
     include_expression : include_expression_file
@@ -182,35 +226,95 @@ def p_expressions(p):
     p[0].append(p[2])
 
 
-def p_whitespace(p):
+def p_identifier_call(p):
     """
-    code_expression : WHITESPACE
+    safe_code_expression : IDENTIFIER code_expression_parenthetical
     """
-    p[0] = ast.WhiteSpaceNode(p[1])
+    print("You did it, Jim!")
+    print(f"{p[1]}: this should be a bunch of linesnodes {p[2]}")
+    p[0] = ast.IdentifierNode([p[1]], args=p[2])
+
+
+def p_code_expression_to_safe(p):
+    """
+    code_expression : safe_code_expression
+    """
+    p[0] = p[1]
 
 
 def p_statement_to_identifier(p):
     """
-    code_expression : IDENTIFIER
+    safe_code_expression : IDENTIFIER
     """
     p[0] = ast.IdentifierNode([p[1]])
 
 
+def p_expression_to_list_of_something(p):
+    """
+    code_expression_parenthetical : '(' list_of_expressions ')'
+    """
+    p[0] = p[2]
+
+
+def p_whitespace_unsafe(p):
+    """
+    safe_code_expression : WHITESPACE
+    """
+    p[0] = ast.WhiteSpaceNode([p[1]])
+
+
 def p_expression_to_string_lit(p):
     """
-    code_expression : STRING_LITERAL
+    safe_code_expression : STRING_LITERAL
     """
     p[0] = ast.StringLiteralNode([p[1]])
 
 
-def p_statement_to_ascii_literal(p):
+
+def p_expression_list_singleton(p):
     """
-    code_expression : '<'
+    list_of_expressions : safe_code_expressions
+    """
+    p[0] = [ast.LinesNode(p[1])]
+
+
+def p_expression_list_empty(p):
+    """
+    list_of_expressions :
+    """
+    p[0] = []
+
+
+def p_expression_list_multiple(p):
+    """
+    list_of_expressions : list_of_expressions ',' maybe_space safe_code_expressions
+    """
+    p[0] = p[1]
+    p[0].append(ast.LinesNode(p[4]))
+
+# don't  mind me, just duplicating code...ugh
+
+def p_safe_expressions_empty(p):
+    """
+    safe_code_expressions :
+    """
+    p[0] = []
+
+
+def p_safe_expressions(p):
+    """
+    safe_code_expressions : safe_code_expressions safe_code_expression
+    """
+    p[0] = p[1]
+    p[0].append(p[2])
+
+
+def p_safe_code_expressions_ascii_literal(p):
+    """
+    safe_code_expression : '<'
               | '>'
               | '+'
               | '-'
-              | '('
-              | ')'
               | '%'
               | '^'
               | '&'
@@ -223,15 +327,23 @@ def p_statement_to_ascii_literal(p):
               | ';'
               | ':'
               | '#'
-              | ','
               | '.'
     """
     p[0] = ast.ASCIILiteralNode(p[1])
 
 
-def p_statement_to_preprocessing_numer(p):
+def p_statement_to_ascii_literal(p):
     """
-    code_expression : PREPROCESSING_NUMBER
+    code_expression :
+              | '.'
+              | ','
+    """
+    p[0] = ast.ASCIILiteralNode(p[1])
+
+
+def p_statement_to_preprocessing_number(p):
+    """
+    safe_code_expression : PREPROCESSING_NUMBER
     """
     p[0] = ast.PreprocessingNumberNode([p[1]])
 
@@ -239,7 +351,7 @@ def p_statement_to_preprocessing_numer(p):
 def p_error(p):
     print(f"ERROR(line {p.lineno}): syntax error")
     print(p)
-    raise Exception
+    raise symtable.PepperSyntaxError()
 
 
 # TODO: expression expansions

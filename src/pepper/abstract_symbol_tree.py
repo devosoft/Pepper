@@ -37,12 +37,18 @@ class Node():
 class LinesNode(Node):
 
     def __init__(self, children=None):
+        if children is not None:
+            # sometimes whitespace is none, oops
+            children = [child for child in children if child is not None]
         super(LinesNode, self).__init__("Statements", children)
 
-    def preprocess(self, lines):
-
-        for child in self.children:
-            child.preprocess(lines)
+    def preprocess(self, lines=None):
+        if lines:
+            for child in self.children:
+                if child is not None: # I am such a hack
+                    child.preprocess(lines)
+        else:
+            return " ".join([r.preprocess() for r in self.children])
 
 
 class PreprocessorDirectiveNode(Node):
@@ -85,16 +91,26 @@ class PreprocessorIncludeNode(Node):
 
 class IdentifierNode(Node):
 
-    def __init__(self, children):
+    def __init__(self, children, args=None):
         super(IdentifierNode, self).__init__("Identifier", children)
+        if args:
+            self.args = args
+        else:
+            self.args = []
 
     def __str__(self):
-        return f"{self.name}: {self.children[0]}"
+        return f"{self.name}: {self.children}"
 
     def preprocess(self, lines=None):
         expansion = self.children[0]
         if self.children[0] in symtable.TABLE.keys():
-            expansion = symtable.TABLE[self.children[0]].expand()
+            expansion = symtable.TABLE[self.children[0]].expand([arg.preprocess() for arg in self.args])
+        else:
+            if self.args:
+                print(f"children: {self.args}")
+                expansion = f'{self.children[0]}({",".join([arg.preprocess() for arg in self.args])})'
+            else:
+                expansion = self.children[0]
         if lines:
             lines[-1] = lines[-1] + expansion
         else:

@@ -15,6 +15,7 @@ from pepper import __version__
 import os
 import pepper.symbol_table as symtable
 from pathlib import Path
+import sys
 
 
 def get_args():
@@ -36,6 +37,8 @@ def get_args():
                         action="append",
                         type=Path)
 
+    parser.add_argument('--debug', help="enable debugging output", action="store_true")
+
     return parser.parse_args()
 
 
@@ -52,6 +55,7 @@ def main(args=None):
     parser_input = ""
 
     preprocessed_lines = [""]
+    tree = None
 
     while len(symtable.FILE_STACK):
         if symtable.EXPANDED_MACRO:
@@ -67,9 +71,21 @@ def main(args=None):
             if len(symtable.FILE_STACK):
                 preprocessed_lines.append("")
         elif not parser_input.endswith(r"\\n"):
-            tree = parser.parse(parser_input)
+            try:
+                tree = parser.parse(parser_input, args.debug if args.debug else None)
+            except symtable.PepperSyntaxError:
+                print("A syntac error was encountered while parsing a line:")
+                print(f"{parser_input}")
+                sys.exit(1)
             if len(symtable.IFDEF_STACK) == 0 or symtable.IFDEF_STACK[-1][1]:
-                output = tree.preprocess(preprocessed_lines)
+                try:
+                    output = tree.preprocess(preprocessed_lines)
+                except Exception as err:
+                    print("An internal error occured while processing a line:")
+                    print(f"{parser_input}")
+                    print("Please report this error: https://github.com/devosoft/Pepper/issues")
+                    raise err
+                    sys.exit(2)
             else:
                 pass  # toss the line, we're in a 'deny' ifdef
             parser_input = ""
