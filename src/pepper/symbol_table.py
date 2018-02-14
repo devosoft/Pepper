@@ -16,6 +16,7 @@ FILE_STACK = []
 IFDEF_STACK = []
 #: The list of paths to search when doing a system include
 SYSTEM_INCLUDE_PATHS = []
+EXPANDED_MACRO = False
 
 #: The default linux paths to search for includes-
 LINUX_DEFAULTS = [
@@ -60,6 +61,7 @@ class MacroExpansion():
         TABLE[self.name] = self
 
     def expand(self, args=None):
+        global EXPANDED_MACRO
         if self.args is None and args is not None:
             raise SyntaxError(f"Macro {self.name} doesn't take any args, but was given {len(args)}")
         elif self.args is not None and args is None:
@@ -72,6 +74,7 @@ class MacroExpansion():
                               f" expected {len(self.args)}, got {len(args)}")
 
         expansion = self.expansion
+        EXPANDED_MACRO = True
 
         if args:
             for index, arg in enumerate(args):

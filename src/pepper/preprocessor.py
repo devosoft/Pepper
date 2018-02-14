@@ -54,13 +54,20 @@ def main(args=None):
     preprocessed_lines = [""]
 
     while len(symtable.FILE_STACK):
-        parser_input += symtable.FILE_STACK[-1].readline()
+        if symtable.EXPANDED_MACRO:
+            symtable.EXPANDED_MACRO = False
+            # lexer eats the newlines, have to re-add them
+            parser_input = "\n" + preprocessed_lines[-2] + "\n"
+            preprocessed_lines = preprocessed_lines[:-2]
+        else:
+            parser_input += symtable.FILE_STACK[-1].readline()
 
         if not len(parser_input):
             symtable.FILE_STACK.pop()
             if len(symtable.FILE_STACK):
                 preprocessed_lines.append("")
         elif not parser_input.endswith(r"\\n"):
+            print(f"Parsing '{parser_input}'")
             tree = parser.parse(parser_input)
             if len(symtable.IFDEF_STACK) == 0 or symtable.IFDEF_STACK[-1][1]:
                 output = tree.preprocess(preprocessed_lines)

@@ -83,3 +83,6 @@ class TestSystem:
 
     def test_comments(self, tmpdir):
         preprocess_and_compare('comments.cpp', 'comments.cpp.preprocessed.cc', tmpdir)
+
+    def test_nested_macro_expansion(self, tmpdir):
+        preprocess_and_compare('multiple_macros.cpp', 'multiple_macros.cpp.preprocessed.cc', tmpdir)
