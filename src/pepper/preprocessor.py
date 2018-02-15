@@ -67,7 +67,6 @@ def main(args=None):
             if len(symtable.FILE_STACK):
                 preprocessed_lines.append("")
         elif not parser_input.endswith(r"\\n"):
-            print(f"Parsing '{parser_input}'")
             tree = parser.parse(parser_input)
             if len(symtable.IFDEF_STACK) == 0 or symtable.IFDEF_STACK[-1][1]:
                 output = tree.preprocess(preprocessed_lines)
