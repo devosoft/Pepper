@@ -74,7 +74,7 @@ def main(args=None):
             try:
                 tree = parser.parse(parser_input, args.debug if args.debug else None)
             except symtable.PepperSyntaxError:
-                print("A syntac error was encountered while parsing a line:")
+                print(f"A syntax error was encountered while parsing a line from {symtable.FILE_STACK[-1].name}:")  # NOQA
                 print(f"{parser_input}")
                 sys.exit(1)
             if len(symtable.IFDEF_STACK) == 0 or symtable.IFDEF_STACK[-1][1]:
@@ -84,8 +84,7 @@ def main(args=None):
                     print("An internal error occured while processing a line:")
                     print(f"{parser_input}")
                     print("Please report this error: https://github.com/devosoft/Pepper/issues")
-                    raise err
-                    sys.exit(2)
+                    raise symtable.PepperInternalError(err)
             else:
                 pass  # toss the line, we're in a 'deny' ifdef
             parser_input = ""

@@ -49,6 +49,10 @@ class PepperSyntaxError(Exception):
     pass
 
 
+class PepperInternalError(Exception):
+    pass
+
+
 class MacroExpansion():
     "Expands an identifier into a macro expansion, possibly with arguments"
     def __init__(self, name, expansion, args=None):
@@ -56,10 +60,7 @@ class MacroExpansion():
         self.expansion = ""
 
         for item in expansion:
-            try:
-                self.expansion += item.preprocess()
-            except AttributeError:
-                continue
+            self.expansion += item.preprocess()
         self.args = args
 
         if self.name in TABLE.keys():

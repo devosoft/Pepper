@@ -87,4 +87,35 @@ class TestSystem:
         preprocess_and_compare('multiple_macros.cpp', 'multiple_macros.cpp.preprocessed.cc', tmpdir)
 
     def test_function_and_macro_calls(self, tmpdir):
-        preprocess_and_compare('function_and_macro_calls.cpp', 'function_and_macro_calls.cpp.preprocessed.cc', tmpdir)
+        preprocess_and_compare('function_and_macro_calls.cpp', 'function_and_macro_calls.cpp.preprocessed.cc', tmpdir)  # NOQA
+
+    def test_error_raised_for_bad_syntax(self, tmpdir):
+        test_dir = tmpdir.mkdir('preprocessor')
+        # copy the test file to the test directory
+        shutil.copy(SOURCE_FILE_DIRECTORY + "error.cpp", test_dir.realpath())
+
+        call = ["Pepper"] + [f"{test_dir.realpath()}/error.cpp"]
+
+        process = subprocess.run(call, timeout=2, stdout=subprocess.PIPE)
+        # out, err = process.communicate()
+        assert(process.returncode == 1)
+        exception_clippings = [
+            "A syntax error was encountered while parsing a line from",
+            "error.cpp",
+            "#define thisisamacro(wait noO IT'S A SYNTAX ERROR"
+        ]
+        data = process.stdout.decode('utf-8')
+        for clip in exception_clippings:
+            assert(clip in data)
+
+    # def test_internal_error_caught_and_reported(self, tmpdir):
+    #     # if we don't pass args, it'll just blow up
+    #     err_raised = False
+    #     try:
+    #         preprocessor.main()
+    #         assert(False and "There should have been an error raised!")
+    #     except symtable.PepperInternalError as err:
+    #         err_raised = True
+    #     except:  # NOQA
+    #         assert(False and "Wrong type of exception raised!")
+    #     assert(err_raised)

@@ -142,8 +142,6 @@ def p_define_expression_some_args(p):
     """
     define_expression : PREPROCESSING_KEYWORD_DEFINE WHITESPACE IDENTIFIER '(' identifier_list ')'  WHITESPACE macro_expansion
     """
-    print(f"wtf: {[r for r in p]}")
-    print(f"doing a thing, {p[3]}, {p[8]}, {p[5]}")
     p[0] = symtable.MacroExpansion(p[3], p[8], args=p[5])
 
 def p_identifier_list_singleton(p):
@@ -230,8 +228,6 @@ def p_identifier_call(p):
     """
     safe_code_expression : IDENTIFIER code_expression_parenthetical
     """
-    print("You did it, Jim!")
-    print(f"{p[1]}: this should be a bunch of linesnodes {p[2]}")
     p[0] = ast.IdentifierNode([p[1]], args=p[2])
 
 
@@ -292,8 +288,8 @@ def p_expression_list_multiple(p):
     p[0] = p[1]
     p[0].append(ast.LinesNode(p[4]))
 
-# don't  mind me, just duplicating code...ugh
 
+# don't  mind me, just duplicating code...ugh
 def p_safe_expressions_empty(p):
     """
     safe_code_expressions :
@@ -335,8 +331,9 @@ def p_safe_code_expressions_ascii_literal(p):
 def p_statement_to_ascii_literal(p):
     """
     code_expression :
-              | '.'
               | ','
+              | '('
+              | ')'
     """
     p[0] = ast.ASCIILiteralNode(p[1])
 
@@ -354,10 +351,6 @@ def p_error(p):
     raise symtable.PepperSyntaxError()
 
 
-# TODO: expression expansions
-# TODO: cpp code expansion
-
-
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('input_file', type=argparse.FileType('r'), help="The file to parse")
@@ -372,8 +365,6 @@ def parse(source, debug_mode=False):
         parser = yacc.yacc(debug=False, errorlog=yacc.NullLogger())
     parse_tree = parser.parse(source, lexer=lexer)
 
-    if debug_mode:
-        print("Parse Successful!", file=sys.stderr)
     return parse_tree
 
 
