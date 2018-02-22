@@ -7,6 +7,7 @@ The Symbol Table module implements a class to track declarations and usages of i
 """
 import sys
 import platform
+import re  # because we need more performance issues
 
 #: The global symboltable
 TABLE = dict()  # Identifier/argment list length pairs.
@@ -86,7 +87,7 @@ class MacroExpansion():
 
         if args:
             for index, arg in enumerate(args):
-                expansion = expansion.replace(self.args[index], str(arg))
+                expansion = re.sub(fr"\b{self.args[index]}\b", str(arg), expansion)
         return expansion
 
     def preprocess(self, lines):
