@@ -89,6 +89,9 @@ class TestSystem:
     def test_function_and_macro_calls(self, tmpdir):
         preprocess_and_compare('function_and_macro_calls.cpp', 'function_and_macro_calls.cpp.preprocessed.cc', tmpdir)  # NOQA
 
+    def test_function_and_macro_calls_2(self, tmpdir):
+        preprocess_and_compare('function_like_macro_2.cpp', 'function_like_macro_2.cpp.preprocessed.cc', tmpdir)  # NOQA
+
     def test_error_raised_for_bad_syntax(self, tmpdir):
         test_dir = tmpdir.mkdir('preprocessor')
         # copy the test file to the test directory
