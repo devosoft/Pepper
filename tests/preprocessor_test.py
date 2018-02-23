@@ -122,3 +122,22 @@ class TestSystem:
     #     except:  # NOQA
     #         assert(False and "Wrong type of exception raised!")
     #     assert(err_raised)
+
+    def test_internal_error_handling(self, tmpdir):
+        test_dir = tmpdir.mkdir('preprocessor')
+        # copy the test file to the test directory
+        shutil.copy(SOURCE_FILE_DIRECTORY + "function_like_macro_2.cpp", test_dir.realpath())
+
+        call = ["Pepper"] + ["--trigger_internal_error"]
+        call += [f"{test_dir.realpath()}/function_like_macro_2.cpp"]
+
+        process = subprocess.run(call, timeout=2, stdout=subprocess.PIPE)
+        # out, err = process.communicate()
+        assert(process.returncode == 2)
+        exception_clippings = [
+            "An internal error occured while processing a line:",
+            "Please report this error: https://github.com/devosoft/Pepper/issues",
+        ]
+        data = process.stdout.decode('utf-8')
+        for clip in exception_clippings:
+            assert(clip in data)

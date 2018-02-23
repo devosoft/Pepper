@@ -142,7 +142,9 @@ def p_define_expression_some_args(p):
     """
     define_expression : PREPROCESSING_KEYWORD_DEFINE WHITESPACE IDENTIFIER '(' identifier_list ')'  WHITESPACE macro_expansion
     """
+    print(f"Macro expansion for ident {p[3]} with args {p[5]}")
     p[0] = symtable.MacroExpansion(p[3], p[8], args=p[5])
+
 
 def p_identifier_list_singleton(p):
     """
@@ -228,6 +230,7 @@ def p_identifier_call(p):
     """
     safe_code_expression : IDENTIFIER code_expression_parenthetical
     """
+    print(f"macro call with ident {p[1]} and args {p[2]}")
     p[0] = ast.IdentifierNode([p[1]], args=p[2])
 
 

@@ -45,8 +45,7 @@ class LinesNode(Node):
     def preprocess(self, lines=None):
         if lines:
             for child in self.children:
-                if child is not None:  # I am such a hack
-                    child.preprocess(lines)
+                child.preprocess(lines)
         else:
             return "".join([r.preprocess() for r in self.children])
 
@@ -102,7 +101,7 @@ class IdentifierNode(Node):
         expansion = self.children[0]
         if self.children[0] in symtable.TABLE.keys():
             expansion = symtable.TABLE[self.children[0]].expand(
-                [arg.preprocess() for arg in self.args] if self.args else None)
+                [arg.preprocess() for arg in self.args] if self.args is not None else None)
         else:
             if self.args is not None:
                 expansion = f'{self.children[0]}({",".join([arg.preprocess() for arg in self.args])})'  # NOQA

@@ -37,6 +37,10 @@ def get_args():
                         action="append",
                         type=Path)
 
+    parser.add_argument('--trigger_internal_error',
+                        help="testing switch to cause an internal error",
+                        action="store_true")
+
     parser.add_argument('--debug', help="enable debugging output", action="store_true")
 
     return parser.parse_args()
@@ -49,6 +53,9 @@ def main(args=None):
     if args.sys_include:
         for p in args.sys_include:
             symtable.SYSTEM_INCLUDE_PATHS.append(p)
+
+    if args.trigger_internal_error:
+        symtable.TRIGGER_INTERNAL_ERROR = True
 
     symtable.FILE_STACK.append(open(args.input_file, 'r'))
 
@@ -84,7 +91,8 @@ def main(args=None):
                     print("An internal error occured while processing a line:")
                     print(f"{parser_input}")
                     print("Please report this error: https://github.com/devosoft/Pepper/issues")
-                    raise symtable.PepperInternalError(err)
+                    print(f"{err}")
+                    sys.exit(2)
             else:
                 pass  # toss the line, we're in a 'deny' ifdef
             parser_input = ""

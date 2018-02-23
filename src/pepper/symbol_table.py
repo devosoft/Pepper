@@ -18,6 +18,8 @@ IFDEF_STACK = []
 #: The list of paths to search when doing a system include
 SYSTEM_INCLUDE_PATHS = []
 EXPANDED_MACRO = False
+#: Switch to test internal error handling
+TRIGGER_INTERNAL_ERROR = False
 
 #: The default linux paths to search for includes-
 LINUX_DEFAULTS = [
@@ -46,6 +48,7 @@ if platform.system() == "Linux":
 elif platform.system() == "Darwin":
     SYSTEM_INCLUDE_PATHS = MAC_DEFAULTS
 
+
 class PepperSyntaxError(Exception):
     pass
 
@@ -71,6 +74,7 @@ class MacroExpansion():
 
     def expand(self, args=None):
         global EXPANDED_MACRO
+        print(f"Expanding {self.name} with args {args}")
         if self.args is None and args is not None:
             raise SyntaxError(f"Macro {self.name} doesn't take any args, but was given {len(args)}")
         elif self.args is not None and args is None:
@@ -91,6 +95,8 @@ class MacroExpansion():
         return expansion
 
     def preprocess(self, lines):
+        if TRIGGER_INTERNAL_ERROR:
+            raise Exception
         lines[-1] += "// " + self.__str__()
 
     def __str__(self):
