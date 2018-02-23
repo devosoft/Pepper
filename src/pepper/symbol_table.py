@@ -74,7 +74,6 @@ class MacroExpansion():
 
     def expand(self, args=None):
         global EXPANDED_MACRO
-        print(f"Expanding {self.name} with args {args}")
         if self.args is None and args is not None:
             raise SyntaxError(f"Macro {self.name} doesn't take any args, but was given {len(args)}")
         elif self.args is not None and args is None:

@@ -141,3 +141,6 @@ class TestSystem:
         data = process.stdout.decode('utf-8')
         for clip in exception_clippings:
             assert(clip in data)
+
+    def test_for_loop_not_breaking_macros(self, tmpdir):
+        preprocess_and_compare("for_loop.cpp", "for_loop.cpp.preprocessed.cc", tmpdir)
