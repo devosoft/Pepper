@@ -7,6 +7,7 @@ The Symbol Table module implements a class to track declarations and usages of i
 """
 import sys
 import platform
+import re  # because we need more performance issues
 
 #: The global symboltable
 TABLE = dict()  # Identifier/argment list length pairs.
@@ -17,6 +18,8 @@ IFDEF_STACK = []
 #: The list of paths to search when doing a system include
 SYSTEM_INCLUDE_PATHS = []
 EXPANDED_MACRO = False
+#: Switch to test internal error handling
+TRIGGER_INTERNAL_ERROR = False
 
 #: The default linux paths to search for includes-
 LINUX_DEFAULTS = [
@@ -44,6 +47,15 @@ if platform.system() == "Linux":
 
 elif platform.system() == "Darwin":
     SYSTEM_INCLUDE_PATHS = MAC_DEFAULTS
+
+
+class PepperSyntaxError(Exception):
+    pass
+
+
+class PepperInternalError(Exception):
+    pass
+
 
 class MacroExpansion():
     "Expands an identifier into a macro expansion, possibly with arguments"
@@ -78,10 +90,12 @@ class MacroExpansion():
 
         if args:
             for index, arg in enumerate(args):
-                expansion = expansion.replace(self.args[index], str(arg))
+                expansion = re.sub(fr"\b{self.args[index]}\b", str(arg), expansion)
         return expansion
 
     def preprocess(self, lines):
+        if TRIGGER_INTERNAL_ERROR:
+            raise Exception
         lines[-1] += "// " + self.__str__()
 
     def __str__(self):
