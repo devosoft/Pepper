@@ -21,7 +21,7 @@ import sys
 def get_args():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('input_file', help="the input source file")
+    parser.add_argument('input_file', help="the input source file", type=argparse.FileType('r'))
     parser.add_argument('--output_file',
                         '-o',
                         type=argparse.FileType('w'),
@@ -57,7 +57,7 @@ def main(args=None):
     if args.trigger_internal_error:
         symtable.TRIGGER_INTERNAL_ERROR = True
 
-    symtable.FILE_STACK.append(open(args.input_file, 'r'))
+    symtable.FILE_STACK.append(args.input_file)
 
     parser_input = ""
 
@@ -97,17 +97,14 @@ def main(args=None):
                 pass  # toss the line, we're in a 'deny' ifdef
             parser_input = ""
 
-    # source = args.input_file.read()
-
-    # parser.parse(source).preprocess(preprocessed_lines)
     output = "\n".join(preprocessed_lines) + "\n"
 
     if args.output_file:
         args.output_file.write(output)
         args.output_file.close()
     else:
-        basepath = os.path.split(args.input_file)[0]
-        with open(basepath + '/' + os.path.split(args.input_file)[1] + ".preprocessed.cc", 'w') as output_file: # NOQA
+        basepath = os.path.split(args.input_file.name)[0]
+        with open(basepath + '/' + os.path.split(args.input_file.name)[1] + ".preprocessed.cc", 'w') as output_file: # NOQA
             output_file.write(output)
 
 

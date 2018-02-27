@@ -39,7 +39,6 @@ MAC_DEFAULTS = [
     "/Library/Developer/CommandLineTools/usr/lib/clang/9.0.0/include",
     "/Library/Developer/CommandLineTools/usr/include",
     "/usr/include"
-
 ]
 
 if platform.system() == "Linux":

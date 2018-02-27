@@ -9,9 +9,78 @@ from pathlib import Path
 
 import pepper.symbol_table as symtable
 import pepper.abstract_symbol_tree as ast
+import pepper.preprocessor as preprocessor
 
 SOURCE_FILE_DIRECTORY = "./tests/test_data/"
 EXAMPLE_OUTPUT_DIRECTORY = "./tests/test_data/output_examples/"
+
+
+class FakeFile():
+    def __init__(self, name, contents=None):
+        self.name = name
+        self.contents = contents if contents else []
+        self.index = 0
+
+    def readline(self):
+        if self.index >= len(self.contents):
+            return ""
+        else:
+            annoying_temp_var = self.contents[self.index]
+            self.index += 1
+            return annoying_temp_var
+
+    def close(self):
+        pass
+
+    def write(self, lines):
+        self.contents.extend(lines.split("\n"))
+
+    def get_contents(self):
+        return "\n".join(self.contents)
+
+    def name(self):
+        return self.name
+
+
+class FakeArgs():
+    def __init__(self):
+        self.input_file = None
+        self.output_file = None
+        self.trigger_internal_error = False
+        self.sys_include = False
+        self.debug = True
+
+
+def preprocess_and_compare_functionally(source, reference, prebuilt_args_object=None):
+    args = None
+    if prebuilt_args_object:
+        args = prebuilt_args_object
+    else:
+        args = FakeArgs()
+        fake_input_file = None
+
+        with open(SOURCE_FILE_DIRECTORY + source, 'r') as sourcefile:
+            fake_input_file = FakeFile(f"{SOURCE_FILE_DIRECTORY}{source}", sourcefile.readlines())
+
+        args.input_file = fake_input_file
+
+        fake_output_file = FakeFile(f"{source}.fake_output")
+        args.output_file = fake_output_file
+
+    preprocessor.main(args)
+
+    with open(EXAMPLE_OUTPUT_DIRECTORY + reference) as reference_file:
+        # import pdb; pdb.set_trace();
+        assert(args.output_file.get_contents() == reference_file.read())
+
+
+def reset_state():
+    symtable.TABLE = dict()
+    symtable.FILE_STACK = []
+    symtable.IFDEF_STACK = []
+    symtable.SYSTEM_INCLUDE_PATHS = []
+    symtable.EXPANDED_MACRO = False
+    symtable.TRIGGER_INTERNAL_ERROR = False
 
 
 def preprocess_and_compare(source, reference, tmpdir, supportfiles=[], optional_args=[]):
@@ -33,6 +102,30 @@ def preprocess_and_compare(source, reference, tmpdir, supportfiles=[], optional_
 
 
 class TestUnit:
+    def setup_method(self, method):
+        reset_state()
+
+    def test_comments(self, tmpdir):
+        preprocess_and_compare_functionally('comments.cpp', 'comments.cpp.preprocessed.cc')
+
+    def test_nested_macro_expansion(self, tmpdir):
+        preprocess_and_compare_functionally('multiple_macros.cpp', 'multiple_macros.cpp.preprocessed.cc')
+
+    def test_function_and_macro_calls(self, tmpdir):
+        preprocess_and_compare_functionally('function_and_macro_calls.cpp', 'function_and_macro_calls.cpp.preprocessed.cc')  # NOQA
+
+    def test_function_and_macro_calls_2(self, tmpdir):
+        preprocess_and_compare_functionally('function_like_macro_2.cpp', 'function_like_macro_2.cpp.preprocessed.cc')  # NOQA
+
+    def test_basic_function_with_defaults_refactored(self, tmpdir):
+        preprocess_and_compare_functionally('file_include.cpp', 'preprocessed_file_include.cpp')
+
+    def test_ifdef_handling(self, tmpdir):
+        preprocess_and_compare_functionally('ifdef.cpp', 'ifdef.cpp.preprocessed.cc')
+
+    def test_for_loop_not_breaking_macros(self, tmpdir):
+        preprocess_and_compare_functionally("for_loop.cpp", "for_loop.cpp.preprocessed.cc")
+
     def test_include_path_search(self, tmpdir):
         # copy some files to the tmpdir, then run search for them
         test_dir = tmpdir.mkdir('include_path')
@@ -52,7 +145,6 @@ class TestUnit:
             assert("Could not find file FileThatDoesNotExist.h in defined system include paths:" in str(err)) # NOQA
 
 
-# bad test now, good test later...?
 class TestSystem:
     def test_basic_function(self, tmpdir):
         outfile = tmpdir.mkdir('preprocessor').join("file_include.cpp.preprocessed.cpp")
@@ -63,13 +155,6 @@ class TestSystem:
         with open('tests/test_data/output_examples/preprocessed_file_include.cpp', 'r') as expected_file: # NOQA
             assert(outfile.read() == expected_file.read())
 
-    def test_basic_function_with_defaults_refactored(self, tmpdir):
-        preprocess_and_compare('file_include.cpp', 'preprocessed_file_include.cpp',
-                               tmpdir, ['SomeFile.h', 'SomeOtherFile.h'])
-
-    def test_ifdef_handling(self, tmpdir):
-        preprocess_and_compare('ifdef.cpp', 'ifdef.cpp.preprocessed.cc', tmpdir)
-
     def test_system_file_include(self, tmpdir):
         # copy some files to the tmpdir, then run search for them
         system_dir = tmpdir.mkdir('system_include_path')
@@ -79,18 +164,6 @@ class TestSystem:
 
         preprocess_and_compare('systemish_include.cpp', 'systemish_include.cpp.preprocessed.cc',
                                tmpdir, optional_args=['-S', system_dir.realpath()])
-
-    def test_comments(self, tmpdir):
-        preprocess_and_compare('comments.cpp', 'comments.cpp.preprocessed.cc', tmpdir)
-
-    def test_nested_macro_expansion(self, tmpdir):
-        preprocess_and_compare('multiple_macros.cpp', 'multiple_macros.cpp.preprocessed.cc', tmpdir)
-
-    def test_function_and_macro_calls(self, tmpdir):
-        preprocess_and_compare('function_and_macro_calls.cpp', 'function_and_macro_calls.cpp.preprocessed.cc', tmpdir)  # NOQA
-
-    def test_function_and_macro_calls_2(self, tmpdir):
-        preprocess_and_compare('function_like_macro_2.cpp', 'function_like_macro_2.cpp.preprocessed.cc', tmpdir)  # NOQA
 
     def test_error_raised_for_bad_syntax(self, tmpdir):
         test_dir = tmpdir.mkdir('preprocessor')
@@ -111,18 +184,6 @@ class TestSystem:
         for clip in exception_clippings:
             assert(clip in data)
 
-    # def test_internal_error_caught_and_reported(self, tmpdir):
-    #     # if we don't pass args, it'll just blow up
-    #     err_raised = False
-    #     try:
-    #         preprocessor.main()
-    #         assert(False and "There should have been an error raised!")
-    #     except symtable.PepperInternalError as err:
-    #         err_raised = True
-    #     except:  # NOQA
-    #         assert(False and "Wrong type of exception raised!")
-    #     assert(err_raised)
-
     def test_internal_error_handling(self, tmpdir):
         test_dir = tmpdir.mkdir('preprocessor')
         # copy the test file to the test directory
@@ -142,5 +203,3 @@ class TestSystem:
         for clip in exception_clippings:
             assert(clip in data)
 
-    def test_for_loop_not_breaking_macros(self, tmpdir):
-        preprocess_and_compare("for_loop.cpp", "for_loop.cpp.preprocessed.cc", tmpdir)
