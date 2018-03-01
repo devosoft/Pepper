@@ -15,7 +15,6 @@ from pepper import __version__
 import os
 import pepper.symbol_table as symtable
 from pathlib import Path
-import sys
 
 
 def get_args():
@@ -80,10 +79,10 @@ def main(args=None):
         elif not parser_input.endswith(r"\\n"):
             try:
                 tree = parser.parse(parser_input, args.debug if args.debug else None)
-            except symtable.PepperSyntaxError:
+            except symtable.PepperSyntaxError as err:
                 print(f"A syntax error was encountered while parsing a line from {symtable.FILE_STACK[-1].name}:")  # NOQA
                 print(f"{parser_input}")
-                sys.exit(1)
+                raise err
             if len(symtable.IFDEF_STACK) == 0 or symtable.IFDEF_STACK[-1][1]:
                 try:
                     output = tree.preprocess(preprocessed_lines)
@@ -92,7 +91,7 @@ def main(args=None):
                     print(f"{parser_input}")
                     print("Please report this error: https://github.com/devosoft/Pepper/issues")
                     print(f"{err}")
-                    sys.exit(2)
+                    raise symtable.PepperInternalError()
             else:
                 pass  # toss the line, we're in a 'deny' ifdef
             parser_input = ""

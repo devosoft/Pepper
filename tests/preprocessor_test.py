@@ -57,6 +57,8 @@ def preprocess_and_compare_functionally(source, reference, prebuilt_args_object=
         args = prebuilt_args_object
     else:
         args = FakeArgs()
+
+    if args.input_file is None:
         fake_input_file = None
 
         with open(SOURCE_FILE_DIRECTORY + source, 'r') as sourcefile:
@@ -64,8 +66,8 @@ def preprocess_and_compare_functionally(source, reference, prebuilt_args_object=
 
         args.input_file = fake_input_file
 
-        fake_output_file = FakeFile(f"{source}.fake_output")
-        args.output_file = fake_output_file
+    fake_output_file = FakeFile(f"{source}.fake_output")
+    args.output_file = fake_output_file
 
     preprocessor.main(args)
 
@@ -96,7 +98,7 @@ def preprocess_and_compare(source, reference, tmpdir, supportfiles=[], optional_
     process = subprocess.run(call, timeout=2, stdout=sys.stdout, stderr=sys.stderr)
     # out, err = process.communicate()
     assert(process.returncode == 0)
-    with open(f'{EXAMPLE_OUTPUT_DIRECTORY}{reference}', 'r') as expected_file: # NOQA
+    with open(f'{EXAMPLE_OUTPUT_DIRECTORY}{reference}', 'r') as expected_file:
         with open(f"{test_dir.realpath()}/{source}.preprocessed.cc") as outfile:
             assert(outfile.read() == expected_file.read())
 
@@ -109,13 +111,16 @@ class TestUnit:
         preprocess_and_compare_functionally('comments.cpp', 'comments.cpp.preprocessed.cc')
 
     def test_nested_macro_expansion(self, tmpdir):
-        preprocess_and_compare_functionally('multiple_macros.cpp', 'multiple_macros.cpp.preprocessed.cc')
+        preprocess_and_compare_functionally('multiple_macros.cpp',
+                                            'multiple_macros.cpp.preprocessed.cc')
 
     def test_function_and_macro_calls(self, tmpdir):
-        preprocess_and_compare_functionally('function_and_macro_calls.cpp', 'function_and_macro_calls.cpp.preprocessed.cc')  # NOQA
+        preprocess_and_compare_functionally('function_and_macro_calls.cpp',
+                                            'function_and_macro_calls.cpp.preprocessed.cc')
 
     def test_function_and_macro_calls_2(self, tmpdir):
-        preprocess_and_compare_functionally('function_like_macro_2.cpp', 'function_like_macro_2.cpp.preprocessed.cc')  # NOQA
+        preprocess_and_compare_functionally('function_like_macro_2.cpp',
+                                            'function_like_macro_2.cpp.preprocessed.cc')
 
     def test_basic_function_with_defaults_refactored(self, tmpdir):
         preprocess_and_compare_functionally('file_include.cpp', 'preprocessed_file_include.cpp')
@@ -125,6 +130,21 @@ class TestUnit:
 
     def test_for_loop_not_breaking_macros(self, tmpdir):
         preprocess_and_compare_functionally("for_loop.cpp", "for_loop.cpp.preprocessed.cc")
+
+    def test_system_file_include(self, tmpdir):
+        system_dir = tmpdir.mkdir('system_include_path')
+
+        args = FakeArgs()
+        args.sys_include = [system_dir.realpath()]
+        # copy some files to the tmpdir, then run search for them
+
+        shutil.copy(SOURCE_FILE_DIRECTORY + 'SomeFile.h', f"{system_dir.realpath()}/SomeFile.h")
+        shutil.copy(SOURCE_FILE_DIRECTORY + 'SomeOtherFile.h',
+                    f"{system_dir.realpath()}/SomeOtherFile.h")
+
+        preprocess_and_compare_functionally('systemish_include.cpp',
+                                            'systemish_include.cpp.preprocessed.cc',
+                                            args)
 
     def test_include_path_search(self, tmpdir):
         # copy some files to the tmpdir, then run search for them
@@ -144,62 +164,40 @@ class TestUnit:
         except OSError as err:
             assert("Could not find file FileThatDoesNotExist.h in defined system include paths:" in str(err)) # NOQA
 
-
-class TestSystem:
-    def test_basic_function(self, tmpdir):
-        outfile = tmpdir.mkdir('preprocessor').join("file_include.cpp.preprocessed.cpp")
-        process = subprocess.run(["Pepper", "./tests/test_data/file_include.cpp", "--output_file",
-                                 str(outfile.realpath())], timeout=2, stdout=subprocess.PIPE)
-        # out, err = process.communicate()
-        assert(process.returncode == 0)
-        with open('tests/test_data/output_examples/preprocessed_file_include.cpp', 'r') as expected_file: # NOQA
-            assert(outfile.read() == expected_file.read())
-
-    def test_system_file_include(self, tmpdir):
-        # copy some files to the tmpdir, then run search for them
-        system_dir = tmpdir.mkdir('system_include_path')
-        shutil.copy(SOURCE_FILE_DIRECTORY + 'SomeFile.h', f"{system_dir.realpath()}/SomeFile.h")
-        shutil.copy(SOURCE_FILE_DIRECTORY + 'SomeOtherFile.h',
-                    f"{system_dir.realpath()}/SomeOtherFile.h")
-
-        preprocess_and_compare('systemish_include.cpp', 'systemish_include.cpp.preprocessed.cc',
-                               tmpdir, optional_args=['-S', system_dir.realpath()])
-
     def test_error_raised_for_bad_syntax(self, tmpdir):
         test_dir = tmpdir.mkdir('preprocessor')
         # copy the test file to the test directory
         shutil.copy(SOURCE_FILE_DIRECTORY + "error.cpp", test_dir.realpath())
 
-        call = ["Pepper"] + [f"{test_dir.realpath()}/error.cpp"]
+        exception_raised = False
+        try:
+            # doesn't actually matter what the reference is
+            preprocess_and_compare_functionally('error.cpp', 'preprocessed_file_include.cpp')
+            assert(False and "Should have had an exception thrown!")
+        except symtable.PepperSyntaxError as err:
+            exception_raised = True
 
-        process = subprocess.run(call, timeout=2, stdout=subprocess.PIPE)
-        # out, err = process.communicate()
-        assert(process.returncode == 1)
-        exception_clippings = [
-            "A syntax error was encountered while parsing a line from",
-            "error.cpp",
-            "#define thisisamacro(wait noO IT'S A SYNTAX ERROR"
-        ]
-        data = process.stdout.decode('utf-8')
-        for clip in exception_clippings:
-            assert(clip in data)
+        assert(exception_raised)
 
     def test_internal_error_handling(self, tmpdir):
-        test_dir = tmpdir.mkdir('preprocessor')
-        # copy the test file to the test directory
-        shutil.copy(SOURCE_FILE_DIRECTORY + "function_like_macro_2.cpp", test_dir.realpath())
+        args = FakeArgs()
+        args.trigger_internal_error = True
 
-        call = ["Pepper"] + ["--trigger_internal_error"]
-        call += [f"{test_dir.realpath()}/function_like_macro_2.cpp"]
+        exception_raised = False
+        try:
+            preprocess_and_compare_functionally('function_like_macro_2.cpp',
+                                                'function_like_macro_2.cpp.preprocessed.cc',
+                                                args)
+            assert(False and "Should have had an exception thrown!")
+        except symtable.PepperInternalError as err:
+            exception_raised = True
 
-        process = subprocess.run(call, timeout=2, stdout=subprocess.PIPE)
-        # out, err = process.communicate()
-        assert(process.returncode == 2)
-        exception_clippings = [
-            "An internal error occured while processing a line:",
-            "Please report this error: https://github.com/devosoft/Pepper/issues",
-        ]
-        data = process.stdout.decode('utf-8')
-        for clip in exception_clippings:
-            assert(clip in data)
+        assert(exception_raised)
 
+
+class TestSystem:
+    def test_basic_function(self, tmpdir):
+        preprocess_and_compare("file_include.cpp",
+                               "preprocessed_file_include.cpp",
+                               tmpdir,
+                               ['SomeFile.h', 'SomeOtherFile.h'])
