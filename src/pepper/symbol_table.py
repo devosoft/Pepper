@@ -49,11 +49,13 @@ elif platform.system() == "Darwin":
 
 
 class PepperSyntaxError(Exception):
-    pass
+    def __init__(self, msg=None):
+        self.msg = msg
 
 
 class PepperInternalError(Exception):
-    pass
+    def __init__(self, msg=None):
+        self.msg = msg
 
 
 class MacroExpansion():
@@ -65,10 +67,10 @@ class MacroExpansion():
         self.variadic = False
 
         if self.args is not None:
-            for arg in self.args:
+            for index, arg in enumerate(self.args):
                 if arg.endswith("..."):
-                    if self.variadic:
-                        raise PepperSyntaxError("Cannot have multiple variadic arguments to a macro")
+                    if index != len(self.args) - 1:
+                        raise PepperSyntaxError("Variadic macro argument must be at the end of the argument definition list")
                     self.variadic = True
 
         for item in expansion:
@@ -81,15 +83,19 @@ class MacroExpansion():
 
     def expand(self, args=None):
         global EXPANDED_MACRO
-        if self.args is None and args is not None:
-            raise SyntaxError(f"Macro {self.name} doesn't take any args, but was given {len(args)}")
+        if self.variadic:
+            if len(args) < len(self.args) + 1:
+                raise PepperSyntaxError(f"Macro {self.name} was given {len(args)} arguments,"
+                                        f" but takes a minimum of {len(self.args) + 1}")
+        elif self.args is None and args is not None:
+            raise PepperSyntaxError(f"Macro {self.name} doesn't take any args, but was given {len(args)}")
         elif self.args is not None and args is None:
-            raise SyntaxError(f"Macro {self.name} takes {len(self.args)}, but was given none."
+            raise PepperSyntaxError(f"Macro {self.name} takes {len(self.args)}, but was given none."
                               " (Did you forget parens?)")
         elif self.args is None and args is None:
             pass
         elif len(args) != len(self.args):
-            raise SyntaxError(f"Wrong number of arguments in macro expansion for {self.name};"
+            raise PepperSyntaxError(f"Wrong number of arguments in macro expansion for {self.name};"
                               f" expected {len(self.args)}, got {len(args)}")
 
         expansion = self.expansion
