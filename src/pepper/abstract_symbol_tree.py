@@ -90,9 +90,10 @@ class PreprocessorIncludeNode(Node):
 
 class IdentifierNode(Node):
 
-    def __init__(self, children, args=None):
+    def __init__(self, children, args=None, variadic=False):
         super(IdentifierNode, self).__init__("Identifier", children)
         self.args = args
+        self.variadic = variadic
 
     def __str__(self):
         return f"{self.name}: {self.children}"

@@ -61,10 +61,18 @@ class MacroExpansion():
     def __init__(self, name, expansion, args=None):
         self.name = name
         self.expansion = ""
+        self.args = args
+        self.variadic = False
+
+        if self.args is not None:
+            for arg in self.args:
+                if arg.endswith("..."):
+                    if self.variadic:
+                        raise PepperSyntaxError("Cannot have multiple variadic arguments to a macro")
+                    self.variadic = True
 
         for item in expansion:
             self.expansion += item.preprocess()
-        self.args = args
 
         if self.name in TABLE.keys():
             print(f"Warning: Redefining macro '{self.name}'", file=sys.stderr)
