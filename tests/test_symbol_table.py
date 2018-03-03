@@ -82,7 +82,7 @@ class TestUnit():
         whitespace = ast.WhiteSpaceNode([' '])
         plus = ast.ASCIILiteralNode(['+'])
 
-        macro = symtable.MacroExpansion('notfoo',
+        macro = symtable.MacroExpansion('alsonotfoo',
                                         [alpha, whitespace, plus, whitespace,
                                          omega, plus, vary_expand],
                                         ['alpha', 'omega', 'varia...'])

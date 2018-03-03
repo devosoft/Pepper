@@ -70,7 +70,8 @@ class MacroExpansion():
             for index, arg in enumerate(self.args):
                 if arg.endswith("..."):
                     if index != len(self.args) - 1:
-                        raise PepperSyntaxError("Variadic macro argument must be at the end of the argument definition list")
+                        raise PepperSyntaxError("Variadic macro argument must be at the end of the"
+                                                " argument definition list")
                     self.variadic = True
 
         for item in expansion:
@@ -81,29 +82,44 @@ class MacroExpansion():
 
         TABLE[self.name] = self
 
-    def expand(self, args=None):
-        global EXPANDED_MACRO
+    def _validate_args(self, args):
+        "Internal arg validator, broken out since it was getting long"
         if self.variadic:
-            if len(args) < len(self.args) + 1:
+            if len(args) <= len(self.args) - 1:
                 raise PepperSyntaxError(f"Macro {self.name} was given {len(args)} arguments,"
                                         f" but takes a minimum of {len(self.args) + 1}")
         elif self.args is None and args is not None:
-            raise PepperSyntaxError(f"Macro {self.name} doesn't take any args, but was given {len(args)}")
+            raise PepperSyntaxError(f"Macro {self.name} doesn't take any args,"
+                                    f" but was given {len(args)}")
         elif self.args is not None and args is None:
             raise PepperSyntaxError(f"Macro {self.name} takes {len(self.args)}, but was given none."
-                              " (Did you forget parens?)")
+                                    " (Did you forget parens?)")
         elif self.args is None and args is None:
             pass
         elif len(args) != len(self.args):
             raise PepperSyntaxError(f"Wrong number of arguments in macro expansion for {self.name};"
-                              f" expected {len(self.args)}, got {len(args)}")
+                                    f" expected {len(self.args)}, got {len(args)}")
+
+    def expand(self, args=None):
+        "Expand macro, maybe with args"
+        global EXPANDED_MACRO
+        self._validate_args(args)
 
         expansion = self.expansion
         EXPANDED_MACRO = True
 
         if args:
-            for index, arg in enumerate(args):
-                expansion = re.sub(fr"\b{self.args[index]}\b", str(arg), expansion)
+            if self.variadic:
+                import pdb; pdb.set_trace()
+                for index, arg in enumerate(args[len(self.args)-1:]):
+                    expansion = re.sub(fr"\b{self.args[index]}\b", str(arg), expansion)
+                variadic_target = "__VA__ARGS__"
+                if len(self.args[-1] > 3):
+                    variadic_target = self.args[-1][:-3]
+                expansion = re.sub(fr"\b{variadic_target}\b", ", ".join(), expansion)
+            else:
+                for index, arg in enumerate(args):
+                    expansion = re.sub(fr"\b{self.args[index]}\b", str(arg), expansion)
         return expansion
 
     def preprocess(self, lines):
