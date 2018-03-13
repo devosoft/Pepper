@@ -286,10 +286,10 @@ def p_expression_list_empty(p):
 
 def p_expression_list_multiple(p):
     """
-    list_of_expressions : list_of_expressions ',' maybe_space safe_code_expressions
+    list_of_expressions : list_of_expressions ',' safe_code_expressions
     """
     p[0] = p[1]
-    p[0].append(ast.LinesNode(p[4]))
+    p[0].append(ast.LinesNode(p[3]))
 
 
 # don't  mind me, just duplicating code...ugh
@@ -357,7 +357,10 @@ def p_error(p):
 
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('input_file', type=argparse.FileType('r'), help="The file to parse")
+    parser.add_argument('input_file',
+                        type=argparse.FileType('r'),
+                        default=sys.stdin,
+                        help="The file to parse")
     parser.add_argument('--debug_mode', action='store_true')
     return parser.parse_args()
 

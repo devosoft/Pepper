@@ -106,6 +106,8 @@ class MacroExpansion():
         EXPANDED_MACRO = True
 
         if args:
+            args = [arg.strip() for arg in args]
+
             if self.variadic:
                 # for some reason slicing this inline doesn't work
                 non_variadic_args = args[:len(self.args)-1]
@@ -117,7 +119,7 @@ class MacroExpansion():
                 variadic_target = "__VA__ARGS__"
 
                 if len(self.args[-1]) > 3:  # named variadic target, i.e. "args..."
-                    variadic_target = self.args[-1][:-3] + r"\.\.\."
+                    variadic_target = self.args[-1][:-3]
 
                 expansion = re.sub(fr"{variadic_target}", ", ".join(variadic_args), expansion)
             else:

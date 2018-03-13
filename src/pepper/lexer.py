@@ -109,7 +109,7 @@ def t_SYSTEM_INCLUDE_LITERAL(t):
 
 
 def t_IDENTIFIER(t):
-    r'[_a-zA-Z][_a-zA-Z0-9]*'
+    r'[_a-zA-Z][_a-zA-Z0-9]*(\.\.\.)?'
     return t
 
 
@@ -206,7 +206,10 @@ def lex(lines, debug_mode=False):
 
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('input_file', type=argparse.FileType('r'), help="The file to lex")
+    parser.add_argument('input_file',
+                        type=argparse.FileType('r'),
+                        default=sys.stdin,
+                        help="The file to lex")
     parser.add_argument('--debug_mode', action='store_true')
     return parser.parse_args()
 

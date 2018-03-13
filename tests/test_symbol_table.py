@@ -42,7 +42,7 @@ class TestUnit():
                                         [alpha, whitespace, plus, whitespace, omega],
                                         ['alpha', 'omega'])
 
-        expansion = macro.expand(args=[1, 2])
+        expansion = macro.expand(args=['1', '2'])
 
         assert(expansion == "1 + 2")
 
@@ -82,7 +82,7 @@ class TestUnit():
         testutils.assert_raises(macro.expand,
                                 symtable.PepperSyntaxError,
                                 ["notfoo was given 2 arguments, but takes a minimum of 4"], # NOQA
-                                [1, 2])
+                                ['1', '2'])
 
         testutils.assert_raises(macro.expand,
                                 symtable.PepperSyntaxError,
@@ -92,7 +92,7 @@ class TestUnit():
     def test_macro_expansion_variadic(self):
         alpha = ast.IdentifierNode(["alpha"])
         omega = ast.IdentifierNode(["omega"])
-        vary_expand = ast.IdentifierNode(["varia..."])
+        vary_expand = ast.IdentifierNode(["varia"])
         whitespace = ast.WhiteSpaceNode([' '])
         plus = ast.ASCIILiteralNode(['+'])
 
