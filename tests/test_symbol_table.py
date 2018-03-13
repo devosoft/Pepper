@@ -24,6 +24,15 @@ class TestUnit():
                                  "got 0"],
                                 args=[])
 
+        newmacro = symtable.MacroExpansion('otherfoo',
+                                           [alpha, whitespace, plus, whitespace, omega],
+                                           None)
+
+        testutils.assert_raises(newmacro.expand,
+                                symtable.PepperSyntaxError,
+                                ["Macro otherfoo doesn't take any args, but was given 2"],
+                                ["1", "2"])
+
     def test_macro_expansion_good_number_of_args(self):
         alpha = ast.IdentifierNode(['alpha'])
         omega = ast.IdentifierNode(['omega'])
@@ -74,6 +83,11 @@ class TestUnit():
                                 symtable.PepperSyntaxError,
                                 ["notfoo was given 2 arguments, but takes a minimum of 4"], # NOQA
                                 [1, 2])
+
+        testutils.assert_raises(macro.expand,
+                                symtable.PepperSyntaxError,
+                                ["notfoo was given 0 arguments, but takes a minimum of 4"],
+                                [])
 
     def test_macro_expansion_variadic(self):
         alpha = ast.IdentifierNode(["alpha"])

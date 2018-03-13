@@ -91,9 +91,6 @@ class MacroExpansion():
         elif self.args is None and args is not None:
             raise PepperSyntaxError(f"Macro {self.name} doesn't take any args,"
                                     f" but was given {len(args)}")
-        elif self.args is not None and args is None:
-            raise PepperSyntaxError(f"Macro {self.name} takes {len(self.args)}, but was given none."
-                                    " (Did you forget parens?)")
         elif self.args is None and args is None:
             pass
         elif len(args) != len(self.args):
