@@ -110,13 +110,19 @@ class MacroExpansion():
 
         if args:
             if self.variadic:
-                import pdb; pdb.set_trace()
-                for index, arg in enumerate(args[len(self.args)-1:]):
+                # for some reason slicing this inline doesn't work
+                non_variadic_args = args[:len(self.args)-1]
+                variadic_args = args[len(non_variadic_args):]
+
+                for index, arg in enumerate(non_variadic_args):
                     expansion = re.sub(fr"\b{self.args[index]}\b", str(arg), expansion)
+
                 variadic_target = "__VA__ARGS__"
-                if len(self.args[-1] > 3):
-                    variadic_target = self.args[-1][:-3]
-                expansion = re.sub(fr"\b{variadic_target}\b", ", ".join(), expansion)
+
+                if len(self.args[-1]) > 3:  # named variadic target, i.e. "args..."
+                    variadic_target = self.args[-1][:-3] + r"\.\.\."
+
+                expansion = re.sub(fr"{variadic_target}", ", ".join(variadic_args), expansion)
             else:
                 for index, arg in enumerate(args):
                     expansion = re.sub(fr"\b{self.args[index]}\b", str(arg), expansion)

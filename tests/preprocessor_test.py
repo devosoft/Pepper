@@ -72,7 +72,6 @@ def preprocess_and_compare_functionally(source, reference, prebuilt_args_object=
     preprocessor.main(args)
 
     with open(EXAMPLE_OUTPUT_DIRECTORY + reference) as reference_file:
-        # import pdb; pdb.set_trace();
         assert(args.output_file.get_contents() == reference_file.read())
 
 
