@@ -140,7 +140,7 @@ def p_define_expression_no_args(p):
 
 def p_define_expression_some_args(p):
     """
-    define_expression : PREPROCESSING_KEYWORD_DEFINE WHITESPACE IDENTIFIER '(' identifier_list ')'  WHITESPACE macro_expansion
+    define_expression : PREPROCESSING_KEYWORD_DEFINE WHITESPACE IDENTIFIER '(' identifier_list ')'  maybe_space macro_expansion
     """
     print(f"Macro expansion for ident {p[3]} with args {p[5]}")
     p[0] = symtable.MacroExpansion(p[3], p[8], args=p[5])
