@@ -93,6 +93,12 @@ def p_valid_char(p):
     '''
     p[0] = ord(p[1][1])
 
+def p_valid_int(p):
+    '''
+    valid_expr : INT_LITERAL
+    '''
+    p[0] = int(p[1])
+
 def p_valid_add(p):
     '''
     valid_expr : valid_expr '+' valid_expr
@@ -120,6 +126,13 @@ def p_valid_div(p):
     '''
 
     p[0] = p[1] / p[3]
+
+def p_valid_mod(p):
+    '''
+    valid_expr : valid_expr '%' valid_expr
+    '''
+
+    p[0] = p[1] % p[3]
 
 def p_valid_bit_not(p):
     '''
@@ -182,6 +195,31 @@ def p_valid_logic_not(p):
     '''
 
     p[0] = (not p[2] ) == True
+
+def p_valid_logic_lt(p):
+    '''
+    valid_expr : valid_expr '<' valid_expr
+    '''
+    p[0] = p[1] < p[3]
+
+def p_valid_logic_le(p):
+    '''
+    valid_expr : valid_expr COMP_LTE valid_expr
+    '''
+    p[0] = p[1]  <= p[3]
+
+def p_valid_logic_gt(p):
+    '''
+    valid_expr : valid_expr '>' valid_expr
+    '''
+    p[0] = p[1] > p[3]
+
+def p_valid_logic_ge(p):
+    '''
+    valid_expr : valid_expr COMP_GTE valid_expr
+    '''
+    p[0] = p[1]  >= p[3]
+
 
 def p_if_expression(p):
     """
@@ -463,6 +501,11 @@ def p_statement_to_preprocessing_number(p):
     """
     p[0] = ast.PreprocessingNumberNode([p[1]])
 
+def p_statement_to_int(p):
+    """
+    safe_code_expression : INT_LITERAL
+    """
+    p[0] = ast.PreprocessingNumberNode([p[1]])
 
 def p_error(p):
     print(f"ERROR(line {p.lineno}): syntax error")
