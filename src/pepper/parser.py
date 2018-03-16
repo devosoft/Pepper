@@ -226,12 +226,29 @@ def p_expressions(p):
     p[0].append(p[2])
 
 
+def p_expressions_to_single(p):
+    """
+    code_expressions : code_expression
+    """
+    p[0] = [p[1]]
+
+
 def p_identifier_call(p):
     """
     safe_code_expression : IDENTIFIER code_expression_parenthetical
     """
     print(f"macro call with ident {p[1]} and args {p[2]}")
     p[0] = ast.IdentifierNode([p[1]], args=p[2])
+
+
+def p_safe_code_expression_to_parens(p):
+    """
+    safe_code_expression : code_expression_parenthetical
+    """
+    p[0] = ast.LinesNode([ast.ASCIILiteralNode('('),
+                          ast.LinesNode(p[1]),
+                          ast.ASCIILiteralNode(')')
+                         ])
 
 
 def p_code_expression_to_safe(p):
@@ -328,6 +345,7 @@ def p_safe_code_expressions_ascii_literal(p):
               | '#'
               | '.'
               | '?'
+              | '~'
     """
     p[0] = ast.ASCIILiteralNode(p[1])
 

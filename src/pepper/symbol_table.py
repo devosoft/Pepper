@@ -100,7 +100,13 @@ class MacroExpansion():
     def expand(self, args=None):
         "Expand macro, maybe with args"
         global EXPANDED_MACRO
-        self._validate_args(args)
+        try:
+            self._validate_args(args)
+        except Exception as err:
+            print(f"\n\nError in macro {self.name} argument validation")
+            print(f"self.args: {self.args}")
+            print(f"incoming args: {args}\n\n")
+            raise err
 
         expansion = self.expansion
         EXPANDED_MACRO = True
