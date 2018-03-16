@@ -14,7 +14,7 @@ TABLE = dict()  # Identifier/argment list length pairs.
 #: The stack of files we're reading from
 FILE_STACK = []
 #: The stack of ifdef/ifndef/if control structures we're processing
-IFDEF_STACK = []
+IF_STACK = []
 #: The list of paths to search when doing a system include
 SYSTEM_INCLUDE_PATHS = []
 EXPANDED_MACRO = False

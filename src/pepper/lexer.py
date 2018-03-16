@@ -15,10 +15,10 @@ import sys
 import ply.lex as lex
 import argparse
 
-DEFAULT_LITERALS = ['+', '-', '*', '/', '(', ')',
-                    '=', ',', '{', '}', '[', ']',
+DEFAULT_LITERALS = ['+', '-', '*', '/', '|', '&', '(',
+                    ')', '=', ',', '{', '}', '[', ']',
                     '.', ';', '!', '<', '>', ':', '~',
-                    '@', '#', '&', "'", '%', "?"]
+                    '^', '@', '#', '&', "'", '%', "?"]
 
 
 literals = DEFAULT_LITERALS
@@ -45,6 +45,14 @@ tokens = [
     'OTHER',
     'PREPROCESSING_NUMBER',
     'PUNCTUATOR',
+    'COMP_LTE',
+    'COMP_GTE',
+    'COMP_EQU',
+    'BOOL_AND',
+    'BOOL_OR',
+    'L_SHIFT',
+    'R_SHIFT',
+    'CHAR_LITERAL',
     # 'SKIPPED_LINE',
     'STRING_LITERAL',
     'WHITESPACE',
@@ -64,11 +72,13 @@ def t_COMMENT(t):
     r"\s//.*"
     pass
 
-
 def t_COMMENT_NO_WHITESPACE(t):
     r"//.*"
     pass
 
+def t_PREPROCESSING_KEYWORD_IF(t):
+    r'\#if\b'
+    return t
 
 def t_PREPROCESSING_KEYWORD_IFDEF(t):
     r'\#ifdef\b'
@@ -84,9 +94,6 @@ def t_PREPROCESSING_KEYWORD_ENDIF(t):
     r'\#endif\b'
     return t
 
-
-def t_PREPROCESSING_KEYWORD_IF(t):
-    r'\#if\b'
 
 def t_PREPROCESSING_KEYWORD_ELSE(t):
     r'\#else\b'
@@ -107,7 +114,6 @@ def t_SYSTEM_INCLUDE_LITERAL(t):
     r"""<[^\'\"<>]*?>"""
     return t
 
-
 def t_IDENTIFIER(t):
     r'[_a-zA-Z][_a-zA-Z0-9]*'
     return t
@@ -117,6 +123,37 @@ def t_PREPROCESSING_NUMBER(t):
     r'\.?[0-9]([0-9]|(e\+)|(e\-)|(E\+)|(E\-)|(p\+)|(p\-)|(P\+)|(P\-)|[a-zA-Z])*'
     return t
 
+def t_COMP_LTE(t):
+    r"<="
+    return t
+
+def t_COMP_GTE(t):
+    r">="
+    return t
+
+def t_COMP_EQU(t):
+    r"=="
+    return t
+
+def t_BOOL_AND(t):
+    r"&&"
+    return t
+
+def t_BOOL_OR(t):
+    r"\|\|"
+    return t
+
+def t_L_SHIFT(t):
+    r"<<"
+    return t
+
+def t_R_SHIFT(t):
+    r">>"
+    return t
+
+def t_CHAR_LITERAL(t):
+    r"'(?:[^\\'] | \\.)'"
+    return t
 
 def t_STRING_LITERAL(t):
     r"""('((\\['tn])|[^'\\])*')|("((\\["tn])|[^"\\])*")"""

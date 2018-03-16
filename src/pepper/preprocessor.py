@@ -84,7 +84,7 @@ def main(args=None):
                 print(f"A syntax error was encountered while parsing a line from {symtable.FILE_STACK[-1].name}:")  # NOQA
                 print(f"{parser_input}")
                 sys.exit(1)
-            if len(symtable.IFDEF_STACK) == 0 or symtable.IFDEF_STACK[-1][1]:
+            if len(symtable.IF_STACK) == 0 or symtable.IF_STACK[-1][1]:
                 try:
                     output = tree.preprocess(preprocessed_lines)
                 except Exception as err:

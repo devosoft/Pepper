@@ -20,7 +20,8 @@ from pepper.lexer import lexer
 from pepper.lexer import tokens  # NOQA
 import pepper.symbol_table as symtable
 
-
+global if_count
+if_count = 0
 def p_program(p):
     """
     program : lines statement
@@ -80,34 +81,144 @@ def p_include_expression(p):
                             | ifndef_expression
                             | endif_expression
                             | else_expression
+                            | if_expression
     """
     p[0] = p[1]
 
+########### IF DEF EXCLUSITIVITEY
 
-#def p_if_expression(p):
-#    """
-#    if_expression : PREPROCESSING_KEYWORD_IF WHITESPACE IDENTIFIER
-#    """
-#    symtable.IFDEF_STACK.append((p[3], p[3] in symtable.TABLE.keys()))
-#
-#    p[0] = ast.StringLiteralNode([f"// if expression {p[3]}"])
+def p_valid_char(p):
+    '''
+    valid_expr : CHAR_LITERAL
+    '''
+    p[0] = ord(p[1][1])
+
+def p_valid_add(p):
+    '''
+    valid_expr : valid_expr '+' valid_expr
+    '''
+
+    p[0] = p[1] + p[3]
+
+def p_valid_sub(p):
+    '''
+    valid_expr : valid_expr '-' valid_expr
+    '''
+
+    p[0] = p[1] - p[3]
+
+def p_valid_mult(p):
+    '''
+    valid_expr : valid_expr '*' valid_expr
+    '''
+
+    p[0] = p[1] * p[3]
+
+def p_valid_div(p):
+    '''
+    valid_expr : valid_expr '/' valid_expr
+    '''
+
+    p[0] = p[1] / p[3]
+
+def p_valid_bit_not(p):
+    '''
+    valid_expr : '~' valid_expr
+    '''
+    p[0] = ~p[2]
+
+def p_valid_bit_or(p):
+    '''
+    valid_expr : valid_expr '|' valid_expr
+    '''
+
+    p[0] = p[1] | p[3]
+
+def p_valid_bit_and(p):
+    '''
+    valid_expr : valid_expr '&' valid_expr
+    '''
+
+    p[0] = p[1] & p[3]
+
+def p_valid_bit_xor(p):
+    '''
+    valid_expr : valid_expr '^' valid_expr
+    '''
+
+    p[0] = p[1] ^ p[3]
+
+def p_valid_bit_lshift(p):
+    '''
+    valid_expr : valid_expr L_SHIFT valid_expr
+    '''
+
+    p[0] = p[1] << p[3]
+
+def p_valid_bit_rshift(p):
+    '''
+    valid_expr : valid_expr R_SHIFT valid_expr
+    '''
+
+    p[0] = p[1] >> p[3]
+
+def p_valid_logic_or(p):
+    '''
+    valid_expr : valid_expr BOOL_OR valid_expr
+    '''
+
+    p[0]  =  (p[1] or p[3] )  == True
+
+def p_valid_logic_and(p):
+    '''
+    valid_expr : valid_expr BOOL_AND valid_expr
+    '''
+
+    p[0] = (p[1] and p[3]) == True
+
+def p_valid_logic_not(p):
+    '''
+    valid_expr : '!' valid_expr
+    '''
+
+    p[0] = (not p[2] ) == True
+
+def p_if_expression(p):
+    """
+    if_expression : PREPROCESSING_KEYWORD_IF WHITESPACE valid_expr
+    """
+    global if_count
+    if_count += 1
+    symtable.IF_STACK.append((if_count, p[3]))
+    p[0] = ast.StringLiteralNode([f"// if expression {if_count } "])
+
+    #if p[3] == 'defined':
+    #    symtable.IF_STACK.append((p[5], p[5] in symtable.TABLE.keys()))
+    #    p[0] = ast.StringLiteralNode([f"// if expression w/ defined call {p[5]}"])
+    #else:
+    #    pass
+    # figure out best way to error calls that arent 'defined' put in lexer?
 
 
+
+####### DONE
 
 def p_ifdef_expression(p):
     """
     ifdef_expression : PREPROCESSING_KEYWORD_IFDEF WHITESPACE IDENTIFIER
     """
-    symtable.IFDEF_STACK.append((p[3], p[3] in symtable.TABLE.keys()))
+    symtable.IF_STACK.append((p[3], p[3] in symtable.TABLE.keys()))
 
     p[0] = ast.StringLiteralNode([f"// ifdef expression {p[3]}"])
+
+
 
 
 def p_ifndef_expression(p):
     """
     ifndef_expression : PREPROCESSING_KEYWORD_IFNDEF WHITESPACE IDENTIFIER
     """
-    symtable.IFDEF_STACK.append((p[3], p[3] not in symtable.TABLE.keys()))
+    symtable.IF_STACK.append((p[3], p[3] not in symtable.TABLE.keys()))
 
     p[0] = ast.StringLiteralNode([f"// ifndef expression {p[3]}"])
 
@@ -116,7 +227,7 @@ def p_else_expression(p):
     """
     else_expression : PREPROCESSING_KEYWORD_ELSE
     """
-    symtable.IFDEF_STACK[-1] = (symtable.IFDEF_STACK[-1][0], not symtable.IFDEF_STACK[-1][1])
+    symtable.IF_STACK[-1] = (symtable.IF_STACK[-1][0], not symtable.IF_STACK[-1][1])
     p[0] = ast.StringLiteralNode([f"// else expression "])
 
 
@@ -124,7 +235,7 @@ def p_endif_expression(p):
     """
     endif_expression : PREPROCESSING_KEYWORD_ENDIF
     """
-    symtable.IFDEF_STACK.pop()
+    symtable.IF_STACK.pop()
     p[0] = ast.StringLiteralNode([f"// endif expression "])
 
 
