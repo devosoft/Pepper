@@ -84,14 +84,21 @@ def p_include_expression(p):
     p[0] = p[1]
 
 
+#def p_if_expression(p):
+#    """
+#    if_expression : PREPROCESSING_KEYWORD_IF WHITESPACE IDENTIFIER
+#    """
+#    symtable.IFDEF_STACK.append((p[3], p[3] in symtable.TABLE.keys()))
+#
+#    p[0] = ast.StringLiteralNode([f"// if expression {p[3]}"])
+
+
+
 def p_ifdef_expression(p):
     """
     ifdef_expression : PREPROCESSING_KEYWORD_IFDEF WHITESPACE IDENTIFIER
     """
-    if p[3] in symtable.TABLE.keys():
-        symtable.IFDEF_STACK.append((p[3], True))
-    else:
-        symtable.IFDEF_STACK.append((p[3], False))
+    symtable.IFDEF_STACK.append((p[3], p[3] in symtable.TABLE.keys()))
 
     p[0] = ast.StringLiteralNode([f"// ifdef expression {p[3]}"])
 
@@ -100,10 +107,7 @@ def p_ifndef_expression(p):
     """
     ifndef_expression : PREPROCESSING_KEYWORD_IFNDEF WHITESPACE IDENTIFIER
     """
-    if p[3] in symtable.TABLE.keys():
-        symtable.IFDEF_STACK.append((p[3], False))
-    else:
-        symtable.IFDEF_STACK.append((p[3], True))
+    symtable.IFDEF_STACK.append((p[3], p[3] not in symtable.TABLE.keys()))
 
     p[0] = ast.StringLiteralNode([f"// ifndef expression {p[3]}"])
 
