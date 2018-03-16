@@ -107,7 +107,7 @@ def main(args=None):
         args.output_file.close()
     else:
         basepath = os.path.split(args.input_file)[0]
-        with open(basepath + '/' + os.path.split(args.input_file)[1] + ".preprocessed.cc", 'w') as output_file: # NOQA
+        with open((basepath + '/') if len(basepath) > 0 else "" + os.path.split(args.input_file)[1] + ".preprocessed.cc", 'w') as output_file: # NOQA
             output_file.write(output)
 
 
