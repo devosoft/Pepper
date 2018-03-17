@@ -147,14 +147,6 @@ def t_BOOL_OR(t):
     r"\|\|"
     return t
 
-def t_L_SHIFT(t):
-    r"<<"
-    return t
-
-def t_R_SHIFT(t):
-    r">>"
-    return t
-
 def t_CHAR_LITERAL(t):
     r"'(?:[^\\'] | \\.)'"
     return t

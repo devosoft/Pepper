@@ -51,7 +51,6 @@ def p_line_to_statement(p):
     """
     p[0] = p[1]
 
-
 def p_statement_to_pepper_directive(p):
     """
     statement : pepper_directive
@@ -89,15 +88,22 @@ def p_include_expression(p):
 
 def p_valid_char(p):
     '''
-    valid_expr : CHAR_LITERAL
+    valid_expr : spaces CHAR_LITERAL spaces
     '''
-    p[0] = ord(p[1][1])
+    p[0] = ord(p[2][1])
 
 def p_valid_int(p):
     '''
-    valid_expr : INT_LITERAL
+    valid_expr : spaces INT_LITERAL spaces
     '''
-    p[0] = int(p[1])
+    p[0] = int(p[2])
+
+
+#def p_valid_macro(p):
+#    '''
+#    valid_expr : IDENTIFER
+#    '''
+#    p[0] =
 
 def p_valid_add(p):
     '''
@@ -220,7 +226,7 @@ def p_valid_logic_ge(p):
     '''
     p[0] = p[1]  >= p[3]
 
-
+#TODO: support parenthesis
 def p_if_expression(p):
     """
     if_expression : PREPROCESSING_KEYWORD_IF WHITESPACE valid_expr
@@ -238,6 +244,20 @@ def p_if_expression(p):
     # figure out best way to error calls that arent 'defined' put in lexer?
 
 
+
+def p_no_space(p):
+    '''
+    spaces :
+    '''
+
+    p[0] = None
+
+def p_spaces(p):
+    '''
+    spaces : WHITESPACE spaces
+    '''
+
+    p[0] = ast.WhiteSpaceNode([p[1]])
 
 ####### DONE
 
