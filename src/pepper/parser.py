@@ -140,7 +140,7 @@ def p_define_expression_no_args(p):
 
 def p_define_expression_some_args(p):
     """
-    define_expression : PREPROCESSING_KEYWORD_DEFINE WHITESPACE IDENTIFIER '(' identifier_list ')'  maybe_space macro_expansion
+    define_expression : PREPROCESSING_KEYWORD_DEFINE WHITESPACE IDENTIFIER '(' identifier_list ')'  WHITESPACE macro_expansion
     """
     print(f"Macro expansion for ident {p[3]} with args {p[5]}")
     p[0] = symtable.MacroExpansion(p[3], p[8], args=p[5])
@@ -226,29 +226,12 @@ def p_expressions(p):
     p[0].append(p[2])
 
 
-def p_expressions_to_single(p):
-    """
-    code_expressions : code_expression
-    """
-    p[0] = [p[1]]
-
-
 def p_identifier_call(p):
     """
     safe_code_expression : IDENTIFIER code_expression_parenthetical
     """
     print(f"macro call with ident {p[1]} and args {p[2]}")
     p[0] = ast.IdentifierNode([p[1]], args=p[2])
-
-
-def p_safe_code_expression_to_parens(p):
-    """
-    safe_code_expression : code_expression_parenthetical
-    """
-    p[0] = ast.LinesNode([ast.ASCIILiteralNode('('),
-                          ast.LinesNode(p[1]),
-                          ast.ASCIILiteralNode(')')
-                         ])
 
 
 def p_code_expression_to_safe(p):
@@ -303,10 +286,10 @@ def p_expression_list_empty(p):
 
 def p_expression_list_multiple(p):
     """
-    list_of_expressions : list_of_expressions ',' safe_code_expressions
+    list_of_expressions : list_of_expressions ',' maybe_space safe_code_expressions
     """
     p[0] = p[1]
-    p[0].append(ast.LinesNode(p[3]))
+    p[0].append(ast.LinesNode(p[4]))
 
 
 # don't  mind me, just duplicating code...ugh
@@ -345,7 +328,6 @@ def p_safe_code_expressions_ascii_literal(p):
               | '#'
               | '.'
               | '?'
-              | '~'
     """
     p[0] = ast.ASCIILiteralNode(p[1])
 
@@ -375,10 +357,7 @@ def p_error(p):
 
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('input_file',
-                        type=argparse.FileType('r'),
-                        default=sys.stdin,
-                        help="The file to parse")
+    parser.add_argument('input_file', type=argparse.FileType('r'), help="The file to parse")
     parser.add_argument('--debug_mode', action='store_true')
     return parser.parse_args()
 
