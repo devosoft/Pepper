@@ -177,8 +177,7 @@ class TestUnit:
         found = ast.PreprocessorIncludeNode.search_system_includes('SomeFile.h')
         expected = Path(f"{test_dir.realpath()}/{'SomeFile.h'}")
 
-        assert(found is not False)
-        assert(found == expected)
+        assert(found && (found == expected))
 
         try:
             found = ast.PreprocessorIncludeNode.search_system_includes('FileThatDoesNotExist.h')
