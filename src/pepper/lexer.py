@@ -14,7 +14,6 @@ token stream and build a tree, which will in turn produce actual c++ or c code.
 import sys
 import ply.lex as lex
 import argparse
-import pepper.symbol_table as symtable
 
 DEFAULT_LITERALS = ['+', '-', '*', '/', '(', ')',
                     '=', ',', '{', '}', '[', ']',
@@ -110,7 +109,7 @@ def t_SYSTEM_INCLUDE_LITERAL(t):
 
 
 def t_IDENTIFIER(t):
-    r'([_a-zA-Z][_a-zA-Z0-9]*(\.\.\.)?)|(\.\.\.)'
+    r'[_a-zA-Z][_a-zA-Z0-9]*'
     return t
 
 
@@ -148,7 +147,7 @@ def t_comment_NEWLINE(t):
 
 
 def t_comment_error(t):
-    raise symtable.PepperSyntaxError(f"Unknown token on line {t.lexer.lineno}: {t.value[0]}")
+    raise Exception(f"Unknown token on line {t.lexer.lineno}: {t.value[0]}")
 
 
 # TODO: maybe convert this to a t_ignore() rule for improved lexing performance
@@ -165,7 +164,7 @@ def t_WHITESPACE(t):
 
 
 def t_error(t):
-    raise symtable.PepperSyntaxError(f"Unknown token on line {t.lexer.lineno}: {t.value[0]}")
+    raise Exception(f"Unknown token on line {t.lexer.lineno}: {t.value[0]}")
 
 
 lexer = lex.lex()
@@ -207,10 +206,7 @@ def lex(lines, debug_mode=False):
 
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('input_file',
-                        type=argparse.FileType('r'),
-                        default=sys.stdin,
-                        help="The file to lex")
+    parser.add_argument('input_file', type=argparse.FileType('r'), help="The file to lex")
     parser.add_argument('--debug_mode', action='store_true')
     return parser.parse_args()
 
