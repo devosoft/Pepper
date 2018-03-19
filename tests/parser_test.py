@@ -4,6 +4,8 @@
 
 import pepper.parser as parser
 import sys
+import subprocess
+import shutil
 
 
 def get_all_tokens(given_lexer):
@@ -18,6 +20,15 @@ def get_all_tokens(given_lexer):
 
 
 class TestUnit(object):
+    def test_parser_commandline_call(self, tmpdir):
+        test_dir = tmpdir.mkdir('preprocessor')
+        shutil.copy('tests/test_data/file_include.cpp', test_dir.realpath())
+
+        call = ["PepperParse"] + [f"{test_dir.realpath()}/file_include.cpp"]
+
+        process = subprocess.run(call, timeout=2, stdout=sys.stdout, stderr=sys.stderr)
+        assert(process.returncode == 0)
+
     def test_parser_system_include_example(self):
         test_lines = open('tests/test_data/system_include.cpp', 'r').readlines()
         parse_tree = parser.parse("\n".join(test_lines))
