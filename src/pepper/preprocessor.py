@@ -76,7 +76,9 @@ def main(args=None):
             symtable.FILE_STACK.pop()
             if len(symtable.FILE_STACK):
                 preprocessed_lines.append("")
-        elif not parser_input.endswith(r"\\n"):
+        elif parser_input.endswith("\\\n"):
+            parser_input = parser_input[:-2]
+        else:
             try:
                 tree = parser.parse(parser_input, args.debug if args.debug else None)
             except symtable.PepperSyntaxError as err:
@@ -103,7 +105,7 @@ def main(args=None):
         args.output_file.close()
     else:
         basepath = os.path.split(args.input_file.name)[0]
-        with open(basepath + '/' + os.path.split(args.input_file.name)[1] + ".preprocessed.cc", 'w') as output_file: # NOQA
+        with open(((basepath + '/') if len(basepath) > 0 else "") + os.path.split(args.input_file.name)[1] + ".preprocessed.cc", 'w') as output_file: # NOQA
             output_file.write(output)
 
 

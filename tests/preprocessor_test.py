@@ -25,9 +25,8 @@ class FakeFile():
         if self.index >= len(self.contents):
             return ""
         else:
-            annoying_temp_var = self.contents[self.index]
             self.index += 1
-            return annoying_temp_var
+            return self.contents[self.index-1]
 
     def close(self):
         pass
@@ -71,9 +70,11 @@ def preprocess_and_compare_functionally(source, reference, prebuilt_args_object=
 
     preprocessor.main(args)
 
-    with open(EXAMPLE_OUTPUT_DIRECTORY + reference) as reference_file:
-        # import pdb; pdb.set_trace();
-        assert(args.output_file.get_contents() == reference_file.read())
+    if isinstance(reference, FakeFile):
+        assert(args.output_file.contents == reference.contents)
+    else:
+        with open(EXAMPLE_OUTPUT_DIRECTORY + reference) as reference_file:
+            assert(args.output_file.get_contents() == reference_file.read())
 
 
 def reset_state():
@@ -131,6 +132,27 @@ class TestUnit:
     def test_for_loop_not_breaking_macros(self, tmpdir):
         preprocess_and_compare_functionally("for_loop.cpp", "for_loop.cpp.preprocessed.cc")
 
+    def test_variadic_macro_expansion(self, tmpdir):
+        ifile_contents = [
+            "#define somemacro(a, b, moar...) a + b + mult(moar)\n",
+            "int main {\n",
+            "   cout << somemacro(1, 2, 3, 4, 5, 6) << endl;\n",
+            "}",
+        ]
+        expected_out = [
+            "// Macro somemacro with args ['a', 'b', 'moar...'] expanding to 'a + b + mult(moar)'", # NOQA
+            "int main {",
+            "   cout << 1 + 2 + mult(3, 4, 5, 6) << endl;",
+            "}",
+            "",
+        ]
+
+        args = FakeArgs()
+        args.input_file = FakeFile('variadic_expand.cc', ifile_contents)
+        expected_out_file = FakeFile('whatever', expected_out)
+
+        preprocess_and_compare_functionally(None, expected_out_file, args)
+
     def test_system_file_include(self, tmpdir):
         system_dir = tmpdir.mkdir('system_include_path')
 
@@ -155,8 +177,7 @@ class TestUnit:
         found = ast.PreprocessorIncludeNode.search_system_includes('SomeFile.h')
         expected = Path(f"{test_dir.realpath()}/{'SomeFile.h'}")
 
-        assert(found is not False)
-        assert(found == expected)
+        assert(found and (found == expected))
 
         try:
             found = ast.PreprocessorIncludeNode.search_system_includes('FileThatDoesNotExist.h')
