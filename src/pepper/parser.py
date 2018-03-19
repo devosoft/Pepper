@@ -99,12 +99,15 @@ def p_valid_int(p):
     p[0] = int(p[2])
 
 
-#def p_valid_macro(p):
-#    '''
-#    valid_expr : IDENTIFER
-#    '''
-#    p[0] =
-
+def p_valid_macro(p):
+    '''
+    valid_expr : spaces IDENTIFIER spaces
+    '''
+    val = symtable.TABLE.get(p[2], 0)
+    if isinstance(val , symtable.MacroExpansion):
+        if val.expansion.isdigit():
+            val = int(val.expansion)
+    p[0] = val
 def p_valid_add(p):
     '''
     valid_expr : valid_expr '+' valid_expr
