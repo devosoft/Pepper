@@ -49,6 +49,7 @@ tokens = [
     'COMP_LTE',
     'COMP_GTE',
     'COMP_EQU',
+    'COMP_NEQU',
     'BOOL_AND',
     'BOOL_OR',
     'L_SHIFT',
@@ -139,12 +140,24 @@ def t_COMP_EQU(t):
     r"=="
     return t
 
+def t_COMP_NEQU(t):
+    r"!="
+    return t
+
 def t_BOOL_AND(t):
     r"&&"
     return t
 
 def t_BOOL_OR(t):
     r"\|\|"
+    return t
+
+def t_L_SHIFT(t):
+    r"<<"
+    return t
+
+def t_R_SHIFT(t):
+    r">>"
     return t
 
 def t_CHAR_LITERAL(t):

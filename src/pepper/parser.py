@@ -20,6 +20,20 @@ from pepper.lexer import lexer
 from pepper.lexer import tokens  # NOQA
 import pepper.symbol_table as symtable
 
+# precedence according to
+# http://en.cppreference.com/w/c/language/operator_precedence
+
+precedence = (('left', 'BOOL_OR'), ('left', 'BOOL_AND'),
+              ('left', '|'),
+              ('left', '^'),
+              ('left', '&'),
+              ('left', 'COMP_EQU', 'COMP_NEQU'),
+              ('left', '<', '>', 'COMP_LTE', 'COMP_GTE'),
+              ('left', 'L_SHIFT', 'R_SHIFT'),
+              ('left', '+', '-'),
+              ('left', '*', '/', '%'),
+              ('nonassoc', '!'))
+
 global if_count
 if_count = 0
 def p_program(p):
@@ -105,9 +119,13 @@ def p_valid_macro(p):
     '''
     val = symtable.TABLE.get(p[2], 0)
     if isinstance(val , symtable.MacroExpansion):
-        if val.expansion.isdigit():
-            val = int(val.expansion)
+
+            # add error checking for floats
+        val = int(val.expansion) if val.expansion.isdigit() else 0
+
     p[0] = val
+
+
 def p_valid_add(p):
     '''
     valid_expr : valid_expr '+' valid_expr
@@ -189,7 +207,7 @@ def p_valid_logic_or(p):
     valid_expr : valid_expr BOOL_OR valid_expr
     '''
 
-    p[0]  =  (p[1] or p[3] )  == True
+    p[0] = (p[1] or p[3]) == True
 
 def p_valid_logic_and(p):
     '''
@@ -215,7 +233,7 @@ def p_valid_logic_le(p):
     '''
     valid_expr : valid_expr COMP_LTE valid_expr
     '''
-    p[0] = p[1]  <= p[3]
+    p[0] = p[1] <= p[3]
 
 def p_valid_logic_gt(p):
     '''
@@ -227,7 +245,19 @@ def p_valid_logic_ge(p):
     '''
     valid_expr : valid_expr COMP_GTE valid_expr
     '''
-    p[0] = p[1]  >= p[3]
+    p[0] = p[1] >= p[3]
+
+def p_valid_equal(p):
+    '''
+    valid_expr : valid_expr COMP_EQU valid_expr
+    '''
+    p[0] = p[1]  == p[3]
+
+def p_valid_nequal(p):
+    '''
+    valid_expr : valid_expr COMP_NEQU valid_expr
+    '''
+    p[0] = p[1] != p[3]
 
 #TODO: support parenthesis
 def p_if_expression(p):
