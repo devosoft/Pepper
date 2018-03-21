@@ -32,7 +32,8 @@ precedence = (('left', 'BOOL_OR'), ('left', 'BOOL_AND'),
               ('left', 'L_SHIFT', 'R_SHIFT'),
               ('left', '+', '-'),
               ('left', '*', '/', '%'),
-              ('nonassoc', '!'))
+              ('right', '!', '~'))
+              #('left', 'IDENTIFIER'))
 
 global if_count
 if_count = 0
@@ -112,7 +113,7 @@ def p_valid_int(p):
     '''
     p[0] = int(p[2])
 
-
+# macro mess
 def p_valid_macro(p):
     '''
     valid_expr : spaces IDENTIFIER spaces
@@ -125,6 +126,21 @@ def p_valid_macro(p):
 
     p[0] = val
 
+
+
+## macro expansion fml
+#def p_valid_defined(p):
+#    '''
+#    valid_expr : spaces IDENTIFIER spaces '(' spaces IDENTIFIER spaces ')' spaces
+#    '''
+#    pass
+
+
+def p_valid_parentheticals(p):
+    '''
+    valid_expr : spaces '(' spaces valid_expr spaces ')' spaces
+    '''
+    p[0] = p[4]
 
 def p_valid_add(p):
     '''
@@ -218,10 +234,10 @@ def p_valid_logic_and(p):
 
 def p_valid_logic_not(p):
     '''
-    valid_expr : '!' valid_expr
+    valid_expr : spaces '!' spaces valid_expr
     '''
 
-    p[0] = (not p[2] ) == True
+    p[0] = (not p[4] ) == True
 
 def p_valid_logic_lt(p):
     '''
@@ -269,13 +285,6 @@ def p_if_expression(p):
     symtable.IF_STACK.append((if_count, p[3]))
     p[0] = ast.StringLiteralNode([f"// if expression {if_count } "])
 
-    #if p[3] == 'defined':
-    #    symtable.IF_STACK.append((p[5], p[5] in symtable.TABLE.keys()))
-    #    p[0] = ast.StringLiteralNode([f"// if expression w/ defined call {p[5]}"])
-    #else:
-    #    pass
-    # figure out best way to error calls that arent 'defined' put in lexer?
-
 
 
 def p_no_space(p):
@@ -292,6 +301,7 @@ def p_spaces(p):
 
     p[0] = ast.WhiteSpaceNode([p[1]])
 
+# TODO: make nodes instead that have the appropraite children and evaluated expression
 ####### DONE
 
 def p_ifdef_expression(p):
