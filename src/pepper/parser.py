@@ -152,7 +152,7 @@ def p_valid_div(p):
     valid_expr : valid_expr '/' valid_expr
     '''
 
-    p[0] = p[1] / p[3]
+    p[0] = p[1] // p[3]
 
 def p_valid_mod(p):
     '''
@@ -536,6 +536,22 @@ def p_safe_code_expressions_ascii_literal(p):
               | '?'
     """
     p[0] = ast.ASCIILiteralNode(p[1])
+
+
+# distinction is ascii literals to preprocessor issues (2 character operators)
+def p_safe_code_expression_operator(p):
+    '''
+    safe_code_expression : COMP_LTE
+                        |   COMP_GTE
+                        |   COMP_EQU
+                        |   COMP_NEQU
+                        |   BOOL_AND
+                        |   BOOL_OR
+                        |   L_SHIFT
+                        |   R_SHIFT
+    '''
+
+    p[0] = ast.OperatorNode([p[1]])
 
 
 def p_statement_to_ascii_literal(p):

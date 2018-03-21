@@ -150,6 +150,10 @@ class ASCIILiteralNode(PrimitiveNode):
     def __init__(self, children):
         super(ASCIILiteralNode, self).__init__('ASCIILit', children)
 
+class OperatorNode(PrimitiveNode):
+
+    def __init__(self, children):
+        super(OperatorNode, self).__init__('2CharOperator', children)
 
 class StringLiteralNode(PrimitiveNode):
 
