@@ -13,8 +13,10 @@ token stream and build a tree, which will in turn produce actual c++ or c code.
 
 import sys
 import ply.lex as lex
+# from ply.lex.LexToken import lex.LexToken
 import argparse
 import pepper.symbol_table as symtable
+from typing import Any, List
 
 DEFAULT_LITERALS = ['+', '-', '*', '/', '(', ')',
                     '=', ',', '{', '}', '[', ']',
@@ -56,115 +58,116 @@ tokens = [
 tokens.extend([f"PREPROCESSING_KEYWORD_{i.upper()}" for i in PREPROCESSING_KEYWORDS])
 
 
-def t_PREPROCESSING_KEYWORD_PY(t):
+def t_PREPROCESSING_KEYWORD_PY(t: lex.LexToken) -> lex.LexToken:
     r"\#py\b"
     return t
 
 
-def t_COMMENT(t):
+def t_COMMENT(t: lex.LexToken) -> lex.LexToken:
     r"\s//.*"
     pass
 
 
-def t_COMMENT_NO_WHITESPACE(t):
+def t_COMMENT_NO_WHITESPACE(t: lex.LexToken) -> lex.LexToken:
     r"//.*"
     pass
 
 
-def t_PREPROCESSING_KEYWORD_IFDEF(t):
+def t_PREPROCESSING_KEYWORD_IFDEF(t: lex.LexToken) -> lex.LexToken:
     r'\#ifdef\b'
     return t
 
 
-def t_PREPROCESSING_KEYWORD_IFNDEF(t):
+def t_PREPROCESSING_KEYWORD_IFNDEF(t: lex.LexToken) -> lex.LexToken:
     r'\#ifndef\b'
     return t
 
 
-def t_PREPROCESSING_KEYWORD_ENDIF(t):
+def t_PREPROCESSING_KEYWORD_ENDIF(t: lex.LexToken) -> lex.LexToken:
     r'\#endif\b'
     return t
 
 
-def t_PREPROCESSING_KEYWORD_IF(t):
+def t_PREPROCESSING_KEYWORD_IF(t: lex.LexToken) -> lex.LexToken:
     r'\#if\b'
 
-def t_PREPROCESSING_KEYWORD_ELSE(t):
+
+def t_PREPROCESSING_KEYWORD_ELSE(t: lex.LexToken) -> lex.LexToken:
     r'\#else\b'
     return t
 
 
-def t_PREPROCESSING_KEYWORD_INCLUDE(t):
+def t_PREPROCESSING_KEYWORD_INCLUDE(t: lex.LexToken) -> lex.LexToken:
     r'\#include\b'
     return t
 
 
-def t_PREPROCESSING_KEYWORD_DEFINE(t):
+def t_PREPROCESSING_KEYWORD_DEFINE(t: lex.LexToken) -> lex.LexToken:
     r'\#define\b'
     return t
 
 
-def t_SYSTEM_INCLUDE_LITERAL(t):
+def t_SYSTEM_INCLUDE_LITERAL(t: lex.LexToken) -> lex.LexToken:
     r"""<[^\'\"<>]*?>"""
     return t
 
 
-def t_IDENTIFIER(t):
+def t_IDENTIFIER(t: lex.LexToken) -> lex.LexToken:
     r'([_a-zA-Z][_a-zA-Z0-9]*(\.\.\.)?)|(\.\.\.)'
     return t
 
 
-def t_PREPROCESSING_NUMBER(t):
+def t_PREPROCESSING_NUMBER(t: lex.LexToken) -> lex.LexToken:
     r'\.?[0-9]([0-9]|(e\+)|(e\-)|(E\+)|(E\-)|(p\+)|(p\-)|(P\+)|(P\-)|[a-zA-Z])*'
     return t
 
 
-def t_STRING_LITERAL(t):
+def t_STRING_LITERAL(t: lex.LexToken) -> lex.LexToken:
     r"""('((\\['tn])|[^'\\])*')|("((\\["tn])|[^"\\])*")"""
     return t
 
 
-def t_LONG_COMMENT_START(t):
+def t_LONG_COMMENT_START(t: lex.LexToken) -> lex.LexToken:
     r"\/\*"
     t.lexer.begin('comment')
     pass
 
 
-def t_comment_BLOCK_COMMENT_END(t):
+def t_comment_BLOCK_COMMENT_END(t: lex.LexToken) -> lex.LexToken:
     r"\*\/"
     t.lexer.begin('INITIAL')  # reset to initial state
     pass
 
 
-def t_comment_ignore_anything_else(t):
+def t_comment_ignore_anything_else(t: lex.LexToken) -> lex.LexToken:
     r".+?"
     pass
 
 
-def t_comment_NEWLINE(t):
+def t_comment_NEWLINE(t: lex.LexToken) -> lex.LexToken:
     r'\n'
     t.lexer.lineno += 1  # the lexer doesn't know what consistutes a 'line' unless we tell it
     return t
 
 
-def t_comment_error(t):
+def t_comment_error(t: lex.LexToken) -> lex.LexToken:
     raise symtable.PepperSyntaxError(f"Unknown token on line {t.lexer.lineno}: {t.value[0]}")
 
 
 # TODO: maybe convert this to a t_ignore() rule for improved lexing performance
-def t_NEWLINE(t):
+def t_NEWLINE(t: lex.LexToken) -> lex.LexToken:
     r"\n"
     t.type = 'NEWLINE'
     t.lexer.lineno += 1  # the lexer doesn't know what consistutes a 'line' unless we tell it
     return t
 
 
-def t_WHITESPACE(t):
+def t_WHITESPACE(t: lex.LexToken) -> lex.LexToken:
     r"[\t ]"
     return t
 
 
-def t_error(t):
+def t_error(t: lex.LexToken) -> lex.LexToken:
     raise symtable.PepperSyntaxError(f"Unknown token on line {t.lexer.lineno}: {t.value[0]}")
 
 
@@ -172,13 +175,12 @@ lexer = lex.lex()
 ignore = ['WHITESPACE', 'NEWLINE']
 
 
-def lex(lines, debug_mode=False):
+def lex(lines: List[str], debug_mode: bool = False) -> None:
     "Takes a single string, containing newlines, that's the entire input"
-    # lexer.input("".join(ilines))
     lexer.input(lines)
 
-    arcade = []
-    tok = True
+    arcade: List[lex.LexToken] = []
+    tok: Any = True
     while True:
         tok = lexer.token()
         if not tok:
@@ -202,10 +204,8 @@ def lex(lines, debug_mode=False):
         except: # NOQA
             print(f'Blew up trying to access type of {token}')
 
-    return 0
 
-
-def get_args():
+def get_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument('input_file',
                         type=argparse.FileType('r'),
@@ -215,7 +215,7 @@ def get_args():
     return parser.parse_args()
 
 
-def main():
+def main() -> None:
     args = get_args()
 
     lex(args.input_file.read(), args.debug_mode)
