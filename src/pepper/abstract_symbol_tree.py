@@ -11,7 +11,7 @@ be used within the tree.
 import pepper.symbol_table as symtable
 from pepper.symbol_table import Node
 import os
-from typing import List, Any
+from typing import List, Any, Optional
 
 from pathlib import Path
 
@@ -22,7 +22,7 @@ class LinesNode(Node):
         children = [child for child in children if child is not None]
         super(LinesNode, self).__init__("Statements", children)
 
-    def preprocess(self, lines: Any = None) -> str:
+    def preprocess(self, lines: Optional[List[str]] = None) -> str:
         result = ""
         if lines:
             for child in self.children:
@@ -58,10 +58,11 @@ class PreprocessorIncludeNode(Node):
         raise OSError(f"Could not find file {filename} in defined system include paths: "
                       f"{symtable.SYSTEM_INCLUDE_PATHS}")
 
-    def preprocess(self, lines: List[str] = []) -> None:
+    def preprocess(self, lines: Optional[List[str]] = None) -> str:
         "This will be a lie for a while. I'll have to fix it later."
 
-        lines[-1] = lines[-1] + 'static_assert(false, "include node not properly implemented")'
+        if lines:
+            lines[-1] = lines[-1] + 'static_assert(false, "include node not properly implemented")'
         if self.system_include:
             found_path = PreprocessorIncludeNode.search_system_includes(self.target)
             symtable.FILE_STACK.append(open(found_path, 'r'))
@@ -69,6 +70,8 @@ class PreprocessorIncludeNode(Node):
         else:
             symtable.FILE_STACK.append(open(os.path.split(symtable.FILE_STACK[-1].name)[0]
                                             + '/' + self.target, 'r'))
+
+        return 'static_assert(false, "include node not properly implemented")'
 
 
 class IdentifierNode(Node):
@@ -98,7 +101,7 @@ class IdentifierNode(Node):
 
 
 class PrimitiveNode(Node):
-    def __init__(self, name: str, children: List[Any] = []) -> None:
+    def __init__(self, name: str, children: List[str] = []) -> None:
         super(PrimitiveNode, self).__init__(name, children)
 
     def __str__(self) -> str:
@@ -112,14 +115,15 @@ class PrimitiveNode(Node):
 
 class NewlineNode(PrimitiveNode):
 
-    def __init__(self, children: List[Any] = []) -> None:
+    def __init__(self, children: List[str] = []) -> None:
         super(NewlineNode, self).__init__("Newline", children)
 
     def __str__(self) -> str:
         return "NewlineNode"
 
-    def preprocess(self, lines: List[str] = []) -> str:
-        lines.append("")
+    def preprocess(self, lines: Optional[List[str]] = None) -> str:
+        if lines:
+            lines.append("")
         return "\n"
 
 
@@ -143,5 +147,5 @@ class StringLiteralNode(PrimitiveNode):
 
 class PreprocessingNumberNode(PrimitiveNode):
 
-    def __init__(self, children: List[Node] = []) -> None:
+    def __init__(self, children: List[str] = []) -> None:
         super(PreprocessingNumberNode, self).__init__("PreprocessingNumber", children)

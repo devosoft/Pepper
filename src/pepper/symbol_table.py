@@ -8,7 +8,7 @@ The Symbol Table module implements a class to track declarations and usages of i
 import sys
 import platform
 import re  # because we need more performance issues
-from typing import Dict, TextIO, List, Tuple, Any
+from typing import Dict, TextIO, List, Tuple, Any, Optional
 
 #: The stack of files we're reading from
 FILE_STACK: List[TextIO] = []
@@ -60,7 +60,7 @@ class Node():
 
         return "\n".join(lines)
 
-    def preprocess(self, lines: List[str] = []) -> Any:
+    def preprocess(self, lines: Optional[List[str]] = None) -> Any:
         raise NotImplementedError()
 
 
@@ -98,9 +98,11 @@ class MacroExpansion():
 
         TABLE[self.name] = self
 
-    def _validate_args(self, args: Any) -> None:
+    def _validate_args(self, args: Optional[List[str]]) -> None:
         "Internal arg validator, broken out since it was getting long"
         if self.variadic:
+            if args is None:
+                raise PepperSyntaxError(f"Macro {self.name} invoked without args, but is variadic")
             if len(args) <= len(self.args) - 1:
                 raise PepperSyntaxError(f"Macro {self.name} was given {len(args)} arguments,"
                                         f" but takes a minimum of {len(self.args) + 1}")
