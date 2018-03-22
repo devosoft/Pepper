@@ -8,7 +8,7 @@ The Symbol Table module implements a class to track declarations and usages of i
 import sys
 import platform
 import re  # because we need more performance issues
-from typing import Dict, TextIO, List, Tuple, Any, Optional
+from typing import Dict, TextIO, List, Tuple, Any, Optional, Union
 
 #: The stack of files we're reading from
 FILE_STACK: List[TextIO] = []
@@ -48,7 +48,7 @@ elif platform.system() == "Darwin":
 
 
 class Node():
-    def __init__(self, name: str = "Node", children: List[Any]=[]) -> None:
+    def __init__(self, name: str, children: Union[List[str], List['Node']]) -> None:
         self.name = name
         self.children = children
 
@@ -60,7 +60,7 @@ class Node():
 
         return "\n".join(lines)
 
-    def preprocess(self, lines: Optional[List[str]] = None) -> Any:
+    def preprocess(self, lines: Optional[List[str]] = None) -> str:
         raise NotImplementedError()
 
 
@@ -91,8 +91,8 @@ class MacroExpansion():
                     self.variadic = True
 
         for item in expansion:
-            self.expansion += item.preprocess()
-
+            preprocessed = item.preprocess()
+            self.expansion += preprocessed if preprocessed is not None else ""
         if self.name in TABLE.keys():
             print(f"Warning: Redefining macro '{self.name}'", file=sys.stderr)
 
@@ -106,25 +106,32 @@ class MacroExpansion():
             if len(args) <= len(self.args) - 1:
                 raise PepperSyntaxError(f"Macro {self.name} was given {len(args)} arguments,"
                                         f" but takes a minimum of {len(self.args) + 1}")
-        elif self.args is None and args is not None:
-            raise PepperSyntaxError(f"Macro {self.name} doesn't take any args,"
-                                    f" but was given {len(args)}")
-        elif self.args is None and args is None:
-            pass
-        elif len(args) != len(self.args):
-            raise PepperSyntaxError(f"Wrong number of arguments in macro expansion for {self.name};"
-                                    f" expected {len(self.args)}, got {len(args)}")
+        else:
+            if self.args is None and args is not None:
+                raise PepperSyntaxError(f"Macro {self.name} doesn't take any args,"
+                                        f" but was given {len(args)}")
+            elif self.args is None and args is None:
+                return
+            elif self.args is not None and args is None:
+                raise PepperSyntaxError(f"Macro {self.name} expects args, but was given none.")
+            else:
+                assert(self.args is not None and args is not None)
+                if len(args) != len(self.args):  # typechecker isn't as clever as I want it to be
+                    raise PepperSyntaxError(f"Wrong number of arguments in macro expansion for "
+                                            f"{self.name}; expected {len(self.args)},"
+                                            f" got {len(args)}")
 
     def expand(self, args: Any = None) -> str:
         "Expand macro, maybe with args"
         global EXPANDED_MACRO
-        try:
-            self._validate_args(args)
-        except Exception as err:
-            print(f"\n\nError in macro {self.name} argument validation")
-            print(f"self.args: {self.args}")
-            print(f"incoming args: {args}\n\n")
-            raise err
+        # try:
+        self._validate_args(args)
+        # except Exception as err:
+        #     print(f"\n\nError in macro {self.name} argument validation")
+        #     print(f"self.args: {self.args}")
+        #     print(f"incoming args: {args}\n\n")
+        #     print(err)
+        #     raise err
 
         expansion = self.expansion
         EXPANDED_MACRO = True

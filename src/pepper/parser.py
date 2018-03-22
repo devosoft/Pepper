@@ -389,7 +389,7 @@ def parse(source: str, debug_mode: bool=False) -> Node:
         parser = yacc.yacc(debug=True)
     else:
         parser = yacc.yacc(debug=False, errorlog=yacc.NullLogger())
-    parse_tree = parser.parse(source, lexer=lexer)
+    parse_tree: Node = parser.parse(source, lexer=lexer)
 
     return parse_tree
 

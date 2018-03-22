@@ -11,7 +11,7 @@ be used within the tree.
 import pepper.symbol_table as symtable
 from pepper.symbol_table import Node
 import os
-from typing import List, Any, Optional
+from typing import List, Any, Optional, cast
 
 from pathlib import Path
 
@@ -25,10 +25,10 @@ class LinesNode(Node):
     def preprocess(self, lines: Optional[List[str]] = None) -> str:
         result = ""
         if lines:
-            for child in self.children:
+            for child in cast(List[Node], self.children):
                 child.preprocess(lines)
         else:
-            result = "".join([r.preprocess() for r in self.children])
+            result = "".join([r.preprocess() for r in cast(List[Node], self.children)])
         return result
 
 
@@ -87,13 +87,13 @@ class IdentifierNode(Node):
     def preprocess(self, lines: Any = None) -> str:
         expansion = ""
         if self.children[0] in symtable.TABLE.keys():
-            expansion = symtable.TABLE[self.children[0]].expand(
+            expansion = symtable.TABLE[cast(str, self.children[0])].expand(
                 [arg.preprocess() for arg in self.args] if self.args is not None else None)
         else:
             if self.args is not None:
                 expansion = f'{self.children[0]}({",".join([arg.preprocess() for arg in self.args])})'  # NOQA
             else:
-                expansion = self.children[0]
+                expansion = cast(str, self.children[0])
         if lines:
             lines[-1] = lines[-1] + expansion
 
@@ -107,10 +107,10 @@ class PrimitiveNode(Node):
     def __str__(self) -> str:
         return f"{self.name}: {self.children[0]}"
 
-    def preprocess(self, lines: Any = None) -> str:
+    def preprocess(self, lines: Optional[List[str]] = None) -> str:
         if lines:
-            lines[-1] += self.children[0]
-        return self.children[0]
+            lines[-1] += cast(str, self.children[0])
+        return cast(str, self.children[0])
 
 
 class NewlineNode(PrimitiveNode):
