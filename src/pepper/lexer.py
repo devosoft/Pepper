@@ -16,7 +16,7 @@ import ply.lex as lex
 # from ply.lex.LexToken import lex.LexToken
 import argparse
 import pepper.symbol_table as symtable
-from typing import Any, List
+from typing import List, Union
 
 DEFAULT_LITERALS = ['+', '-', '*', '/', '(', ')',
                     '=', ',', '{', '}', '[', ']',
@@ -180,7 +180,7 @@ def lex(lines: List[str], debug_mode: bool = False) -> None:
     lexer.input(lines)
 
     arcade: List[lex.LexToken] = []
-    tok: Any = True
+    tok: Union[lex.LexToken, bool] = True
     while True:
         tok = lexer.token()
         if not tok:

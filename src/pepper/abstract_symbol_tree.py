@@ -11,7 +11,7 @@ be used within the tree.
 import pepper.symbol_table as symtable
 from pepper.symbol_table import Node
 import os
-from typing import List, Any, Optional, cast
+from typing import List, Optional, cast
 
 from pathlib import Path
 
@@ -40,7 +40,7 @@ class PreprocessorDirectiveNode(Node):
 
 class PreprocessorIncludeNode(Node):
 
-    def __init__(self, children: List[Any] = [], system_include: bool = False) -> None:
+    def __init__(self, children: List[str] = [], system_include: bool = False) -> None:
         super(PreprocessorIncludeNode, self).__init__("PreprocessorInclude", children)
         self.system_include = system_include
         self.target: str = children[0][1:-1]
@@ -76,7 +76,10 @@ class PreprocessorIncludeNode(Node):
 
 class IdentifierNode(Node):
 
-    def __init__(self, children: List[str] = [], args: Any = None, variadic: bool = False) -> None:
+    def __init__(self,
+                 children: List[str] = [],
+                 args: Optional[List[Node]] = None,
+                 variadic: bool = False) -> None:
         super(IdentifierNode, self).__init__("Identifier", children)
         self.args = args
         self.variadic = variadic
@@ -84,7 +87,7 @@ class IdentifierNode(Node):
     def __str__(self) -> str:
         return f"{self.name}: {self.children}"
 
-    def preprocess(self, lines: Any = None) -> str:
+    def preprocess(self, lines: Optional[List[str]] = None) -> str:
         expansion = ""
         if self.children[0] in symtable.TABLE.keys():
             expansion = symtable.TABLE[cast(str, self.children[0])].expand(

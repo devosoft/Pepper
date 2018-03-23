@@ -8,7 +8,15 @@ The Symbol Table module implements a class to track declarations and usages of i
 import sys
 import platform
 import re  # because we need more performance issues
-from typing import Dict, TextIO, List, Tuple, Any, Optional, Union
+from typing import (
+    Dict,
+    TextIO,
+    List,
+    Tuple,
+    Any,
+    Optional,
+    Union,
+    cast)
 
 #: The stack of files we're reading from
 FILE_STACK: List[TextIO] = []
@@ -76,16 +84,16 @@ class PepperInternalError(Exception):
 
 class MacroExpansion():
     "Expands an identifier into a macro expansion, possibly with arguments"
-    def __init__(self, name: str, expansion: List[Node], args: Any = None) -> None:
+    def __init__(self, name: str, expansion: List[Node], args: Optional[List[str]] = None) -> None:
         self.name = name
         self.expansion = ""
         self.args = args
         self.variadic = False
 
-        if args:
-            for index, arg in enumerate(self.args):
+        if args is not None:
+            for index, arg in enumerate(args):
                 if arg.endswith("..."):
-                    if index != len(self.args) - 1:
+                    if index != len(args) - 1:
                         raise PepperSyntaxError("Variadic macro argument must be at the end of the"
                                                 " argument definition list")
                     self.variadic = True
@@ -103,7 +111,9 @@ class MacroExpansion():
         if self.variadic:
             if args is None:
                 raise PepperSyntaxError(f"Macro {self.name} invoked without args, but is variadic")
-            if len(args) <= len(self.args) - 1:
+            elif self.args is None:
+                raise PepperInternalError(f"Impossible state, we're variadic but have no args")
+            elif len(args) <= len(self.args) - 1:
                 raise PepperSyntaxError(f"Macro {self.name} was given {len(args)} arguments,"
                                         f" but takes a minimum of {len(self.args) + 1}")
         else:
@@ -126,12 +136,6 @@ class MacroExpansion():
         global EXPANDED_MACRO
         # try:
         self._validate_args(args)
-        # except Exception as err:
-        #     print(f"\n\nError in macro {self.name} argument validation")
-        #     print(f"self.args: {self.args}")
-        #     print(f"incoming args: {args}\n\n")
-        #     print(err)
-        #     raise err
 
         expansion = self.expansion
         EXPANDED_MACRO = True
@@ -141,6 +145,7 @@ class MacroExpansion():
 
             if self.variadic:
                 # for some reason slicing this inline doesn't work
+                assert(self.args is not None)
                 non_variadic_args = stripped_args[:len(self.args)-1]
                 variadic_args = stripped_args[len(non_variadic_args):]
 
@@ -155,7 +160,10 @@ class MacroExpansion():
                 expansion = re.sub(fr"{variadic_target}", ", ".join(variadic_args), expansion)
             else:
                 for index, arg in enumerate(stripped_args):
-                    expansion = re.sub(fr"\b{self.args[index]}\b", str(arg), expansion)
+                    replacement = cast(List[str], self.args)[index]
+                    expansion = re.sub(fr"\b{replacement}\b",
+                                       str(arg),
+                                       expansion)
         return expansion
 
     def preprocess(self, lines: List[str] = []) -> None:
