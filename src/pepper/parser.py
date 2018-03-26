@@ -120,9 +120,7 @@ def p_valid_macro(p):
     '''
     val = symtable.TABLE.get(p[2], 0)
     if isinstance(val , symtable.MacroExpansion):
-
-            # add error checking for floats
-        val = int(val.expansion) if val.expansion.isdigit() else 0
+        val = parse_macro(val.tokens)
 
     p[0] = val
 
@@ -275,7 +273,6 @@ def p_valid_nequal(p):
     '''
     p[0] = p[1] != p[3]
 
-#TODO: support parenthesis
 def p_if_expression(p):
     """
     if_expression : PREPROCESSING_KEYWORD_IF WHITESPACE valid_expr
@@ -591,6 +588,35 @@ def p_error(p):
     print(p)
     raise symtable.PepperSyntaxError()
 
+
+def parse_macro(tokens):
+    scalar_tokens = []
+    for token in tokens:
+        token = [token]
+        while isinstance(token[0], ast.IdentifierNode):
+            if token[0].children[0] in symtable.TABLE:
+                token = symtable.TABLE[token[0].children[0]].tokens
+
+        scalar_tokens.append(token)
+
+    evaluation = []
+    for expr in scalar_tokens:
+        for exp in expr:
+            exp = exp.children[0]
+            evaluation.append(exp)
+
+    print(evaluation)
+
+
+
+
+
+
+
+    print(scalar_tokens)
+
+
+    return 0
 
 def get_args():
     parser = argparse.ArgumentParser()

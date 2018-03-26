@@ -49,6 +49,13 @@ elif platform.system() == "Darwin":
     SYSTEM_INCLUDE_PATHS = MAC_DEFAULTS
 
 
+
+## Predefined arguments
+#TABLE['false'] =
+#TABLE ['defined'] = MacroExpansion('defined', '')
+
+
+
 class PepperSyntaxError(Exception):
     pass
 
@@ -62,6 +69,11 @@ class MacroExpansion():
     def __init__(self, name, expansion, args=None):
         self.name = name
         self.expansion = ""
+        self.tokens = []
+
+        for token in expansion:
+            if not token.children[0].isspace():
+                self.tokens.append(token)
 
         for item in expansion:
             self.expansion += item.preprocess()
@@ -92,6 +104,7 @@ class MacroExpansion():
             for index, arg in enumerate(args):
                 expansion = re.sub(fr"\b{self.args[index]}\b", str(arg), expansion)
         return expansion
+
 
     def preprocess(self, lines):
         if TRIGGER_INTERNAL_ERROR:

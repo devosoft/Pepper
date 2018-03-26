@@ -34,6 +34,7 @@ class Node():
         raise NotImplementedError()
 
 
+
 class LinesNode(Node):
 
     def __init__(self, children=None):
@@ -150,6 +151,7 @@ class ASCIILiteralNode(PrimitiveNode):
     def __init__(self, children):
         super(ASCIILiteralNode, self).__init__('ASCIILit', children)
 
+
 class OperatorNode(PrimitiveNode):
 
     def __init__(self, children):
@@ -165,3 +167,12 @@ class PreprocessingNumberNode(PrimitiveNode):
 
     def __init__(self, children):
         super(PreprocessingNumberNode, self).__init__("PreprocessingNumber", children)
+
+
+class StartParenthesisNode(PrimitiveNode):
+    def __init__(self, children):
+        super(StartParenthesisNode, self).__init__("StartParenthesis", children)
+
+class CloseParenthesisNode(PrimitiveNode):
+    def __init__(self, children):
+        super(CloseParenthesisNode, self).__init__("CloseParenthesis", children)
