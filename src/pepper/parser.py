@@ -121,7 +121,7 @@ def p_valid_macro(p):
     val = symtable.TABLE.get(p[2], 0)
     if isinstance(val , symtable.MacroExpansion):
         val = parse_macro(val.tokens)
-
+    print(f"If evaluation: {val}")
     p[0] = val
 
 
@@ -596,6 +596,8 @@ def parse_macro(tokens):
         while isinstance(token[0], ast.IdentifierNode):
             if token[0].children[0] in symtable.TABLE:
                 token = symtable.TABLE[token[0].children[0]].tokens
+            else:
+                token = 0
 
         scalar_tokens.append(token)
 
@@ -605,18 +607,13 @@ def parse_macro(tokens):
             exp = exp.children[0]
             evaluation.append(exp)
 
-    print(evaluation)
+    final = eval(" ".join(evaluation))
 
 
 
 
 
-
-
-    print(scalar_tokens)
-
-
-    return 0
+    return final
 
 def get_args():
     parser = argparse.ArgumentParser()
