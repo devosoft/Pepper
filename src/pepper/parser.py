@@ -120,18 +120,94 @@ def p_valid_macro(p):
     '''
     val = symtable.TABLE.get(p[2], 0)
     if isinstance(val , symtable.MacroExpansion):
-        val = parse_macro(val.tokens)
-    print(f"If evaluation: {val}")
+        val = parse_macro(val.tokens, p.lineno)
+    p[0] = val
+
+
+def p_valid_defined(p):
+    '''
+    valid_expr : spaces DEFINED spaces '(' spaces IDENTIFIER spaces ')' spaces
+    '''
+
+    p[0] =  p[6] in symtable.TABLE
+
+
+def p_valid_defined_no_paren(p):
+    '''
+    valid_expr : spaces DEFINED spaces IDENTIFIER spaces
+    '''
+
+    p[0] =  p[4] in symtable.TABLE
+
+
+
+def p_valid_macro_no_args(p):
+    '''
+    valid_expr : spaces IDENTIFIER spaces '(' spaces ')' spaces
+    '''
+    val = symtable.TABLE.get(p[2], 0)
+    if isinstance(val , symtable.MacroExpansion):
+        val.expand()
+        val = parse_macro(val.tokens, p.lineno)
+    p[0] = val
+
+
+def p_valid_macro_args(p):
+    '''
+    valid_expr : spaces IDENTIFIER spaces valid_args spaces
+    '''
+    val = symtable.TABLE.get(p[2], 0)
+    arg_tokens = p[4][:]
+    args = [child.children[0] for child in p[4]]
+
+    if isinstance(val , symtable.MacroExpansion):
+        # error check argument count
+        expansion = val.expand(args)
+
+
+        old_tokens = val.tokens[:]
+        new_tokens = []
+
+        for token in old_tokens:
+            if isinstance(token ,ast.IdentifierNode):
+                if token.children[0] in val.args:
+                    index = val.args.index(token.children[0])
+                    token = arg_tokens[index]
+
+
+            new_tokens.append(token)
+
+        val = parse_macro(new_tokens, p.lineno)
+
+
     p[0] = val
 
 
 
-## macro expansion fml
-#def p_valid_defined(p):
-#    '''
-#    valid_expr : spaces IDENTIFIER spaces '(' spaces IDENTIFIER spaces ')' spaces
-#    '''
-#    pass
+
+
+
+
+def p_valid_args(p):
+    '''
+    valid_args : '(' spaces valid_arg spaces  ')'
+    '''
+    p[0] = p[3]
+
+def p_valid_arg(p):
+    '''
+    valid_arg :  valid_expr
+    '''
+    p[0]  = [ast.PreprocessingNumberNode([str(int(p[1]))])]
+
+
+
+def p_valid_arg_commas(p):
+    '''
+    valid_arg : valid_arg spaces ',' spaces valid_arg spaces
+    '''
+
+    p[0] = p[1] + p[5]
 
 
 def p_valid_parentheticals(p):
@@ -583,13 +659,45 @@ def p_statement_to_int(p):
     """
     p[0] = ast.PreprocessingNumberNode([p[1]])
 
+def p_statement_to_char(p):
+    """
+    safe_code_expression : CHAR_LITERAL
+    """
+    p[0] = ast.StringLiteralNode([p[1]])
+
+
+
 def p_error(p):
     print(f"ERROR(line {p.lineno}): syntax error")
     print(p)
     raise symtable.PepperSyntaxError()
 
 
-def parse_macro(tokens):
+def validate(exp, line_no):
+    literal = None
+    if isinstance(exp, ast.PreprocessingNumberNode):
+        if not exp.children[0].isdigit():
+            print(f"ERROR: token {exp.children[0]} is not valid in preprocessor expressions")
+            raise symtable.PepperSyntaxError()
+        literal = exp.children[0]
+    elif isinstance(exp , ast.StringLiteralNode):
+        if  len(exp.children[0]) != 3:
+            print(f"ERROR: token {exp.children[0]} is not valid in preprocessor expressions")
+            raise symtable.PepperSyntaxError()
+        literal = str(ord(exp.children[0][1]))
+    elif isinstance(exp, ast.ASCIILiteralNode):
+        literal = exp.children[0]
+    elif isinstance(exp, ast.OperatorNode):
+        child = exp.children[0]
+        if child == '&&':
+            literal = 'and'
+        elif child == '||':
+            literal = 'or'
+        else:
+            literal = child
+    return literal
+
+def parse_macro(tokens, line_no = 0 ):
     scalar_tokens = []
     for token in tokens:
         token = [token]
@@ -601,18 +709,32 @@ def parse_macro(tokens):
 
         scalar_tokens.append(token)
 
+
     evaluation = []
+
+    # no defined macros will accepted if not an integer type
     for expr in scalar_tokens:
         for exp in expr:
-            exp = exp.children[0]
+
+            exp = validate(exp, line_no)
             evaluation.append(exp)
 
-    final = eval(" ".join(evaluation))
 
 
 
+    try:
+        final = eval(" ".join(evaluation))
+    except SyntaxError:
+        print(f"ERROR: syntax error")
+        raise symtable.PepperSyntaxError()
 
 
+    if (isinstance(final, str) and len(final) > 1) and not isinstance(final, float) and not isinstance(final , int):
+        print(f"ERROR: token {final} is not valid in preprocessor expressions")
+        raise symtable.PepperSyntaxError()
+
+    if isinstance(final, float):
+        final = int(final)
     return final
 
 def get_args():

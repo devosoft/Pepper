@@ -18,7 +18,7 @@ import argparse
 DEFAULT_LITERALS = ['+', '-', '*', '/', '|', '&', '(',
                     ')', '=', ',', '{', '}', '[', ']',
                     '.', ';', '!', '<', '>', ':', '~',
-                    '^', '@', '#', '&', "'", '%', "?"]
+                    '^', '@', '#', '&', "'", '%', "?", "\\"]
 
 
 literals = DEFAULT_LITERALS
@@ -54,6 +54,7 @@ tokens = [
     'BOOL_OR',
     'L_SHIFT',
     'R_SHIFT',
+    'DEFINED',
     'CHAR_LITERAL',
     # 'SKIPPED_LINE',
     'STRING_LITERAL',
@@ -111,6 +112,9 @@ def t_PREPROCESSING_KEYWORD_DEFINE(t):
     r'\#define\b'
     return t
 
+def t_DEFINED(t):
+    r'defined'
+    return t
 
 def t_SYSTEM_INCLUDE_LITERAL(t):
     r"""<[^\'\"<>]*?>"""

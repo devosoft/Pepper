@@ -49,20 +49,12 @@ elif platform.system() == "Darwin":
     SYSTEM_INCLUDE_PATHS = MAC_DEFAULTS
 
 
-
-## Predefined arguments
-#TABLE['false'] =
-#TABLE ['defined'] = MacroExpansion('defined', '')
-
-
-
 class PepperSyntaxError(Exception):
     pass
 
 
 class PepperInternalError(Exception):
     pass
-
 
 class MacroExpansion():
     "Expands an identifier into a macro expansion, possibly with arguments"
@@ -82,6 +74,9 @@ class MacroExpansion():
         if self.name in TABLE.keys():
             print(f"Warning: Redefining macro '{self.name}'", file=sys.stderr)
 
+        elif self.name == 'defined':
+            raise SyntaxError("ERROR: defined can't be used as a macro name.")
+
         TABLE[self.name] = self
 
     def expand(self, args=None):
@@ -97,7 +92,7 @@ class MacroExpansion():
             raise SyntaxError(f"Wrong number of arguments in macro expansion for {self.name};"
                               f" expected {len(self.args)}, got {len(args)}")
 
-        expansion = self.expansion
+        expansion = self.expansion[:]
         EXPANDED_MACRO = True
 
         if args:

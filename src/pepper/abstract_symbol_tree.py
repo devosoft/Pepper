@@ -14,6 +14,8 @@ import os
 from pathlib import Path
 
 
+
+
 class Node():
     def __init__(self, name="Node", children=None):
         self.name = name
@@ -169,10 +171,6 @@ class PreprocessingNumberNode(PrimitiveNode):
         super(PreprocessingNumberNode, self).__init__("PreprocessingNumber", children)
 
 
-class StartParenthesisNode(PrimitiveNode):
-    def __init__(self, children):
-        super(StartParenthesisNode, self).__init__("StartParenthesis", children)
-
-class CloseParenthesisNode(PrimitiveNode):
-    def __init__(self, children):
-        super(CloseParenthesisNode, self).__init__("CloseParenthesis", children)
+## Predefined arguments
+symtable.TABLE['true'] = symtable.MacroExpansion('true' , [PreprocessingNumberNode('1')])
+symtable.TABLE['false'] = symtable.MacroExpansion('false' , [PreprocessingNumberNode('0')])
