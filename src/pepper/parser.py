@@ -429,7 +429,7 @@ def p_define_expression_no_args(p):
 
 def p_define_expression_some_args(p):
     """
-    define_expression : PREPROCESSING_KEYWORD_DEFINE WHITESPACE IDENTIFIER '(' identifier_list ')'  WHITESPACE macro_expansion
+    define_expression : PREPROCESSING_KEYWORD_DEFINE WHITESPACE IDENTIFIER '(' identifier_list ')'  maybe_space macro_expansion
     """
     print(f"Macro expansion for ident {p[3]} with args {p[5]}")
     p[0] = symtable.MacroExpansion(p[3], p[8], args=p[5])
@@ -515,12 +515,29 @@ def p_expressions(p):
     p[0].append(p[2])
 
 
+def p_expressions_to_single(p):
+    """
+    code_expressions : code_expression
+    """
+    p[0] = [p[1]]
+
+
 def p_identifier_call(p):
     """
     safe_code_expression : IDENTIFIER code_expression_parenthetical
     """
     print(f"macro call with ident {p[1]} and args {p[2]}")
     p[0] = ast.IdentifierNode([p[1]], args=p[2])
+
+
+def p_safe_code_expression_to_parens(p):
+    """
+    safe_code_expression : code_expression_parenthetical
+    """
+    p[0] = ast.LinesNode([ast.ASCIILiteralNode('('),
+                          ast.LinesNode(p[1]),
+                          ast.ASCIILiteralNode(')')
+                         ])
 
 
 def p_code_expression_to_safe(p):
@@ -575,10 +592,10 @@ def p_expression_list_empty(p):
 
 def p_expression_list_multiple(p):
     """
-    list_of_expressions : list_of_expressions ',' maybe_space safe_code_expressions
+    list_of_expressions : list_of_expressions ',' safe_code_expressions
     """
     p[0] = p[1]
-    p[0].append(ast.LinesNode(p[4]))
+    p[0].append(ast.LinesNode(p[3]))
 
 
 # don't  mind me, just duplicating code...ugh
@@ -617,6 +634,7 @@ def p_safe_code_expressions_ascii_literal(p):
               | '#'
               | '.'
               | '?'
+              | '~'
     """
     p[0] = ast.ASCIILiteralNode(p[1])
 
@@ -697,31 +715,124 @@ def validate(exp, line_no):
             literal = child
     return literal
 
+
+def parse_line(t):
+    if isinstance(t[0] , ast.LinesNode):
+        return parse_lines(t[0])
+    while isinstance(t[0], ast.IdentifierNode):
+        if t[0].children[0] in symtable.TABLE:
+            t = symtable.TABLE[t[0].children[0]].tokens
+        else:
+            t = [0]
+
+    return t
+
+
+def parse_lines(token):
+    return [parse_line([t]) for t in token.children]
+
+
+
+def unravel_list(exp):
+    parsing = []
+    is_white = True
+    for tok in exp:
+        while isinstance(tok, list):
+            temp = tok.pop(0)
+            #if isinstance(temp, ast.WhiteSpaceNode) or (isinstance(temp[0])
+            if not tok and not isinstance(temp, list):
+                tok = temp
+            elif not tok:
+                parsing.append(ast.ASCIILiteralNode(['(']))
+                tok = temp
+                parsing.append(ast.ASCIILiteralNode([')']))
+            elif not isinstance(temp, list):
+                parsing.append(temp)
+            else:
+                parsing.append(ast.ASCIILiteralNode(['(']))
+                parsing.extend(unravel_list(temp))
+                parsing.append(ast.ASCIILiteralNode([')']))
+
+
+
+        parsing.append(tok)
+
+    i = 0
+    while i + 2 < len(parsing):
+        found = False
+        if isinstance(parsing[i], ast.ASCIILiteralNode) \
+and isinstance(parsing[i+1], ast.WhiteSpaceNode) \
+and isinstance(parsing[i+2], ast.ASCIILiteralNode):
+            parsing.pop(i)
+            parsing.pop(i)
+            parsing.pop(i)
+            found = True
+        if not found:
+            i +=1
+
+    return parsing #[ast.ASCIILiteralNode(['('])] + parsing + [ast.ASCIILiteralNode([')'])]
+
+
 def parse_macro(tokens, line_no = 0 ):
     scalar_tokens = []
     for token in tokens:
         token = [token]
+        if isinstance(token[0], ast.LinesNode):
+            token = parse_lines(token[0] )
         while isinstance(token[0], ast.IdentifierNode):
             if token[0].children[0] in symtable.TABLE:
                 token = symtable.TABLE[token[0].children[0]].tokens
             else:
-                token = 0
+                token = [0]
+
 
         scalar_tokens.append(token)
-
 
     evaluation = []
 
     # no defined macros will accepted if not an integer type
     for expr in scalar_tokens:
-        for exp in expr:
+            for exp in expr:
+                if isinstance(exp, list):
+                    exp = unravel_list(exp)
+                    exp = [validate(tok, line_no) for tok in exp if not isinstance(tok, ast.WhiteSpaceNode)]
+                    evaluation.extend(exp)
+                elif exp == "(" or exp == ")":
+                    evaluation.append(exp)
+                elif not isinstance(exp, ast.WhiteSpaceNode):
+                    exp = validate(exp, line_no)
+                    evaluation.append(exp)
 
-            exp = validate(exp, line_no)
-            evaluation.append(exp)
+    print("\n",scalar_tokens, "\n")
+
+
+    OPERATORS = {'+', '-', '*', '/', 'and', 'or', '&', '|', '<<', '>>', '^'}
+    i = 0
+
+
+    while i + 1 < len(evaluation):
+        found = False
+        if evaluation[i] == "("  and  evaluation[i+1] == ")" :
+            evaluation.pop(i)
+            evaluation.pop(i)
+            found = True
+        if not found:
+            i += 1
+
+    i = 0
+    while i + 2 < len(evaluation):
+        found = False
+        if evaluation[i] == '(' and evaluation[i+1] in OPERATORS and evaluation[i+2] == ')':
+            evaluation.pop(i)
+            evaluation.pop(i+1)
+        i +=1
 
 
 
 
+
+
+    print("\n",evaluation)
     try:
         final = eval(" ".join(evaluation))
     except SyntaxError:
@@ -739,7 +850,10 @@ def parse_macro(tokens, line_no = 0 ):
 
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('input_file', type=argparse.FileType('r'), help="The file to parse")
+    parser.add_argument('input_file',
+                        type=argparse.FileType('r'),
+                        default=sys.stdin,
+                        help="The file to parse")
     parser.add_argument('--debug_mode', action='store_true')
     return parser.parse_args()
 

@@ -15,13 +15,11 @@ from pepper import __version__
 import os
 import pepper.symbol_table as symtable
 from pathlib import Path
-import sys
-
 
 def get_args():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('input_file', help="the input source file")
+    parser.add_argument('input_file', help="the input source file", type=argparse.FileType('r'))
     parser.add_argument('--output_file',
                         '-o',
                         type=argparse.FileType('w'),
@@ -57,7 +55,7 @@ def main(args=None):
     if args.trigger_internal_error:
         symtable.TRIGGER_INTERNAL_ERROR = True
 
-    symtable.FILE_STACK.append(open(args.input_file, 'r'))
+    symtable.FILE_STACK.append(args.input_file)
 
     parser_input = ""
 
@@ -77,13 +75,15 @@ def main(args=None):
             symtable.FILE_STACK.pop()
             if len(symtable.FILE_STACK):
                 preprocessed_lines.append("")
-        elif not parser_input.endswith(r"\\n"):
+        elif parser_input.endswith("\\\n"):
+            parser_input = parser_input[:-2]
+        else:
             try:
                 tree = parser.parse(parser_input, args.debug if args.debug else None)
-            except symtable.PepperSyntaxError:
+            except symtable.PepperSyntaxError as err:
                 print(f"A syntax error was encountered while parsing a line from {symtable.FILE_STACK[-1].name}:")  # NOQA
                 print(f"{parser_input}")
-                sys.exit(1)
+                raise err
             if len(symtable.IF_STACK) == 0 or symtable.IF_STACK[-1][1]:
                 try:
                     output = tree.preprocess(preprocessed_lines)
@@ -92,22 +92,19 @@ def main(args=None):
                     print(f"{parser_input}")
                     print("Please report this error: https://github.com/devosoft/Pepper/issues")
                     print(f"{err}")
-                    sys.exit(2)
+                    raise symtable.PepperInternalError()
             else:
                 pass  # toss the line, we're in a 'deny' ifdef
             parser_input = ""
 
-    # source = args.input_file.read()
-
-    # parser.parse(source).preprocess(preprocessed_lines)
     output = "\n".join(preprocessed_lines) + "\n"
 
     if args.output_file:
         args.output_file.write(output)
         args.output_file.close()
     else:
-        basepath = os.path.split(args.input_file)[0]
-        with open(basepath + '/' + os.path.split(args.input_file)[1] + ".preprocessed.cc", 'w') as output_file: # NOQA
+        basepath = os.path.split(args.input_file.name)[0]
+        with open(((basepath + '/') if len(basepath) > 0 else "") + os.path.split(args.input_file.name)[1] + ".preprocessed.cc", 'w') as output_file: # NOQA
             output_file.write(output)
 
 
