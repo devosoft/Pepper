@@ -183,11 +183,6 @@ def p_valid_macro_args(p):
     p[0] = val
 
 
-
-
-
-
-
 def p_valid_args(p):
     '''
     valid_args : '(' spaces valid_arg spaces  ')'
@@ -297,14 +292,14 @@ def p_valid_logic_or(p):
     valid_expr : valid_expr BOOL_OR valid_expr
     '''
 
-    p[0] = (p[1] or p[3]) == True
+    p[0] = int(bool(p[1] or p[3]))
 
 def p_valid_logic_and(p):
     '''
     valid_expr : valid_expr BOOL_AND valid_expr
     '''
 
-    p[0] = (p[1] and p[3]) == True
+    p[0] = int(bool(p[1] and p[3]))
 
 def p_valid_logic_not(p):
     '''
@@ -739,7 +734,6 @@ def unravel_list(exp):
     for tok in exp:
         while isinstance(tok, list):
             temp = tok.pop(0)
-            #if isinstance(temp, ast.WhiteSpaceNode) or (isinstance(temp[0])
             if not tok and not isinstance(temp, list):
                 tok = temp
             elif not tok:
@@ -826,10 +820,6 @@ def parse_macro(tokens, line_no = 0 ):
             evaluation.pop(i)
             evaluation.pop(i+1)
         i +=1
-
-
-
-
 
 
     print("\n",evaluation)
