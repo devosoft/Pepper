@@ -19,17 +19,13 @@ before_install:
   - lsb_release -a
 install:
   - pip install -e .
-  - pip install tox diff_cover pytest pytest-cov flake8
+  - pip install tox diff_cover pytest pytest-cov flake8 mypy
   - virtualenv --version
   - easy_install --version
   - pip --version
-  - tox --version
 script:
   - git fetch origin master:refs/remotes/origin/master
-  - tox -v
   - pytest --cov-report=xml --cov=pepper
   - diff-cover coverage.xml --compare-branch=origin/master --fail-under=100
   - diff-quality --compare-branch=origin/master --violations=flake8 --fail-under=100
-after_failure:
-  - more .tox/log/* | cat
-  - more .tox/*/log/* | cat
+  - make typecheck
