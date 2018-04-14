@@ -6,8 +6,8 @@
 The Symbol Table module implements a class to track declarations and usages of identifiers
 """
 import sys
-import platform
 import re  # because we need more performance issues
+import subprocess
 from typing import (
     Dict,
     TextIO,
@@ -28,31 +28,29 @@ EXPANDED_MACRO = False
 #: Switch to test internal error handling
 TRIGGER_INTERNAL_ERROR = False
 
-#: The default linux paths to search for includes-
-LINUX_DEFAULTS = [
-    "/usr/include/c++/7",
-    "/usr/include/x86_64-linux-gnu/c++/7",
-    "/usr/include/c++/7/backward",
-    "/usr/lib/gcc/x86_64-linux-gnu/7/include",
-    "/usr/local/include",
-    "/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed",
-    "/usr/include/x86_64-linux-gnu",
-    "/usr/include"
-]
 
-MAC_DEFAULTS = [
-    "/usr/local/include",
-    "/Library/Developer/CommandLineTools/usr/include/c++/v1",
-    "/Library/Developer/CommandLineTools/usr/lib/clang/9.0.0/include",
-    "/Library/Developer/CommandLineTools/usr/include",
-    "/usr/include"
-]
+def build_default_include_lists() -> List[str]:
+    p = subprocess.run(["cpp", "-v", "/dev/null", "-o", "/dev/null"],
+                       stdout=subprocess.PIPE,
+                       stderr=subprocess.PIPE)
+    output_lines = p.stderr.decode('utf-8').split("\n")
 
-if platform.system() == "Linux":
-    SYSTEM_INCLUDE_PATHS = LINUX_DEFAULTS
+    found_include_listing = False
+    default_include = []
+    for line in output_lines:
+        line = line.strip()
+        if found_include_listing:
+            if line.startswith("End of search list."):
+                found_include_listing = False
+            else:
+                default_include.append(line)
+        elif line.startswith("#include <...> search starts here:"):
+            found_include_listing = True
 
-elif platform.system() == "Darwin":
-    SYSTEM_INCLUDE_PATHS = MAC_DEFAULTS
+    return default_include
+
+
+SYSTEM_INCLUDE_PATHS = build_default_include_lists()
 
 
 class Node():
