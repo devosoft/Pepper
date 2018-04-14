@@ -344,6 +344,13 @@ def p_valid_nequal(p):
     '''
     p[0] = p[1] != p[3]
 
+def p_valid_ternary(p):
+    '''
+    valid_expr : valid_expr spaces '?' spaces valid_expr ':' valid_expr
+    '''
+    p[0] = p[5] if p[1] else p[7]
+
+
 def p_if_expression(p):
     """
     if_expression : PREPROCESSING_KEYWORD_IF WHITESPACE valid_expr
@@ -814,12 +821,47 @@ def parse_macro(tokens, line_no = 0 ):
             i += 1
 
     i = 0
+
     while i + 2 < len(evaluation):
         found = False
         if evaluation[i] == '(' and evaluation[i+1] in OPERATORS and evaluation[i+2] == ')':
             evaluation.pop(i)
             evaluation.pop(i+1)
         i +=1
+
+
+    # catch AND  && OR stuff
+    i = 0
+
+    new = []
+    while i < len(evaluation):
+        temp= []
+        token = evaluation[i]
+        if token == 'and':
+            temp.insert(0 , 'bool(')
+
+            if evaluation[i-1] != ')' :
+                temp.append(new.pop())
+
+            temp.append('and')
+
+            if evaluation[i + 1] != '(':
+                temp.append(evaluation[i+1])
+                i +=1
+            temp.append( ')')
+
+            new.extend(temp)
+        else:
+            new.append(token)
+
+
+        i +=1
+
+
+
+    print(" ".join(new))
+    evaluation = new
+
 
 
     print("\n",evaluation)
@@ -836,6 +878,9 @@ def parse_macro(tokens, line_no = 0 ):
 
     if isinstance(final, float):
         final = int(final)
+
+
+    print ( final )
     return final
 
 def get_args():

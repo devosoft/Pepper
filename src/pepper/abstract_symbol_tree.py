@@ -81,7 +81,7 @@ class PreprocessorIncludeNode(Node):
     def preprocess(self, lines):
         "This will be a lie for a while. I'll have to fix it later."
 
-        lines[-1] = lines[-1] + 'static_assert(false, "include node not properly implemented")'
+        lines[-1] = lines[-1] + 'static_assert(0, "include node not properly implemented")'
         if self.system_include:
             found_path = PreprocessorIncludeNode.search_system_includes(self.target)
             symtable.FILE_STACK.append(open(found_path, 'r'))

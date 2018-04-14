@@ -1,12 +1,10 @@
-static_assert(false, "include node not properly implemented")
-static_assert(false, "include node not properly implemented")
-// Macro SomeOtherFileIncluded with args None expanding to 'true'
-// Macro SomeFileIncluded with args None expanding to 'true'
-// Macro SomeFileMultilineIncluded with args None expanding to 'true'
+static_assert(0, "include node not properly implemented")
+static_assert(0, "include node not properly implemented")
+
 
 bool ExpandTheMacro() {
     std::cout << "Congrats! You included the thing!" << std::endl;
-    return true;
+    return 1;
 }
 // Macro POTATO with args None expanding to '12345'
 // Macro FOO with args None expanding to '12345 > 4578'
@@ -18,7 +16,7 @@ int main() {
     for(int i = 0; i < x; i++) {
         sum += i;
     }
-    if (true) {
+    if (1) {
         return sum;
     } else {
         return -1;

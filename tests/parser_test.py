@@ -40,6 +40,12 @@ class TestUnit(object):
         print(parse_tree, file=sys.stderr)
 
 
+    def test_simple_if(self):
+        test_lines = open('tests/test_data/file_include.cpp', 'r').readlines()
+        parse_tree = parser.parse("\n".join(test_lines))
+        print(parse_tree, file=sys.stderr)
+
+
 #  Do you like my super long literals?
 file_include_parse_results = b"""Node: Statements
 \tPreprocessorInclude:
