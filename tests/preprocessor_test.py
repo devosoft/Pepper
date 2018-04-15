@@ -216,6 +216,15 @@ class TestUnit:
         assert(exception_raised)
 
 
+    def test_if_basic_expressions(self, tmpdir):
+        preprocess_and_compare_functionally('if_expressions.cpp',
+                                            'if_expressions.cpp.preprocessed.cc')
+
+    def test_if_macro_calls(self, tmpdir):
+        preprocess_and_compare_functionally('if_macro_expressions.cpp',
+                                            'if_macro_expressions.cpp.preprocessed.cc')
+
+
 class TestSystem:
     def test_basic_function(self, tmpdir):
         preprocess_and_compare("file_include.cpp",

@@ -149,6 +149,7 @@ def p_valid_macro_no_args(p):
     if isinstance(val , symtable.MacroExpansion):
         val.expand()
         val = parse_macro(val.tokens, p.lineno)
+        symtable.EXPANDED_MACRO = False
     p[0] = val
 
 
@@ -178,6 +179,7 @@ def p_valid_macro_args(p):
             new_tokens.append(token)
 
         val = parse_macro(new_tokens, p.lineno)
+        symtable.EXPANDED_MACRO = False
 
 
     p[0] = val
@@ -292,14 +294,14 @@ def p_valid_logic_or(p):
     valid_expr : valid_expr BOOL_OR valid_expr
     '''
 
-    p[0] = int(bool(p[1] or p[3]))
+    p[0] = bool(p[1] or p[3])
 
 def p_valid_logic_and(p):
     '''
     valid_expr : valid_expr BOOL_AND valid_expr
     '''
 
-    p[0] = int(bool(p[1] and p[3]))
+    p[0] = bool(p[1] and p[3])
 
 def p_valid_logic_not(p):
     '''
@@ -358,7 +360,7 @@ def p_if_expression(p):
     global if_count
     if_count += 1
     symtable.IF_STACK.append((if_count, p[3]))
-    p[0] = ast.StringLiteralNode([f"// if expression {if_count } "])
+    p[0] = ast.StringLiteralNode([f"// if expression result: { int(p[3]) }"])
 
 
 
@@ -715,6 +717,10 @@ def validate(exp, line_no):
             literal = 'or'
         else:
             literal = child
+    elif isinstance(exp, int) or isinstance(exp, bool):
+        literal = str(exp)
+
+
     return literal
 
 
@@ -733,7 +739,35 @@ def parse_line(t):
 def parse_lines(token):
     return [parse_line([t]) for t in token.children]
 
+def parse_parant(ev, i, beg):
+    temp = []
+    keep_going = 1
+    if beg:
+        temp.append(ev[i])
+        i +=1
+        while keep_going:
+            if ev[i] == '(' :
+                keep_going += 1
+            elif ev[i] == ')':
+                keep_going -= 1
 
+            temp.append(ev[i])
+            i += 1
+
+    else:
+        temp.append(ev.pop())
+        while keep_going:
+            if ev[-1] == '(' :
+                keep_going -= 1
+            elif ev[-1] == ')':
+                keep_going += 1
+
+            temp.append(ev.pop())
+        temp = temp[::-1]
+
+
+
+    return temp, i
 
 def unravel_list(exp):
     parsing = []
@@ -790,7 +824,6 @@ def parse_macro(tokens, line_no = 0 ):
         scalar_tokens.append(token)
 
     evaluation = []
-
     # no defined macros will accepted if not an integer type
     for expr in scalar_tokens:
             for exp in expr:
@@ -804,7 +837,6 @@ def parse_macro(tokens, line_no = 0 ):
                     exp = validate(exp, line_no)
                     evaluation.append(exp)
 
-    print("\n",scalar_tokens, "\n")
 
 
     OPERATORS = {'+', '-', '*', '/', 'and', 'or', '&', '|', '<<', '>>', '^'}
@@ -830,9 +862,10 @@ def parse_macro(tokens, line_no = 0 ):
         i +=1
 
 
+
+    print(evaluation)
     # catch AND  && OR stuff
     i = 0
-
     new = []
     while i < len(evaluation):
         temp= []
@@ -842,25 +875,53 @@ def parse_macro(tokens, line_no = 0 ):
 
             if evaluation[i-1] != ')' :
                 temp.append(new.pop())
+            else:
+                left, i = parse_parant(new, i , False)
+                temp.extend(left)
 
             temp.append('and')
 
             if evaluation[i + 1] != '(':
                 temp.append(evaluation[i+1])
                 i +=1
-            temp.append( ')')
+            else:
+                right, i = parse_parant(evaluation, i+1, True)
+                temp.extend(right)
+                i +=1
 
+            temp.append( ')')
             new.extend(temp)
+
+        elif token == 'or':
+            temp.insert(0 , 'bool(')
+
+            if evaluation[i-1] != ')' :
+                temp.append(new.pop())
+            else:
+                left, i = parse_parant(new, i , False)
+                temp.extend(left)
+            temp.append('or')
+
+            if evaluation[i + 1] != '(':
+                temp.append(evaluation[i+1])
+                i +=1
+            else:
+                right, i = parse_parant(evaluation, i+1, True)
+                temp.extend(right)
+                i +=1
+            temp.append( ')')
+            new.extend(temp)
+
+
+
         else:
             new.append(token)
 
 
         i +=1
 
-
-
-    print(" ".join(new))
     evaluation = new
+
 
 
 
