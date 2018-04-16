@@ -26,8 +26,6 @@ class TestUnit(object):
         lexer.lexer.input('\n'.join(test_lines))
         tokens = get_all_tokens(lexer.lexer)
 
-        #########assert(len(tokens) == 76)
-
         token_types = defaultdict(int)
 
         for token in tokens:
@@ -51,8 +49,8 @@ class TestUnit(object):
             'PREPROCESSING_KEYWORD_INCLUDE': 1,
             'INT_LITERAL': 4,
             'STRING_LITERAL': 4,
-            'L_SHIFT' : 6,
-            'R_SHIFT' : 0 ,
+            'L_SHIFT': 6,
+            'R_SHIFT': 0,
             'SYSTEM_INCLUDE_LITERAL': 1
         }
 

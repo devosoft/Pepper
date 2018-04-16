@@ -172,6 +172,6 @@ class PreprocessingNumberNode(PrimitiveNode):
         super(PreprocessingNumberNode, self).__init__("PreprocessingNumber", children)
 
 
-## Predefined arguments
-symtable.TABLE['true'] = symtable.MacroExpansion('true' , [PreprocessingNumberNode('1')])
-symtable.TABLE['false'] = symtable.MacroExpansion('false' , [PreprocessingNumberNode('0')])
+# Predefined arguments
+symtable.TABLE['true'] = symtable.MacroExpansion('true', [PreprocessingNumberNode('1')])
+symtable.TABLE['false'] = symtable.MacroExpansion('false', [PreprocessingNumberNode('0')])

@@ -74,7 +74,6 @@ class MacroExpansion():
                                                 " argument definition list")
                     self.variadic = True
 
-
         for token in expansion:
                 self.tokens.append(token)
 
@@ -83,9 +82,6 @@ class MacroExpansion():
 
         if self.name in TABLE.keys():
             print(f"Warning: Redefining macro '{self.name}'", file=sys.stderr)
-
-        elif self.name == 'defined':
-            raise SyntaxError("ERROR: defined can't be used as a macro name.")
 
         TABLE[self.name] = self
 

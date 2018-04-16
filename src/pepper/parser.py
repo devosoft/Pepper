@@ -639,6 +639,7 @@ def p_safe_code_expressions_ascii_literal(p):
               | '.'
               | '?'
               | '~'
+              | '/'
     """
     p[0] = ast.ASCIILiteralNode(p[1])
 
