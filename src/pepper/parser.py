@@ -7,19 +7,22 @@
 """
 This is the Parser module for Pepper
 
-This module impelements the grammar for the preprocessor language, comprised of tokens from the Lexer module.
+This module implements the grammar for the preprocessor language, comprised of tokens from the Lexer module.
 This module implements a main function, but this is only for debugging and will be removed on release.
 """
 
 # flake8: noqa E501
+import pepper.symbol_table as symtable
+import pepper.abstract_symbol_tree as ast
 import sys
 import argparse
 import ply.yacc as yacc
-import pepper.abstract_symbol_tree as ast
 from pepper.lexer import lexer
 from pepper.lexer import tokens  # NOQA
 import pepper.symbol_table as symtable
 from pepper.evaluator import parse_macro
+from pepper.symbol_table import Node
+
 # precedence according to
 # http://en.cppreference.com/w/c/language/operator_precedence
 
@@ -33,11 +36,11 @@ precedence = (('left', 'BOOL_OR'), ('left', 'BOOL_AND'),
               ('left', '+', '-'),
               ('left', '*', '/', '%'),
               ('right', '!', '~'))
-              #('left', 'IDENTIFIER'))
 
 global if_count
 if_count = 0
-def p_program(p):
+
+def p_program(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     program : lines statement
     """
@@ -45,49 +48,50 @@ def p_program(p):
     p[0] = p[1]
 
 
-def p_statements_empty(p):
+def p_statements_empty(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     lines :
     """
     p[0] = ast.LinesNode()
 
 
-def p_lines_nonempty(p):
+def p_lines_nonempty(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     lines : lines line
     """
-    statements = p[1].children + [p[2], ast.NewlineNode("\n")]
+    statements = p[1].children + [p[2], ast.NewlineNode(["\n"])]
     p[0] = ast.LinesNode(statements)
 
 
-def p_line_to_statement(p):
+def p_line_to_statement(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     line : statement NEWLINE
     """
     p[0] = p[1]
 
-def p_statement_to_pepper_directive(p):
+
+def p_statement_to_pepper_directive(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     statement : pepper_directive
     """
     p[0] = p[1]
 
 
-def p_statement_to_code_expression(p):
+def p_statement_to_code_expression(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     statement : code_expressions
     """
     p[0] = ast.LinesNode(p[1])
 
 
-def p_pepper_directive(p):
+def p_pepper_directive(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     pepper_directive : preprocessor_expression
     """
     p[0] = p[1]
 
 
-def p_include_expression(p):
+def p_include_expression(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     preprocessor_expression : include_expression
                             | define_expression
@@ -101,20 +105,21 @@ def p_include_expression(p):
 
 ########### IF DEF EXCLUSITIVITEY
 
-def p_valid_char(p):
+def p_valid_char(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     valid_expr : spaces CHAR_LITERAL spaces
     '''
     p[0] = ord(p[2][1])
 
-def p_valid_int(p):
+
+def p_valid_int(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     valid_expr : spaces INT_LITERAL spaces
     '''
     p[0] = int(p[2])
 
-# macro mess
-def p_valid_macro(p):
+
+def p_valid_macro(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     valid_expr : spaces IDENTIFIER spaces
     '''
@@ -124,7 +129,7 @@ def p_valid_macro(p):
     p[0] = val
 
 
-def p_valid_defined(p):
+def p_valid_defined(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     valid_expr : spaces DEFINED spaces '(' spaces IDENTIFIER spaces ')' spaces
     '''
@@ -132,7 +137,7 @@ def p_valid_defined(p):
     p[0] =  p[6] in symtable.TABLE
 
 
-def p_valid_defined_no_paren(p):
+def p_valid_defined_no_paren(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     valid_expr : spaces DEFINED spaces IDENTIFIER spaces
     '''
@@ -141,7 +146,7 @@ def p_valid_defined_no_paren(p):
 
 
 
-def p_valid_macro_no_args(p):
+def p_valid_macro_no_args(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     valid_expr : spaces IDENTIFIER spaces '(' spaces ')' spaces
     '''
@@ -153,7 +158,7 @@ def p_valid_macro_no_args(p):
     p[0] = val
 
 
-def p_valid_macro_args(p):
+def p_valid_macro_args(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     valid_expr : spaces IDENTIFIER spaces valid_args spaces
     '''
@@ -185,13 +190,13 @@ def p_valid_macro_args(p):
     p[0] = val
 
 
-def p_valid_args(p):
+def p_valid_args(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     valid_args : '(' spaces valid_arg spaces  ')'
     '''
     p[0] = p[3]
 
-def p_valid_arg(p):
+def p_valid_arg(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     valid_arg :  valid_expr
     '''
@@ -199,7 +204,7 @@ def p_valid_arg(p):
 
 
 
-def p_valid_arg_commas(p):
+def p_valid_arg_commas(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     valid_arg : valid_arg spaces ',' spaces valid_arg spaces
     '''
@@ -207,181 +212,182 @@ def p_valid_arg_commas(p):
     p[0] = p[1] + p[5]
 
 
-def p_valid_parentheticals(p):
+def p_valid_parentheticals(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     valid_expr : spaces '(' spaces valid_expr spaces ')' spaces
     '''
     p[0] = p[4]
 
-def p_valid_add(p):
+def p_valid_add(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     valid_expr : valid_expr '+' valid_expr
     '''
 
     p[0] = p[1] + p[3]
 
-def p_valid_sub(p):
+def p_valid_sub(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     valid_expr : valid_expr '-' valid_expr
     '''
 
     p[0] = p[1] - p[3]
 
-def p_valid_mult(p):
+def p_valid_mult(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     valid_expr : valid_expr '*' valid_expr
     '''
 
     p[0] = p[1] * p[3]
 
-def p_valid_div(p):
+def p_valid_div(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     valid_expr : valid_expr '/' valid_expr
     '''
 
     p[0] = p[1] // p[3]
 
-def p_valid_mod(p):
+def p_valid_mod(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     valid_expr : valid_expr '%' valid_expr
     '''
 
     p[0] = p[1] % p[3]
 
-def p_valid_bit_not(p):
+def p_valid_bit_not(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     valid_expr : '~' valid_expr
     '''
     p[0] = ~p[2]
 
-def p_valid_bit_or(p):
+def p_valid_bit_or(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     valid_expr : valid_expr '|' valid_expr
     '''
 
     p[0] = p[1] | p[3]
 
-def p_valid_bit_and(p):
+def p_valid_bit_and(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     valid_expr : valid_expr '&' valid_expr
     '''
 
     p[0] = p[1] & p[3]
 
-def p_valid_bit_xor(p):
+def p_valid_bit_xor(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     valid_expr : valid_expr '^' valid_expr
     '''
 
     p[0] = p[1] ^ p[3]
 
-def p_valid_bit_lshift(p):
+def p_valid_bit_lshift(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     valid_expr : valid_expr L_SHIFT valid_expr
     '''
 
     p[0] = p[1] << p[3]
 
-def p_valid_bit_rshift(p):
+def p_valid_bit_rshift(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     valid_expr : valid_expr R_SHIFT valid_expr
     '''
 
     p[0] = p[1] >> p[3]
 
-def p_valid_logic_or(p):
+def p_valid_logic_or(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     valid_expr : valid_expr BOOL_OR valid_expr
     '''
 
     p[0] = bool(p[1] or p[3])
 
-def p_valid_logic_and(p):
+def p_valid_logic_and(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     valid_expr : valid_expr BOOL_AND valid_expr
     '''
 
     p[0] = bool(p[1] and p[3])
 
-def p_valid_logic_not(p):
+def p_valid_logic_not(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     valid_expr : spaces '!' spaces valid_expr
     '''
 
     p[0] = (not p[4] ) == True
 
-def p_valid_logic_lt(p):
+def p_valid_logic_lt(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     valid_expr : valid_expr '<' valid_expr
     '''
     p[0] = p[1] < p[3]
 
-def p_valid_logic_le(p):
+def p_valid_logic_le(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     valid_expr : valid_expr COMP_LTE valid_expr
     '''
     p[0] = p[1] <= p[3]
 
-def p_valid_logic_gt(p):
+def p_valid_logic_gt(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     valid_expr : valid_expr '>' valid_expr
     '''
     p[0] = p[1] > p[3]
 
-def p_valid_logic_ge(p):
+def p_valid_logic_ge(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     valid_expr : valid_expr COMP_GTE valid_expr
     '''
     p[0] = p[1] >= p[3]
 
-def p_valid_equal(p):
+def p_valid_equal(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     valid_expr : valid_expr COMP_EQU valid_expr
     '''
     p[0] = p[1]  == p[3]
 
-def p_valid_nequal(p):
+def p_valid_nequal(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     valid_expr : valid_expr COMP_NEQU valid_expr
     '''
     p[0] = p[1] != p[3]
 
-def p_valid_ternary(p):
+def p_valid_ternary(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     valid_expr : valid_expr spaces '?' spaces valid_expr ':' valid_expr
     '''
     p[0] = p[5] if p[1] else p[7]
 
 
-def p_if_expression(p):
+def p_if_expression(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     if_expression : PREPROCESSING_KEYWORD_IF WHITESPACE valid_expr
     """
     global if_count
     if_count += 1
+
     symtable.IF_STACK.append((if_count, p[3]))
     p[0] = ast.StringLiteralNode([f"// if expression result: { int(p[3]) }"])
 
 
 
-def p_no_space(p):
+def p_no_space(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     spaces :
     '''
 
     p[0] = None
 
-def p_spaces(p):
+def p_spaces(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     spaces : WHITESPACE spaces
     '''
 
     p[0] = ast.WhiteSpaceNode([p[1]])
 
-# TODO: make nodes instead that have the appropraite children and evaluated expression
+# TODO: make nodes instead that have the appropriate children and evaluated expression?
 ####### DONE
 
-def p_ifdef_expression(p):
+def p_ifdef_expression(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     ifdef_expression : PREPROCESSING_KEYWORD_IFDEF WHITESPACE IDENTIFIER
     """
@@ -390,9 +396,7 @@ def p_ifdef_expression(p):
     p[0] = ast.StringLiteralNode([f"// ifdef expression {p[3]}"])
 
 
-
-
-def p_ifndef_expression(p):
+def p_ifndef_expression(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     ifndef_expression : PREPROCESSING_KEYWORD_IFNDEF WHITESPACE IDENTIFIER
     """
@@ -401,7 +405,7 @@ def p_ifndef_expression(p):
     p[0] = ast.StringLiteralNode([f"// ifndef expression {p[3]}"])
 
 
-def p_else_expression(p):
+def p_else_expression(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     else_expression : PREPROCESSING_KEYWORD_ELSE
     """
@@ -409,7 +413,7 @@ def p_else_expression(p):
     p[0] = ast.StringLiteralNode([f"// else expression "])
 
 
-def p_endif_expression(p):
+def p_endif_expression(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     endif_expression : PREPROCESSING_KEYWORD_ENDIF
     """
@@ -417,21 +421,21 @@ def p_endif_expression(p):
     p[0] = ast.StringLiteralNode([f"// endif expression "])
 
 
-def p_define_expression_no_expansion(p):
+def p_define_expression_no_expansion(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     define_expression : PREPROCESSING_KEYWORD_DEFINE WHITESPACE IDENTIFIER
     """
     p[0] = symtable.MacroExpansion(p[3], [ast.IdentifierNode(["true"])])
 
 
-def p_define_expression_no_args(p):
+def p_define_expression_no_args(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     define_expression : PREPROCESSING_KEYWORD_DEFINE WHITESPACE IDENTIFIER WHITESPACE macro_expansion
     """
     p[0] = symtable.MacroExpansion(p[3], p[5])
 
 
-def p_define_expression_some_args(p):
+def p_define_expression_some_args(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     define_expression : PREPROCESSING_KEYWORD_DEFINE WHITESPACE IDENTIFIER '(' identifier_list ')'  maybe_space macro_expansion
     """
@@ -439,21 +443,21 @@ def p_define_expression_some_args(p):
     p[0] = symtable.MacroExpansion(p[3], p[8], args=p[5])
 
 
-def p_identifier_list_singleton(p):
+def p_identifier_list_singleton(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     identifier_list : IDENTIFIER
     """
     p[0] = [p[1]]
 
 
-def p_identifier_list_empty(p):
+def p_identifier_list_empty(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     identifier_list :
     """
     p[0] = []
 
 
-def p_identifier_list_multiple(p):
+def p_identifier_list_multiple(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     identifier_list : identifier_list ',' maybe_space IDENTIFIER
     """
@@ -461,21 +465,21 @@ def p_identifier_list_multiple(p):
     p[0].append(p[4])
 
 
-def p_maybe_whitespace_none(p):
+def p_maybe_whitespace_none(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     maybe_space :
     """
     p[0] = ast.WhiteSpaceNode([""])
 
 
-def p_maybe_whitespace_some(p):
+def p_maybe_whitespace_some(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     maybe_space : WHITESPACE
     """
     p[0] = ast.WhiteSpaceNode([p[1]])
 
 
-def p_include_expression_disambiguation(p):
+def p_include_expression_disambiguation(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     include_expression : include_expression_file
                        | include_expression_system
@@ -483,35 +487,35 @@ def p_include_expression_disambiguation(p):
     p[0] = p[1]
 
 
-def p_define_expansion(p):
+def p_define_expansion(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     macro_expansion : code_expressions
     """
     p[0] = p[1]
 
 
-def p_include_expression_file(p):
+def p_include_expression_file(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     include_expression_file : PREPROCESSING_KEYWORD_INCLUDE WHITESPACE STRING_LITERAL
     """
     p[0] = ast.PreprocessorIncludeNode([p[3]], False)
 
 
-def p_include_expression_system(p):
+def p_include_expression_system(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     include_expression_system : PREPROCESSING_KEYWORD_INCLUDE WHITESPACE SYSTEM_INCLUDE_LITERAL
     """
     p[0] = ast.PreprocessorIncludeNode([p[3]], True)
 
 
-def p_expressions_empty(p):
+def p_expressions_empty(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     code_expressions :
     """
     p[0] = []
 
 
-def p_expressions(p):
+def p_expressions(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     code_expressions : code_expressions code_expression
     """
@@ -519,14 +523,14 @@ def p_expressions(p):
     p[0].append(p[2])
 
 
-def p_expressions_to_single(p):
+def p_expressions_to_single(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     code_expressions : code_expression
     """
     p[0] = [p[1]]
 
 
-def p_identifier_call(p):
+def p_identifier_call(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     safe_code_expression : IDENTIFIER code_expression_parenthetical
     """
@@ -534,45 +538,45 @@ def p_identifier_call(p):
     p[0] = ast.IdentifierNode([p[1]], args=p[2])
 
 
-def p_safe_code_expression_to_parens(p):
+def p_safe_code_expression_to_parens(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     safe_code_expression : code_expression_parenthetical
     """
-    p[0] = ast.LinesNode([ast.ASCIILiteralNode('('),
+    p[0] = ast.LinesNode([ast.ASCIILiteralNode(['(']),
                           ast.LinesNode(p[1]),
-                          ast.ASCIILiteralNode(')')
+                          ast.ASCIILiteralNode([')'])
                          ])
 
 
-def p_code_expression_to_safe(p):
+def p_code_expression_to_safe(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     code_expression : safe_code_expression
     """
     p[0] = p[1]
 
 
-def p_statement_to_identifier(p):
+def p_statement_to_identifier(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     safe_code_expression : IDENTIFIER
     """
     p[0] = ast.IdentifierNode([p[1]])
 
 
-def p_expression_to_list_of_something(p):
+def p_expression_to_list_of_something(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     code_expression_parenthetical : '(' list_of_expressions ')'
     """
     p[0] = p[2]
 
 
-def p_whitespace_unsafe(p):
+def p_whitespace_unsafe(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     safe_code_expression : WHITESPACE
     """
     p[0] = ast.WhiteSpaceNode([p[1]])
 
 
-def p_expression_to_string_lit(p):
+def p_expression_to_string_lit(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     safe_code_expression : STRING_LITERAL
     """
@@ -580,21 +584,21 @@ def p_expression_to_string_lit(p):
 
 
 
-def p_expression_list_singleton(p):
+def p_expression_list_singleton(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     list_of_expressions : safe_code_expressions
     """
     p[0] = [ast.LinesNode(p[1])]
 
 
-def p_expression_list_empty(p):
+def p_expression_list_empty(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     list_of_expressions :
     """
     p[0] = []
 
 
-def p_expression_list_multiple(p):
+def p_expression_list_multiple(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     list_of_expressions : list_of_expressions ',' safe_code_expressions
     """
@@ -603,14 +607,14 @@ def p_expression_list_multiple(p):
 
 
 # don't  mind me, just duplicating code...ugh
-def p_safe_expressions_empty(p):
+def p_safe_expressions_empty(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     safe_code_expressions :
     """
     p[0] = []
 
 
-def p_safe_expressions(p):
+def p_safe_expressions(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     safe_code_expressions : safe_code_expressions safe_code_expression
     """
@@ -618,7 +622,7 @@ def p_safe_expressions(p):
     p[0].append(p[2])
 
 
-def p_safe_code_expressions_ascii_literal(p):
+def p_safe_code_expressions_ascii_literal(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     safe_code_expression : '<'
               | '>'
@@ -670,7 +674,7 @@ def p_statement_to_ascii_literal(p):
     p[0] = ast.ASCIILiteralNode(p[1])
 
 
-def p_statement_to_preprocessing_number(p):
+def p_statement_to_preprocessing_number(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     safe_code_expression : PREPROCESSING_NUMBER
     """
@@ -690,14 +694,13 @@ def p_statement_to_char(p):
 
 
 
-def p_error(p):
+def p_error(p: yacc.YaccProduction) -> yacc.YaccProduction:
     print(f"ERROR(line {p.lineno}): syntax error")
     print(p)
     raise symtable.PepperSyntaxError()
 
 
-
-def get_args():
+def get_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument('input_file',
                         type=argparse.FileType('r'),
@@ -707,17 +710,17 @@ def get_args():
     return parser.parse_args()
 
 
-def parse(source, debug_mode=False):
+def parse(source: str, debug_mode: bool=False) -> Node:
     if debug_mode:
         parser = yacc.yacc(debug=True)
     else:
         parser = yacc.yacc(debug=False, errorlog=yacc.NullLogger())
-    parse_tree = parser.parse(source, lexer=lexer)
+    parse_tree: Node = parser.parse(source, lexer=lexer)
 
     return parse_tree
 
 
-def main():
+def main() -> None:
     args = get_args()
 
     # source = "\n".join(args.input_file.readlines())

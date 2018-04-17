@@ -15,8 +15,10 @@ from pepper import __version__
 import os
 import pepper.symbol_table as symtable
 from pathlib import Path
+from typing import Optional
 
-def get_args():
+
+def get_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
 
     parser.add_argument('input_file', help="the input source file", type=argparse.FileType('r'))
@@ -44,7 +46,7 @@ def get_args():
     return parser.parse_args()
 
 
-def main(args=None):
+def main(args: Optional[argparse.Namespace]=None) -> None:
     if not args:
         args = get_args()
 

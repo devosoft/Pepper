@@ -24,6 +24,11 @@ class TestUnit():
                                  "got 0"],
                                 args=[])
 
+        testutils.assert_raises(macro.expand,
+                                symtable.PepperSyntaxError,
+                                ["Macro foo expects args, but was given none"],
+                                args=None)
+
         newmacro = symtable.MacroExpansion('otherfoo',
                                            [alpha, whitespace, plus, whitespace, omega],
                                            None)
@@ -89,6 +94,11 @@ class TestUnit():
                                 ["notfoo was given 0 arguments, but takes a minimum of 4"],
                                 [])
 
+        testutils.assert_raises(macro.expand,
+                                symtable.PepperSyntaxError,
+                                ["Macro notfoo invoked without args, but is variadic"],
+                                None)
+
     def test_macro_expansion_variadic(self):
         alpha = ast.IdentifierNode(["alpha"])
         omega = ast.IdentifierNode(["omega"])
@@ -103,3 +113,7 @@ class TestUnit():
 
         expansion = macro.expand(args=['1', '2', '3', '4', '5', '6', '7', '8', '9'])
         assert(expansion == "1 + 2 + 3, 4, 5, 6, 7, 8, 9")
+
+    def test_bare_node_explodes_on_preprocess(self):
+        n = symtable.Node('TestingNode', [])
+        testutils.assert_raises(n.preprocess, NotImplementedError, [])
