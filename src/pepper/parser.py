@@ -22,7 +22,7 @@ from pepper.lexer import tokens  # NOQA
 import pepper.symbol_table as symtable
 from pepper.evaluator import parse_macro
 from pepper.symbol_table import Node
-
+from typing import List
 # precedence according to
 # http://en.cppreference.com/w/c/language/operator_precedence
 
@@ -125,7 +125,7 @@ def p_valid_macro(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     val = symtable.TABLE.get(p[2], 0)
     if isinstance(val , symtable.MacroExpansion):
-        val = parse_macro(val.tokens, p.lineno)
+        val = parse_macro(val.tokens)
     p[0] = val
 
 
@@ -153,7 +153,7 @@ def p_valid_macro_no_args(p: yacc.YaccProduction) -> yacc.YaccProduction:
     val = symtable.TABLE.get(p[2], 0)
     if isinstance(val , symtable.MacroExpansion):
         val.expand()
-        val = parse_macro(val.tokens, p.lineno)
+        val = parse_macro(val.tokens)
         symtable.EXPANDED_MACRO = False
     p[0] = val
 
@@ -171,7 +171,7 @@ def p_valid_macro_args(p: yacc.YaccProduction) -> yacc.YaccProduction:
         expansion = val.expand(args)
 
 
-        old_tokens = val.tokens[:]
+        old_tokens: List['Node'] = val.tokens[:]
         new_tokens = []
 
         for token in old_tokens:
@@ -183,7 +183,7 @@ def p_valid_macro_args(p: yacc.YaccProduction) -> yacc.YaccProduction:
 
             new_tokens.append(token)
 
-        val = parse_macro(new_tokens, p.lineno)
+        val = parse_macro(new_tokens)
         symtable.EXPANDED_MACRO = False
 
 
@@ -365,7 +365,7 @@ def p_if_expression(p: yacc.YaccProduction) -> yacc.YaccProduction:
     global if_count
     if_count += 1
 
-    symtable.IF_STACK.append((if_count, p[3]))
+    symtable.IF_STACK.append((str(if_count), True))
     p[0] = ast.StringLiteralNode([f"// if expression result: { int(p[3]) }"])
 
 
@@ -649,7 +649,7 @@ def p_safe_code_expressions_ascii_literal(p: yacc.YaccProduction) -> yacc.YaccPr
 
 
 # distinction is ascii literals to preprocessor issues (2 character operators)
-def p_safe_code_expression_operator(p):
+def p_safe_code_expression_operator(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     safe_code_expression : COMP_LTE
                         |   COMP_GTE
@@ -664,7 +664,7 @@ def p_safe_code_expression_operator(p):
     p[0] = ast.OperatorNode([p[1]])
 
 
-def p_statement_to_ascii_literal(p):
+def p_statement_to_ascii_literal(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     code_expression :
               | ','
@@ -680,13 +680,13 @@ def p_statement_to_preprocessing_number(p: yacc.YaccProduction) -> yacc.YaccProd
     """
     p[0] = ast.PreprocessingNumberNode([p[1]])
 
-def p_statement_to_int(p):
+def p_statement_to_int(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     safe_code_expression : INT_LITERAL
     """
     p[0] = ast.PreprocessingNumberNode([p[1]])
 
-def p_statement_to_char(p):
+def p_statement_to_char(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     safe_code_expression : CHAR_LITERAL
     """

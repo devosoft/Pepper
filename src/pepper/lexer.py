@@ -84,7 +84,7 @@ def t_COMMENT_NO_WHITESPACE(t: lex.LexToken) -> lex.LexToken:
     pass
 
 
-def t_PREPROCESSING_KEYWORD_IFDEF(t):
+def t_PREPROCESSING_KEYWORD_IFDEF(t: lex.LexToken) -> lex.LexToken:
     r'\#ifdef\b'
     return t
 
@@ -183,12 +183,12 @@ def t_R_SHIFT(t: lex.LexToken) -> lex.LexToken:
     return t
 
 
-def t_CHAR_LITERAL(t):
+def t_CHAR_LITERAL(t: lex.LexToken) -> lex.LexToken:
     r"'(?:[^\\'] | \\.)'"
     return t
 
 
-def t_STRING_LITERAL(t):
+def t_STRING_LITERAL(t: lex.LexToken) -> lex.LexToken:
     r"""('((\\['tn])|[^'\\])*')|("((\\["tn])|[^"\\])*")"""
     return t
 

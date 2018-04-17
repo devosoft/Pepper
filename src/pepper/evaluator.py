@@ -13,10 +13,12 @@ This should not be used in isolation.
 
 import pepper.abstract_symbol_tree as ast
 import pepper.symbol_table as symtable
+from typing import Union, List
+from pepper.symbol_table import Node  # NOQA
 
 
-def validate(exp, line_no):
-    literal = None
+def validate(exp: 'Node') -> str:
+    literal = ""
     if isinstance(exp, ast.PreprocessingNumberNode):
         literal = exp.children[0]
     elif isinstance(exp, ast.StringLiteralNode):
@@ -31,13 +33,11 @@ def validate(exp, line_no):
             literal = 'or'
         else:
             literal = child
-    elif isinstance(exp, int) or isinstance(exp, bool):
-        literal = str(exp)
 
     return literal
 
 
-def parse_line(t):
+def parse_line(t: List['Node']) -> List['Node']:
     if isinstance(t[0], ast.LinesNode):
         return parse_lines(t[0])
     # while isinstance(t[0], ast.IdentifierNode):
@@ -49,12 +49,12 @@ def parse_line(t):
     return t
 
 
-def parse_lines(token):
+def parse_lines(token: 'Node') -> List[List['Node']]:
     return [parse_line([t]) for t in token.children]
 
 
-def unravel_list(exp):
-    parsing = []
+def unravel_list(exp: Union[List[List['Node']], List['Node']])-> List['Node']:
+    parsing: List['Node'] = []
     for tok in exp:
         while isinstance(tok, list):
             temp = tok.pop(0)
@@ -87,36 +87,7 @@ def unravel_list(exp):
     return parsing
 
 
-def parse_macro(tokens, line_no=0):
-    scalar_tokens = []
-    for token in tokens:
-        token = [token]
-        if isinstance(token[0], ast.LinesNode):
-            token = parse_lines(token[0])
-        while isinstance(token[0], ast.IdentifierNode):
-            if token[0].children[0] in symtable.TABLE:
-                token = symtable.TABLE[token[0].children[0]].tokens
-            else:
-                token = [0]
-
-        scalar_tokens.append(token)
-
-    evaluation = []
-
-    # no defined macros will accepted if not an integer type
-    for expr in scalar_tokens:
-        for exp in expr:
-            if isinstance(exp, list):
-                exp = unravel_list(exp)
-                exp = [validate(tok, line_no) for tok in exp
-                       if not isinstance(tok, ast.WhiteSpaceNode)]
-                evaluation.extend(exp)
-            elif exp == "(" or exp == ")":
-                evaluation.append(exp)
-            elif not isinstance(exp, ast.WhiteSpaceNode):
-                exp = validate(exp, line_no)
-                evaluation.append(exp)
-
+def clean_parathensis(evaluation: List[str]) -> None:
     OPERATORS = {'+', '-', '*', '/', 'and', 'or', '&', '|', '<<', '>>', '^'}
     i = 0
 
@@ -130,7 +101,6 @@ def parse_macro(tokens, line_no=0):
             i += 1
 
     i = 0
-
     while i + 2 < len(evaluation):
         found = False
         if evaluation[i] == '(' and evaluation[i+1] in OPERATORS and evaluation[i+2] == ')':
@@ -138,6 +108,8 @@ def parse_macro(tokens, line_no=0):
             evaluation.pop(i+1)
         i += 1
 
+
+def convert_to_python(evaluation: List[str]) -> None:
     # catch AND  && OR stuff
     bool_count = evaluation.count("or") + evaluation.count("and")
     if bool_count:
@@ -158,13 +130,47 @@ def parse_macro(tokens, line_no=0):
             start = i+1
         evaluation = new
 
+
+def parse_macro(tokens: List['Node']) -> int:
+    scalar_tokens: List[List['Node']] = []
+    for curr in tokens:
+        token: List['Node'] = [curr]
+        if isinstance(token[0], ast.LinesNode):
+            token = parse_lines(token[0])
+        while isinstance(token[0], ast.IdentifierNode):
+            if token[0].children[0] in symtable.TABLE:
+                token = symtable.TABLE[token[0].children[0]].tokens
+            else:
+                token = [ast.PreprocessingNumberNode(["0"])]
+
+        scalar_tokens.append(token)
+
+    evaluation = []
+
+    # no defined macros will accepted if not an integer type
+    for expr in scalar_tokens:
+        for exp in expr:
+            if isinstance(exp, list):
+                exp = unravel_list(exp)
+                exp = [validate(tok) for tok in exp
+                       if not isinstance(tok, ast.WhiteSpaceNode)]
+                evaluation.extend(exp)
+            elif exp == "(" or exp == ")":
+                evaluation.append(exp)
+            elif not isinstance(exp, ast.WhiteSpaceNode):
+                exp = validate(exp)
+                evaluation.append(exp)
+
+    clean_parathensis(evaluation)
+    convert_to_python(evaluation)
+
+    final = 0
     try:
         final = eval(" ".join(evaluation))
     except SyntaxError:
         print(f"ERROR: syntax error while evaluating Macro Call")
         raise symtable.PepperSyntaxError()
 
-    if isinstance(final, float):
-        final = int(final)
+    final = int(final)
 
     return final

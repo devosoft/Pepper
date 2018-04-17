@@ -124,7 +124,10 @@ class TestUnit:
                                             'function_like_macro_2.cpp.preprocessed.cc')
 
     def test_basic_function_with_defaults_refactored(self, tmpdir):
-        preprocess_and_compare_functionally('file_include.cpp', 'preprocessed_file_include.cpp')
+        preprocess_and_compare("file_include.cpp",
+                               "preprocessed_file_include.cpp",
+                               tmpdir,
+                               ['SomeFile.h', 'SomeOtherFile.h'])
 
     def test_ifdef_handling(self, tmpdir):
         preprocess_and_compare_functionally('ifdef.cpp', 'ifdef.cpp.preprocessed.cc')

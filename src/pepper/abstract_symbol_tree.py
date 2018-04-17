@@ -144,7 +144,7 @@ class ASCIILiteralNode(PrimitiveNode):
 
 class OperatorNode(PrimitiveNode):
 
-    def __init__(self, children):
+    def __init__(self, children: List[str] = []) -> None:
         super(OperatorNode, self).__init__('2CharOperator', children)
 
 class StringLiteralNode(PrimitiveNode):
@@ -160,5 +160,5 @@ class PreprocessingNumberNode(PrimitiveNode):
 
 
 # Predefined arguments
-symtable.TABLE['true'] = symtable.MacroExpansion('true', [PreprocessingNumberNode('1')])
-symtable.TABLE['false'] = symtable.MacroExpansion('false', [PreprocessingNumberNode('0')])
+symtable.TABLE['true'] = symtable.MacroExpansion('true', [PreprocessingNumberNode(['1'])])
+symtable.TABLE['false'] = symtable.MacroExpansion('false', [PreprocessingNumberNode(['0'])])

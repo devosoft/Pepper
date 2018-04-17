@@ -21,7 +21,7 @@ from typing import (
 #: The stack of files we're reading from
 FILE_STACK: List[TextIO] = []
 #: The stack of ifdef/ifndef/if control structures we're processing
-IF_STACK = []
+IF_STACK: List[Tuple[str, bool]] = []
 #: The list of paths to search when doing a system include
 SYSTEM_INCLUDE_PATHS: List[str] = []
 EXPANDED_MACRO = False
@@ -84,7 +84,7 @@ class MacroExpansion():
     def __init__(self, name: str, expansion: List[Node], args: Optional[List[str]] = None) -> None:
         self.name = name
         self.expansion = ""
-        self.tokens = []
+        self.tokens: List[Node] = []
         self.args = args
         self.variadic = False
 
