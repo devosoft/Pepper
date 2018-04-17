@@ -19,7 +19,7 @@ def validate(exp, line_no):
     literal = None
     if isinstance(exp, ast.PreprocessingNumberNode):
         literal = exp.children[0]
-    elif isinstance(exp , ast.StringLiteralNode):
+    elif isinstance(exp, ast.StringLiteralNode):
         literal = str(ord(exp.children[0][1]))
     elif isinstance(exp, ast.ASCIILiteralNode):
         literal = exp.children[0]

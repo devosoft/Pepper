@@ -118,11 +118,12 @@ def t_PREPROCESSING_KEYWORD_DEFINE(t: lex.LexToken) -> lex.LexToken:
     return t
 
 
-def t_DEFINED(t):
+def t_DEFINED(t: lex.LexToken) -> lex.LexToken:
     r'defined'
     return t
 
-def t_SYSTEM_INCLUDE_LITERAL(t):
+
+def t_SYSTEM_INCLUDE_LITERAL(t: lex.LexToken) -> lex.LexToken:
     r"""<[^\'\"<>]*?>"""
     return t
 
@@ -132,52 +133,52 @@ def t_IDENTIFIER(t: lex.LexToken) -> lex.LexToken:
     return t
 
 
-def t_INT_LITERAL(t):
+def t_INT_LITERAL(t: lex.LexToken) -> lex.LexToken:
     r'[0-9]+'
     return t
 
 
-def t_PREPROCESSING_NUMBER(t):
+def t_PREPROCESSING_NUMBER(t: lex.LexToken) -> lex.LexToken:
     r'\.?[0-9]([0-9]|(e\+)|(e\-)|(E\+)|(E\-)|(p\+)|(p\-)|(P\+)|(P\-)|[a-zA-Z])*'
     return t
 
 
-def t_COMP_LTE(t):
+def t_COMP_LTE(t: lex.LexToken) -> lex.LexToken:
     r"<="
     return t
 
 
-def t_COMP_GTE(t):
+def t_COMP_GTE(t: lex.LexToken) -> lex.LexToken:
     r">="
     return t
 
 
-def t_COMP_EQU(t):
+def t_COMP_EQU(t: lex.LexToken) -> lex.LexToken:
     r"=="
     return t
 
 
-def t_COMP_NEQU(t):
+def t_COMP_NEQU(t: lex.LexToken) -> lex.LexToken:
     r"!="
     return t
 
 
-def t_BOOL_AND(t):
+def t_BOOL_AND(t: lex.LexToken) -> lex.LexToken:
     r"&&"
     return t
 
 
-def t_BOOL_OR(t):
+def t_BOOL_OR(t: lex.LexToken) -> lex.LexToken:
     r"\|\|"
     return t
 
 
-def t_L_SHIFT(t):
+def t_L_SHIFT(t: lex.LexToken) -> lex.LexToken:
     r"<<"
     return t
 
 
-def t_R_SHIFT(t):
+def t_R_SHIFT(t: lex.LexToken) -> lex.LexToken:
     r">>"
     return t
 
