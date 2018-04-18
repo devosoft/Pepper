@@ -84,7 +84,7 @@ def reset_state():
     symtable.SYSTEM_INCLUDE_PATHS = []
     symtable.EXPANDED_MACRO = False
     symtable.TRIGGER_INTERNAL_ERROR = False
-
+    symtable.IF_COUNT = 0
 
 def preprocess_and_compare(source, reference, tmpdir, supportfiles=[], optional_args=[]):
     test_dir = tmpdir.mkdir('preprocessor')

@@ -17,7 +17,7 @@ from typing import Union, List, cast
 from pepper.symbol_table import Node  # NOQA
 
 
-def validate(exp: Union['Node']) -> str:
+def validate(exp: Node) -> str:
     literal = ""
     if isinstance(exp, ast.PreprocessingNumberNode) or \
             isinstance(exp, ast.ASCIILiteralNode) or isinstance(exp, ast.OperatorNode):
@@ -148,7 +148,6 @@ def convert_to_python(evaluation: List[str]) -> List[str]:
             start = i+1
         evaluation = new
 
-    print(evaluation)
     # catch ternary's
     if '?' in evaluation:
         question = evaluation.index('?')

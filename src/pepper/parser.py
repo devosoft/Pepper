@@ -23,6 +23,7 @@ import pepper.symbol_table as symtable
 from pepper.evaluator import parse_lines, parse_macro
 from pepper.symbol_table import Node
 from typing import List, cast
+
 # precedence according to
 # http://en.cppreference.com/w/c/language/operator_precedence
 
@@ -37,8 +38,6 @@ precedence = (('left', 'BOOL_OR'), ('left', 'BOOL_AND'),
               ('left', '*', '/', '%'),
               ('right', '!', '~'))
 
-global if_count
-if_count = 0
 
 def p_program(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
@@ -145,7 +144,6 @@ def p_valid_defined_no_paren(p: yacc.YaccProduction) -> yacc.YaccProduction:
     p[0] =  p[4] in symtable.TABLE
 
 
-
 def p_valid_macro_no_args(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     valid_expr : spaces IDENTIFIER spaces '(' spaces ')' spaces
@@ -201,12 +199,12 @@ def p_valid_args(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     p[0] = p[3]
 
+
 def p_valid_arg(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     valid_arg :  valid_expr
     '''
     p[0]  = [ast.PreprocessingNumberNode([str(int(p[1]))])]
-
 
 
 def p_valid_arg_commas(p: yacc.YaccProduction) -> yacc.YaccProduction:
@@ -367,10 +365,9 @@ def p_if_expression(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     if_expression : PREPROCESSING_KEYWORD_IF WHITESPACE valid_expr
     """
-    global if_count
-    if_count += 1
+    symtable.IF_COUNT += 1
 
-    symtable.IF_STACK.append((str(if_count), True))
+    symtable.IF_STACK.append((str(symtable.IF_COUNT), True))
     p[0] = ast.StringLiteralNode([f"// if expression result: { int(p[3]) }"])
 
 
@@ -396,7 +393,7 @@ def p_ifdef_expression(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     ifdef_expression : PREPROCESSING_KEYWORD_IFDEF WHITESPACE IDENTIFIER
     """
-    symtable.IF_STACK.append((p[3], p[3] in symtable.TABLE.keys()))
+    symtable.IF_STACK.append((p[3], p[3] in symtable.TABLE))
 
     p[0] = ast.StringLiteralNode([f"// ifdef expression {p[3]}"])
 
@@ -405,7 +402,7 @@ def p_ifndef_expression(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     ifndef_expression : PREPROCESSING_KEYWORD_IFNDEF WHITESPACE IDENTIFIER
     """
-    symtable.IF_STACK.append((p[3], p[3] not in symtable.TABLE.keys()))
+    symtable.IF_STACK.append((p[3], p[3] not in symtable.TABLE))
 
     p[0] = ast.StringLiteralNode([f"// ifndef expression {p[3]}"])
 
