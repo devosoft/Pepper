@@ -102,8 +102,8 @@ def p_include_expression(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     p[0] = p[1]
 
-########### IF DEF EXCLUSITIVITEY
 
+########### IF DEF EXCLUSITIVITEY
 def p_valid_char(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     valid_expr : spaces CHAR_LITERAL spaces
@@ -221,12 +221,14 @@ def p_valid_parentheticals(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     p[0] = p[4]
 
+
 def p_valid_add(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     valid_expr : valid_expr '+' valid_expr
     '''
 
     p[0] = p[1] + p[3]
+
 
 def p_valid_sub(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
@@ -235,12 +237,14 @@ def p_valid_sub(p: yacc.YaccProduction) -> yacc.YaccProduction:
 
     p[0] = p[1] - p[3]
 
+
 def p_valid_mult(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     valid_expr : valid_expr '*' valid_expr
     '''
 
     p[0] = p[1] * p[3]
+
 
 def p_valid_div(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
@@ -249,6 +253,7 @@ def p_valid_div(p: yacc.YaccProduction) -> yacc.YaccProduction:
 
     p[0] = p[1] // p[3]
 
+
 def p_valid_mod(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     valid_expr : valid_expr '%' valid_expr
@@ -256,11 +261,13 @@ def p_valid_mod(p: yacc.YaccProduction) -> yacc.YaccProduction:
 
     p[0] = p[1] % p[3]
 
+
 def p_valid_bit_not(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     valid_expr : '~' valid_expr
     '''
     p[0] = ~p[2]
+
 
 def p_valid_bit_or(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
@@ -269,12 +276,14 @@ def p_valid_bit_or(p: yacc.YaccProduction) -> yacc.YaccProduction:
 
     p[0] = p[1] | p[3]
 
+
 def p_valid_bit_and(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     valid_expr : valid_expr '&' valid_expr
     '''
 
     p[0] = p[1] & p[3]
+
 
 def p_valid_bit_xor(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
@@ -283,12 +292,14 @@ def p_valid_bit_xor(p: yacc.YaccProduction) -> yacc.YaccProduction:
 
     p[0] = p[1] ^ p[3]
 
+
 def p_valid_bit_lshift(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     valid_expr : valid_expr L_SHIFT valid_expr
     '''
 
     p[0] = p[1] << p[3]
+
 
 def p_valid_bit_rshift(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
@@ -297,12 +308,14 @@ def p_valid_bit_rshift(p: yacc.YaccProduction) -> yacc.YaccProduction:
 
     p[0] = p[1] >> p[3]
 
+
 def p_valid_logic_or(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     valid_expr : valid_expr BOOL_OR valid_expr
     '''
 
     p[0] = bool(p[1] or p[3])
+
 
 def p_valid_logic_and(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
@@ -311,6 +324,7 @@ def p_valid_logic_and(p: yacc.YaccProduction) -> yacc.YaccProduction:
 
     p[0] = bool(p[1] and p[3])
 
+
 def p_valid_logic_not(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     valid_expr : spaces '!' spaces valid_expr
@@ -318,11 +332,13 @@ def p_valid_logic_not(p: yacc.YaccProduction) -> yacc.YaccProduction:
 
     p[0] = (not p[4] ) == True
 
+
 def p_valid_logic_lt(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     valid_expr : valid_expr '<' valid_expr
     '''
     p[0] = p[1] < p[3]
+
 
 def p_valid_logic_le(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
@@ -330,11 +346,13 @@ def p_valid_logic_le(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     p[0] = p[1] <= p[3]
 
+
 def p_valid_logic_gt(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     valid_expr : valid_expr '>' valid_expr
     '''
     p[0] = p[1] > p[3]
+
 
 def p_valid_logic_ge(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
@@ -342,17 +360,20 @@ def p_valid_logic_ge(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     p[0] = p[1] >= p[3]
 
+
 def p_valid_equal(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     valid_expr : valid_expr COMP_EQU valid_expr
     '''
     p[0] = p[1]  == p[3]
 
+
 def p_valid_nequal(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     valid_expr : valid_expr COMP_NEQU valid_expr
     '''
     p[0] = p[1] != p[3]
+
 
 def p_valid_ternary(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
@@ -371,13 +392,13 @@ def p_if_expression(p: yacc.YaccProduction) -> yacc.YaccProduction:
     p[0] = ast.StringLiteralNode([f"// if expression result: { int(p[3]) }"])
 
 
-
 def p_no_space(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
     spaces :
     '''
 
     p[0] = None
+
 
 def p_spaces(p: yacc.YaccProduction) -> yacc.YaccProduction:
     '''
@@ -388,6 +409,7 @@ def p_spaces(p: yacc.YaccProduction) -> yacc.YaccProduction:
 
 # TODO: make nodes instead that have the appropriate children and evaluated expression?
 ####### DONE
+
 
 def p_ifdef_expression(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
@@ -682,18 +704,19 @@ def p_statement_to_preprocessing_number(p: yacc.YaccProduction) -> yacc.YaccProd
     """
     p[0] = ast.PreprocessingNumberNode([p[1]])
 
+
 def p_statement_to_int(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     safe_code_expression : INT_LITERAL
     """
     p[0] = ast.PreprocessingNumberNode([p[1]])
 
+
 def p_statement_to_char(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     safe_code_expression : CHAR_LITERAL
     """
     p[0] = ast.StringLiteralNode([p[1]])
-
 
 
 def p_error(p: yacc.YaccProduction) -> yacc.YaccProduction:
