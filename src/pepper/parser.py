@@ -20,9 +20,9 @@ import ply.yacc as yacc
 from pepper.lexer import lexer
 from pepper.lexer import tokens  # NOQA
 import pepper.symbol_table as symtable
-from pepper.evaluator import parse_macro
+from pepper.evaluator import parse_lines, parse_macro
 from pepper.symbol_table import Node
-from typing import List
+from typing import List, cast
 # precedence according to
 # http://en.cppreference.com/w/c/language/operator_precedence
 
@@ -170,20 +170,25 @@ def p_valid_macro_args(p: yacc.YaccProduction) -> yacc.YaccProduction:
         # error check argument count
         expansion = val.expand(args)
 
-
-        old_tokens: List['Node'] = val.tokens[:]
+        old_tokens: List[object] = [parse_lines(val.tokens[i]) if isinstance(val.tokens[i], ast.LinesNode) else
+                                    val.tokens[i] for i in range(len(val.tokens)) ]
         new_tokens = []
 
-        for token in old_tokens:
+        while old_tokens:
+            token = old_tokens.pop(0)
+            while isinstance(token, list):
+                old_tokens = token + old_tokens
+                token = old_tokens.pop(0)
             if isinstance(token ,ast.IdentifierNode):
-                if token.children[0] in val.args:
-                    index = val.args.index(token.children[0])
-                    token = arg_tokens[index]
+                if val.args:
+                    if token.children[0] in val.args:
+                        index = val.args.index(cast(str, token.children[0]))
+                        token = arg_tokens[index]
 
 
             new_tokens.append(token)
 
-        val = parse_macro(new_tokens)
+        val = parse_macro(cast(List['Node'],new_tokens))
         symtable.EXPANDED_MACRO = False
 
 

@@ -13,33 +13,31 @@ This should not be used in isolation.
 
 import pepper.abstract_symbol_tree as ast
 import pepper.symbol_table as symtable
-from typing import Union, List
+from typing import Union, List, cast
 from pepper.symbol_table import Node  # NOQA
 
 
-def validate(exp: 'Node') -> str:
+def validate(exp: Union['Node']) -> str:
     literal = ""
-    if isinstance(exp, ast.PreprocessingNumberNode):
-        literal = exp.children[0]
+    if isinstance(exp, ast.PreprocessingNumberNode) or \
+            isinstance(exp, ast.ASCIILiteralNode) or isinstance(exp, ast.OperatorNode):
+        if isinstance(exp.children[0], str):
+            literal = exp.children[0]
+            if literal == '&&':
+                literal = 'and'
+            elif literal == '||':
+                literal = 'or'
+
     elif isinstance(exp, ast.StringLiteralNode):
-        literal = str(ord(exp.children[0][1]))
-    elif isinstance(exp, ast.ASCIILiteralNode):
-        literal = exp.children[0]
-    elif isinstance(exp, ast.OperatorNode):
-        child = exp.children[0]
-        if child == '&&':
-            literal = 'and'
-        elif child == '||':
-            literal = 'or'
-        else:
-            literal = child
+        if isinstance(exp.children[0], str):
+            literal = str(ord(exp.children[0][1]))
 
     return literal
 
 
 def parse_line(t: List['Node']) -> List['Node']:
     if isinstance(t[0], ast.LinesNode):
-        return parse_lines(t[0])
+        return cast(List['Node'], parse_lines(t[0]))
     # while isinstance(t[0], ast.IdentifierNode):
     #    if t[0].children[0] in symtable.TABLE:
     #        t = symtable.TABLE[t[0].children[0]].tokens
@@ -50,26 +48,27 @@ def parse_line(t: List['Node']) -> List['Node']:
 
 
 def parse_lines(token: 'Node') -> List[List['Node']]:
-    return [parse_line([t]) for t in token.children]
+    return [parse_line([cast('Node', t)]) for t in token.children]
 
 
-def unravel_list(exp: Union[List[List['Node']], List['Node']])-> List['Node']:
+def unravel_list(exp: Union[List[List['Node']], List['Node'], 'Node'])-> List['Node']:
     parsing: List['Node'] = []
-    for tok in exp:
-        while isinstance(tok, list):
-            temp = tok.pop(0)
-            if not tok and not isinstance(temp, list):
-                tok = temp
-            elif not tok:
-                parsing.append(ast.ASCIILiteralNode(['(']))
-                tok = temp
-                parsing.append(ast.ASCIILiteralNode([')']))
-            else:
-                parsing.append(ast.ASCIILiteralNode(['(']))
-                parsing.extend(unravel_list(temp))
-                parsing.append(ast.ASCIILiteralNode([')']))
+    if isinstance(exp, list):
+        for tok in exp:
+            while isinstance(tok, list):
+                temp = tok.pop(0)
+                if not tok and not isinstance(temp, list):
+                    tok = temp
+                elif not tok:
+                    parsing.append(ast.ASCIILiteralNode(['(']))
+                    tok = temp
+                    parsing.append(ast.ASCIILiteralNode([')']))
+                else:
+                    parsing.append(ast.ASCIILiteralNode(['(']))
+                    parsing.extend(unravel_list(temp))
+                    parsing.append(ast.ASCIILiteralNode([')']))
 
-        parsing.append(tok)
+            parsing.append(tok)
 
     i = 0
     while i + 2 < len(parsing):
@@ -85,6 +84,25 @@ def unravel_list(exp: Union[List[List['Node']], List['Node']])-> List['Node']:
             i += 1
 
     return parsing
+
+
+def convert_nodes_to_expr(scalar_tokens: List[List['Node']]) -> List[str]:
+    evaluation = []
+
+    for expr in scalar_tokens:
+        for exp in expr:
+            if isinstance(exp, list):
+                exp = unravel_list(exp)
+                temp = [validate(t) for t in exp if not isinstance(t, ast.WhiteSpaceNode)
+                        and isinstance(t, Node)]
+                evaluation.extend(temp)
+            elif not isinstance(exp, ast.WhiteSpaceNode):
+                evaluation.append(validate(exp))
+
+    clean_parathensis(evaluation)
+    evaluation = convert_to_python(evaluation)
+
+    return evaluation
 
 
 def clean_parathensis(evaluation: List[str]) -> None:
@@ -109,8 +127,8 @@ def clean_parathensis(evaluation: List[str]) -> None:
         i += 1
 
 
-def convert_to_python(evaluation: List[str]) -> None:
-    # catch AND  && OR stuff
+def convert_to_python(evaluation: List[str]) -> List[str]:
+    # catch AND && OR stuff
     bool_count = evaluation.count("or") + evaluation.count("and")
     if bool_count:
         booleans = [(i, tok) for i, tok in enumerate(evaluation) if tok == "and" or tok == "or"]
@@ -130,39 +148,34 @@ def convert_to_python(evaluation: List[str]) -> None:
             start = i+1
         evaluation = new
 
+    print(evaluation)
+    # catch ternary's
+    if '?' in evaluation:
+        question = evaluation.index('?')
+        expr = evaluation[:question]
+        colon = evaluation.index(':')
+        if_true = evaluation[question + 1:colon]
+        if_false = evaluation[colon+1:]
+        evaluation = if_true + ["if"] + expr + ["else"] + if_false
+
+    return evaluation
+
 
 def parse_macro(tokens: List['Node']) -> int:
     scalar_tokens: List[List['Node']] = []
     for curr in tokens:
         token: List['Node'] = [curr]
         if isinstance(token[0], ast.LinesNode):
-            token = parse_lines(token[0])
+            token = cast(List['Node'], parse_lines(token[0]))
         while isinstance(token[0], ast.IdentifierNode):
             if token[0].children[0] in symtable.TABLE:
-                token = symtable.TABLE[token[0].children[0]].tokens
+                token = symtable.TABLE[cast(str, token[0].children[0])].tokens
             else:
                 token = [ast.PreprocessingNumberNode(["0"])]
 
         scalar_tokens.append(token)
 
-    evaluation = []
-
-    # no defined macros will accepted if not an integer type
-    for expr in scalar_tokens:
-        for exp in expr:
-            if isinstance(exp, list):
-                exp = unravel_list(exp)
-                exp = [validate(tok) for tok in exp
-                       if not isinstance(tok, ast.WhiteSpaceNode)]
-                evaluation.extend(exp)
-            elif exp == "(" or exp == ")":
-                evaluation.append(exp)
-            elif not isinstance(exp, ast.WhiteSpaceNode):
-                exp = validate(exp)
-                evaluation.append(exp)
-
-    clean_parathensis(evaluation)
-    convert_to_python(evaluation)
+    evaluation = convert_nodes_to_expr(scalar_tokens)
 
     final = 0
     try:

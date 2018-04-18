@@ -7,7 +7,7 @@
 #define M7 0 || ('a' - 97 + 1) || 1
 #define M8 'a' == 97
 #define M9(a,b) a / b
-
+#define M10(a, b, c, d) a+b > c+d? a+c : b + d
 #if M1 - M1 + 1
 "testing call M1 - M1 + 1";
 #endif
@@ -38,4 +38,8 @@
 
 #if M9(3,2)
 "testing call M9, evaluating to 3 / 2 ";
+#endif
+
+#if M10(0, 1, 0 + 1 , 2)
+"testing call M10 with args 0, 1, 1, 2"
 #endif
