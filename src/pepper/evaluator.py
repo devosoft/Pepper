@@ -16,6 +16,8 @@ import pepper.symbol_table as symtable
 from typing import Union, List, cast
 from pepper.symbol_table import Node  # NOQA
 
+Child = Union[str, Node]
+
 
 def validate(exp: Node) -> str:
     literal = ""
@@ -35,9 +37,10 @@ def validate(exp: Node) -> str:
     return literal
 
 
-def parse_line(t: List['Node']) -> List['Node']:
+def parse_line(t: List[Child]) -> List[Child]:
     if isinstance(t[0], ast.LinesNode):
-        return cast(List['Node'], parse_lines(t[0]))
+
+        return parse_lines(t[0])
     # while isinstance(t[0], ast.IdentifierNode):
     #    if t[0].children[0] in symtable.TABLE:
     #        t = symtable.TABLE[t[0].children[0]].tokens
@@ -47,11 +50,16 @@ def parse_line(t: List['Node']) -> List['Node']:
     return t
 
 
-def parse_lines(token: 'Node') -> List[List['Node']]:
-    return [parse_line([cast('Node', t)]) for t in token.children]
+def parse_lines(token: Node) -> List[Child]:
+    temp = []
+    for t in token.children:
+        tok = parse_line([t])
+        temp.extend(tok)
+
+    return temp
 
 
-def unravel_list(exp: Union[List[List['Node']], List['Node'], 'Node'])-> List['Node']:
+def unravel_list(exp: Union[List[List[Node]], List[Node], Node])-> List[Node]:
     parsing: List['Node'] = []
     if isinstance(exp, list):
         for tok in exp:
@@ -166,6 +174,7 @@ def parse_macro(tokens: List['Node']) -> int:
         token: List['Node'] = [curr]
         if isinstance(token[0], ast.LinesNode):
             token = cast(List['Node'], parse_lines(token[0]))
+            print(token)
         while isinstance(token[0], ast.IdentifierNode):
             if token[0].children[0] in symtable.TABLE:
                 token = symtable.TABLE[cast(str, token[0].children[0])].tokens

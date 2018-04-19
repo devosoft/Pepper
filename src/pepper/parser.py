@@ -171,7 +171,6 @@ def p_valid_macro_args(p: yacc.YaccProduction) -> yacc.YaccProduction:
         old_tokens: List[object] = [parse_lines(val.tokens[i]) if isinstance(val.tokens[i], ast.LinesNode) else
                                     val.tokens[i] for i in range(len(val.tokens)) ]
         new_tokens = []
-
         while old_tokens:
             token = old_tokens.pop(0)
             while isinstance(token, list):
