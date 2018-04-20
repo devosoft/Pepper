@@ -60,7 +60,7 @@ def parse_lines(token: Node) -> List[Child]:
 
 
 def unravel_list(exp: Union[List[List[Node]], List[Node], Node])-> List[Node]:
-    parsing: List['Node'] = []
+    parsing: List[Node] = []
     if isinstance(exp, list):
         for tok in exp:
             while isinstance(tok, list):
@@ -94,7 +94,7 @@ def unravel_list(exp: Union[List[List[Node]], List[Node], Node])-> List[Node]:
     return parsing
 
 
-def convert_nodes_to_expr(scalar_tokens: List[List['Node']]) -> List[str]:
+def convert_nodes_to_expr(scalar_tokens: List[List[Node]]) -> List[str]:
     evaluation = []
 
     for expr in scalar_tokens:
@@ -168,13 +168,12 @@ def convert_to_python(evaluation: List[str]) -> List[str]:
     return evaluation
 
 
-def parse_macro(tokens: List['Node']) -> int:
-    scalar_tokens: List[List['Node']] = []
+def parse_macro(tokens: List[Node]) -> int:
+    scalar_tokens: List[List[Node]] = []
     for curr in tokens:
-        token: List['Node'] = [curr]
+        token: List[Node] = [curr]
         if isinstance(token[0], ast.LinesNode):
-            token = cast(List['Node'], parse_lines(token[0]))
-            print(token)
+            token = cast(List[Node], parse_lines(token[0]))
         while isinstance(token[0], ast.IdentifierNode):
             if token[0].children[0] in symtable.TABLE:
                 token = symtable.TABLE[cast(str, token[0].children[0])].tokens
