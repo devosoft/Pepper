@@ -18,10 +18,10 @@ import argparse
 import pepper.symbol_table as symtable
 from typing import List, Union
 
-DEFAULT_LITERALS = ['+', '-', '*', '/', '(', ')',
-                    '=', ',', '{', '}', '[', ']',
+DEFAULT_LITERALS = ['+', '-', '*', '/', '|', '&', '(',
+                    ')', '=', ',', '{', '}', '[', ']',
                     '.', ';', '!', '<', '>', ':', '~',
-                    '@', '#', '&', "'", '%', "?"]
+                    '^', '@', '#', '&', "'", '%', "?", "\\"]
 
 
 literals = DEFAULT_LITERALS
@@ -46,8 +46,19 @@ tokens = [
     'IDENTIFIER',
     'NEWLINE',
     'OTHER',
+    'INT_LITERAL',
     'PREPROCESSING_NUMBER',
     'PUNCTUATOR',
+    'COMP_LTE',
+    'COMP_GTE',
+    'COMP_EQU',
+    'COMP_NEQU',
+    'BOOL_AND',
+    'BOOL_OR',
+    'L_SHIFT',
+    'R_SHIFT',
+    'DEFINED',
+    'CHAR_LITERAL',
     # 'SKIPPED_LINE',
     'STRING_LITERAL',
     'WHITESPACE',
@@ -90,7 +101,7 @@ def t_PREPROCESSING_KEYWORD_ENDIF(t: lex.LexToken) -> lex.LexToken:
 
 def t_PREPROCESSING_KEYWORD_IF(t: lex.LexToken) -> lex.LexToken:
     r'\#if\b'
-
+    return t
 
 def t_PREPROCESSING_KEYWORD_ELSE(t: lex.LexToken) -> lex.LexToken:
     r'\#else\b'
@@ -107,6 +118,11 @@ def t_PREPROCESSING_KEYWORD_DEFINE(t: lex.LexToken) -> lex.LexToken:
     return t
 
 
+def t_DEFINED(t: lex.LexToken) -> lex.LexToken:
+    r'defined'
+    return t
+
+
 def t_SYSTEM_INCLUDE_LITERAL(t: lex.LexToken) -> lex.LexToken:
     r"""<[^\'\"<>]*?>"""
     return t
@@ -117,8 +133,58 @@ def t_IDENTIFIER(t: lex.LexToken) -> lex.LexToken:
     return t
 
 
+def t_INT_LITERAL(t: lex.LexToken) -> lex.LexToken:
+    r'[0-9]+'
+    return t
+
+
 def t_PREPROCESSING_NUMBER(t: lex.LexToken) -> lex.LexToken:
     r'\.?[0-9]([0-9]|(e\+)|(e\-)|(E\+)|(E\-)|(p\+)|(p\-)|(P\+)|(P\-)|[a-zA-Z])*'
+    return t
+
+
+def t_COMP_LTE(t: lex.LexToken) -> lex.LexToken:
+    r"<="
+    return t
+
+
+def t_COMP_GTE(t: lex.LexToken) -> lex.LexToken:
+    r">="
+    return t
+
+
+def t_COMP_EQU(t: lex.LexToken) -> lex.LexToken:
+    r"=="
+    return t
+
+
+def t_COMP_NEQU(t: lex.LexToken) -> lex.LexToken:
+    r"!="
+    return t
+
+
+def t_BOOL_AND(t: lex.LexToken) -> lex.LexToken:
+    r"&&"
+    return t
+
+
+def t_BOOL_OR(t: lex.LexToken) -> lex.LexToken:
+    r"\|\|"
+    return t
+
+
+def t_L_SHIFT(t: lex.LexToken) -> lex.LexToken:
+    r"<<"
+    return t
+
+
+def t_R_SHIFT(t: lex.LexToken) -> lex.LexToken:
+    r">>"
+    return t
+
+
+def t_CHAR_LITERAL(t: lex.LexToken) -> lex.LexToken:
+    r"'(?:[^\\'] | \\.)'"
     return t
 
 

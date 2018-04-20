@@ -62,7 +62,7 @@ class PreprocessorIncludeNode(Node):
         "This will be a lie for a while. I'll have to fix it later."
 
         if lines:
-            lines[-1] = lines[-1] + 'static_assert(false, "include node not properly implemented")'
+            lines[-1] = lines[-1] + 'static_assert(0, "include node not properly implemented")'
         if self.system_include:
             found_path = PreprocessorIncludeNode.search_system_includes(self.target)
             symtable.FILE_STACK.append(open(found_path, 'r'))
@@ -71,7 +71,7 @@ class PreprocessorIncludeNode(Node):
             symtable.FILE_STACK.append(open(os.path.split(symtable.FILE_STACK[-1].name)[0]
                                             + '/' + self.target, 'r'))
 
-        return 'static_assert(false, "include node not properly implemented")'
+        return 'static_assert(0, "include node not properly implemented")'
 
 
 class IdentifierNode(Node):
@@ -142,6 +142,11 @@ class ASCIILiteralNode(PrimitiveNode):
         super(ASCIILiteralNode, self).__init__('ASCIILit', children)
 
 
+class OperatorNode(PrimitiveNode):
+
+    def __init__(self, children: List[str] = []) -> None:
+        super(OperatorNode, self).__init__('2CharOperator', children)
+
 class StringLiteralNode(PrimitiveNode):
 
     def __init__(self, children: List[str] = []) -> None:
@@ -152,3 +157,8 @@ class PreprocessingNumberNode(PrimitiveNode):
 
     def __init__(self, children: List[str] = []) -> None:
         super(PreprocessingNumberNode, self).__init__("PreprocessingNumber", children)
+
+
+# Predefined arguments
+symtable.TABLE['true'] = symtable.MacroExpansion('true', [PreprocessingNumberNode(['1'])])
+symtable.TABLE['false'] = symtable.MacroExpansion('false', [PreprocessingNumberNode(['0'])])

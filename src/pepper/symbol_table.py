@@ -21,13 +21,14 @@ from typing import (
 #: The stack of files we're reading from
 FILE_STACK: List[TextIO] = []
 #: The stack of ifdef/ifndef/if control structures we're processing
-IFDEF_STACK: List[Tuple[str, bool]] = []
+IF_STACK: List[Tuple[str, bool]] = []
 #: The list of paths to search when doing a system include
 SYSTEM_INCLUDE_PATHS: List[str] = []
 EXPANDED_MACRO = False
 #: Switch to test internal error handling
 TRIGGER_INTERNAL_ERROR = False
-
+#: Count of if directive calls
+IF_COUNT = 0
 
 def build_default_include_lists() -> List[str]:
     p = subprocess.run(["cpp", "-v", "/dev/null", "-o", "/dev/null"],
@@ -79,12 +80,12 @@ class PepperInternalError(Exception):
     def __init__(self, msg: str="") -> None:
         self.msg = msg
 
-
 class MacroExpansion():
     "Expands an identifier into a macro expansion, possibly with arguments"
     def __init__(self, name: str, expansion: List[Node], args: Optional[List[str]] = None) -> None:
         self.name = name
         self.expansion = ""
+        self.tokens: List[Node] = []
         self.args = args
         self.variadic = False
 
@@ -95,6 +96,9 @@ class MacroExpansion():
                         raise PepperSyntaxError("Variadic macro argument must be at the end of the"
                                                 " argument definition list")
                     self.variadic = True
+
+        for token in expansion:
+                self.tokens.append(token)
 
         for item in expansion:
             preprocessed = item.preprocess()
@@ -135,7 +139,7 @@ class MacroExpansion():
         # try:
         self._validate_args(args)
 
-        expansion = self.expansion
+        expansion = self.expansion[:]
         EXPANDED_MACRO = True
 
         if args:

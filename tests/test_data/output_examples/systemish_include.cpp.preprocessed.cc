@@ -1,5 +1,5 @@
-static_assert(false, "include node not properly implemented")
-static_assert(false, "include node not properly implemented")
+static_assert(0, "include node not properly implemented")
+static_assert(0, "include node not properly implemented")
 // Macro SomeOtherFileIncluded with args None expanding to 'true'
 // Macro SomeFileIncluded with args None expanding to 'true'
 // Macro SomeFileMultilineIncluded with args None expanding to 'true'

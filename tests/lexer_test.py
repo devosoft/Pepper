@@ -26,8 +26,6 @@ class TestUnit(object):
         lexer.lexer.input('\n'.join(test_lines))
         tokens = get_all_tokens(lexer.lexer)
 
-        assert(len(tokens) == 76)
-
         token_types = defaultdict(int)
 
         for token in tokens:
@@ -36,9 +34,6 @@ class TestUnit(object):
         print(token_types)
 
         tokens_to_assert = {
-            ',': 1,
-            ';': 2,
-            ':': 8,
             '.': 3,
             '(': 4,
             ')': 4,
@@ -48,13 +43,14 @@ class TestUnit(object):
             '}': 1,
             '#': 0,
             '+': 1,
-            '<': 12,
             '=': 2,
             'IDENTIFIER': 22,
             'PREPROCESSING_KEYWORD_DEFINE': 1,
             'PREPROCESSING_KEYWORD_INCLUDE': 1,
-            'PREPROCESSING_NUMBER': 4,
+            'INT_LITERAL': 4,
             'STRING_LITERAL': 4,
+            'L_SHIFT': 6,
+            'R_SHIFT': 0,
             'SYSTEM_INCLUDE_LITERAL': 1
         }
 
@@ -81,12 +77,12 @@ PREPROCESSING_KEYWORD_INCLUDE: #include
 STRING_LITERAL: 'SomeFile.h'
 PREPROCESSING_KEYWORD_DEFINE: #define
 IDENTIFIER: POTATO
-PREPROCESSING_NUMBER: 12345
+INT_LITERAL: 12345
 PREPROCESSING_KEYWORD_DEFINE: #define
 IDENTIFIER: FOO
-PREPROCESSING_NUMBER: 12345
+INT_LITERAL: 12345
 ASCII_LITERAL: >
-PREPROCESSING_NUMBER: 4578
+INT_LITERAL: 4578
 IDENTIFIER: int
 IDENTIFIER: main
 ASCII_LITERAL: (
@@ -95,19 +91,19 @@ ASCII_LITERAL: {
 IDENTIFIER: int
 IDENTIFIER: x
 ASCII_LITERAL: =
-PREPROCESSING_NUMBER: 3
+INT_LITERAL: 3
 ASCII_LITERAL: ;
 IDENTIFIER: int
 IDENTIFIER: sum
 ASCII_LITERAL: =
-PREPROCESSING_NUMBER: 0
+INT_LITERAL: 0
 ASCII_LITERAL: ;
 IDENTIFIER: for
 ASCII_LITERAL: (
 IDENTIFIER: int
 IDENTIFIER: i
 ASCII_LITERAL: =
-PREPROCESSING_NUMBER: 0
+INT_LITERAL: 0
 ASCII_LITERAL: ;
 IDENTIFIER: i
 ASCII_LITERAL: <
@@ -137,7 +133,7 @@ IDENTIFIER: else
 ASCII_LITERAL: {
 IDENTIFIER: return
 ASCII_LITERAL: -
-PREPROCESSING_NUMBER: 1
+INT_LITERAL: 1
 ASCII_LITERAL: ;
 ASCII_LITERAL: }
 ASCII_LITERAL: }

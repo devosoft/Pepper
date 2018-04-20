@@ -84,7 +84,7 @@ def reset_state():
     symtable.SYSTEM_INCLUDE_PATHS = []
     symtable.EXPANDED_MACRO = False
     symtable.TRIGGER_INTERNAL_ERROR = False
-
+    symtable.IF_COUNT = 0
 
 def preprocess_and_compare(source, reference, tmpdir, supportfiles=[], optional_args=[]):
     test_dir = tmpdir.mkdir('preprocessor')
@@ -124,7 +124,10 @@ class TestUnit:
                                             'function_like_macro_2.cpp.preprocessed.cc')
 
     def test_basic_function_with_defaults_refactored(self, tmpdir):
-        preprocess_and_compare_functionally('file_include.cpp', 'preprocessed_file_include.cpp')
+        preprocess_and_compare("file_include.cpp",
+                               "preprocessed_file_include.cpp",
+                               tmpdir,
+                               ['SomeFile.h', 'SomeOtherFile.h'])
 
     def test_ifdef_handling(self, tmpdir):
         preprocess_and_compare_functionally('ifdef.cpp', 'ifdef.cpp.preprocessed.cc')
@@ -214,6 +217,66 @@ class TestUnit:
             exception_raised = True
 
         assert(exception_raised)
+
+    def test_if_basic_expressions(self, tmpdir):
+        preprocess_and_compare_functionally('if_expressions.cpp',
+                                            'if_expressions.cpp.preprocessed.cc')
+
+    def test_if_macro_calls(self, tmpdir):
+        preprocess_and_compare_functionally('if_macro_expressions.cpp',
+                                            'if_macro_expressions.cpp.preprocessed.cc')
+
+    def test_if_with_file_includes(self, tmpdir):
+        preprocess_and_compare("file_include_if.cpp", "file_include_if.preprocessed.cc",
+                               tmpdir,
+                               ['SomeFile.h', 'SomeOtherFile.h'])
+
+    def test_error_raised_if_token_syntax(self, tmpdir):
+        in_contents = [
+            "#define M1(a,b) a + b\n",
+            "#if M1(12.2, 12.1 *0.23)\n",
+            "#endif"
+        ]
+
+        expected = [""]
+
+        args = FakeArgs()
+        args.input_file = FakeFile("type_error.cc", in_contents)
+        expected_file = FakeFile("whatever", expected)
+
+        exception_raised = False
+        try:
+            # doesn't actually matter what the reference is
+            preprocess_and_compare_functionally(None, expected_file, args)
+            assert(False and "Should have had an exception thrown!")
+        except symtable.PepperSyntaxError as err:
+            exception_raised = True
+
+        assert(exception_raised)
+
+    def test_error_raised_macro_eval_syntax(self, tmpdir):
+        in_contents = [
+            "#define M1(a,b) a and or and b\n",
+            "#if M1(1, 2)\n",
+            "#endif"
+        ]
+
+        expected = [""]
+
+        args = FakeArgs()
+        args.input_file = FakeFile("macro_error.cc", in_contents)
+        expected_file = FakeFile("whatever", expected)
+
+        exception_raised = False
+        try:
+            # doesn't actually matter what the reference is
+            preprocess_and_compare_functionally(None, expected_file, args)
+            assert(False and "Should have had an exception thrown!")
+        except symtable.PepperSyntaxError as err:
+            exception_raised = True
+
+        assert(exception_raised)
+
 
 
 class TestSystem:

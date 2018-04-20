@@ -7,7 +7,7 @@
 """
 This is the Parser module for Pepper
 
-This module impelements the grammar for the preprocessor language, comprised of tokens from the Lexer module.
+This module implements the grammar for the preprocessor language, comprised of tokens from the Lexer module.
 This module implements a main function, but this is only for debugging and will be removed on release.
 """
 
@@ -19,7 +19,24 @@ import argparse
 import ply.yacc as yacc
 from pepper.lexer import lexer
 from pepper.lexer import tokens  # NOQA
+import pepper.symbol_table as symtable
+from pepper.evaluator import parse_lines, parse_macro
 from pepper.symbol_table import Node
+from typing import List, cast
+
+# precedence according to
+# http://en.cppreference.com/w/c/language/operator_precedence
+
+precedence = (('left', 'BOOL_OR'), ('left', 'BOOL_AND'),
+              ('left', '|'),
+              ('left', '^'),
+              ('left', '&'),
+              ('left', 'COMP_EQU', 'COMP_NEQU'),
+              ('left', '<', '>', 'COMP_LTE', 'COMP_GTE'),
+              ('left', 'L_SHIFT', 'R_SHIFT'),
+              ('left', '+', '-'),
+              ('left', '*', '/', '%'),
+              ('right', '!', '~'))
 
 
 def p_program(p: yacc.YaccProduction) -> yacc.YaccProduction:
@@ -81,18 +98,323 @@ def p_include_expression(p: yacc.YaccProduction) -> yacc.YaccProduction:
                             | ifndef_expression
                             | endif_expression
                             | else_expression
+                            | if_expression
     """
     p[0] = p[1]
+
+
+########### IF DEF EXCLUSITIVITEY
+def p_valid_char(p: yacc.YaccProduction) -> yacc.YaccProduction:
+    '''
+    valid_expr : spaces CHAR_LITERAL spaces
+    '''
+    p[0] = ord(p[2][1])
+
+
+def p_valid_int(p: yacc.YaccProduction) -> yacc.YaccProduction:
+    '''
+    valid_expr : spaces INT_LITERAL spaces
+    '''
+    p[0] = int(p[2])
+
+
+def p_valid_macro(p: yacc.YaccProduction) -> yacc.YaccProduction:
+    '''
+    valid_expr : spaces IDENTIFIER spaces
+    '''
+    val = symtable.TABLE.get(p[2], 0)
+    if isinstance(val , symtable.MacroExpansion):
+        val = parse_macro(val.tokens)
+    p[0] = val
+
+
+def p_valid_defined(p: yacc.YaccProduction) -> yacc.YaccProduction:
+    '''
+    valid_expr : spaces DEFINED spaces '(' spaces IDENTIFIER spaces ')' spaces
+    '''
+
+    p[0] =  p[6] in symtable.TABLE
+
+
+def p_valid_defined_no_paren(p: yacc.YaccProduction) -> yacc.YaccProduction:
+    '''
+    valid_expr : spaces DEFINED spaces IDENTIFIER spaces
+    '''
+
+    p[0] =  p[4] in symtable.TABLE
+
+
+def p_valid_macro_no_args(p: yacc.YaccProduction) -> yacc.YaccProduction:
+    '''
+    valid_expr : spaces IDENTIFIER spaces '(' spaces ')' spaces
+    '''
+    val = symtable.TABLE.get(p[2], 0)
+    if isinstance(val , symtable.MacroExpansion):
+        val.expand()
+        val = parse_macro(val.tokens)
+        symtable.EXPANDED_MACRO = False
+    p[0] = val
+
+
+def p_valid_macro_args(p: yacc.YaccProduction) -> yacc.YaccProduction:
+    '''
+    valid_expr : spaces IDENTIFIER spaces valid_args spaces
+    '''
+    val = symtable.TABLE.get(p[2], 0)
+    arg_tokens = p[4][:]
+    args = [child.children[0] for child in p[4]]
+
+    if isinstance(val , symtable.MacroExpansion):
+        # error check argument count
+        expansion = val.expand(args)
+
+        old_tokens: List[object] = [parse_lines(val.tokens[i]) if isinstance(val.tokens[i], ast.LinesNode) else
+                                    val.tokens[i] for i in range(len(val.tokens)) ]
+        new_tokens = []
+        while old_tokens:
+            token = old_tokens.pop(0)
+            while isinstance(token, list):
+                old_tokens = token + old_tokens
+                token = old_tokens.pop(0)
+            if isinstance(token ,ast.IdentifierNode):
+                if val.args:
+                    if token.children[0] in val.args:
+                        index = val.args.index(cast(str, token.children[0]))
+                        token = arg_tokens[index]
+
+
+            new_tokens.append(token)
+
+        val = parse_macro(cast(List['Node'],new_tokens))
+        symtable.EXPANDED_MACRO = False
+
+
+    p[0] = val
+
+
+def p_valid_args(p: yacc.YaccProduction) -> yacc.YaccProduction:
+    '''
+    valid_args : '(' spaces valid_arg spaces  ')'
+    '''
+    p[0] = p[3]
+
+
+def p_valid_arg(p: yacc.YaccProduction) -> yacc.YaccProduction:
+    '''
+    valid_arg :  valid_expr
+    '''
+    p[0]  = [ast.PreprocessingNumberNode([str(int(p[1]))])]
+
+
+def p_valid_arg_commas(p: yacc.YaccProduction) -> yacc.YaccProduction:
+    '''
+    valid_arg : valid_arg spaces ',' spaces valid_arg spaces
+    '''
+
+    p[0] = p[1] + p[5]
+
+
+def p_valid_parentheticals(p: yacc.YaccProduction) -> yacc.YaccProduction:
+    '''
+    valid_expr : spaces '(' spaces valid_expr spaces ')' spaces
+    '''
+    p[0] = p[4]
+
+
+def p_valid_add(p: yacc.YaccProduction) -> yacc.YaccProduction:
+    '''
+    valid_expr : valid_expr '+' valid_expr
+    '''
+
+    p[0] = p[1] + p[3]
+
+
+def p_valid_sub(p: yacc.YaccProduction) -> yacc.YaccProduction:
+    '''
+    valid_expr : valid_expr '-' valid_expr
+    '''
+
+    p[0] = p[1] - p[3]
+
+
+def p_valid_mult(p: yacc.YaccProduction) -> yacc.YaccProduction:
+    '''
+    valid_expr : valid_expr '*' valid_expr
+    '''
+
+    p[0] = p[1] * p[3]
+
+
+def p_valid_div(p: yacc.YaccProduction) -> yacc.YaccProduction:
+    '''
+    valid_expr : valid_expr '/' valid_expr
+    '''
+
+    p[0] = p[1] // p[3]
+
+
+def p_valid_mod(p: yacc.YaccProduction) -> yacc.YaccProduction:
+    '''
+    valid_expr : valid_expr '%' valid_expr
+    '''
+
+    p[0] = p[1] % p[3]
+
+
+def p_valid_bit_not(p: yacc.YaccProduction) -> yacc.YaccProduction:
+    '''
+    valid_expr : '~' valid_expr
+    '''
+    p[0] = ~p[2]
+
+
+def p_valid_bit_or(p: yacc.YaccProduction) -> yacc.YaccProduction:
+    '''
+    valid_expr : valid_expr '|' valid_expr
+    '''
+
+    p[0] = p[1] | p[3]
+
+
+def p_valid_bit_and(p: yacc.YaccProduction) -> yacc.YaccProduction:
+    '''
+    valid_expr : valid_expr '&' valid_expr
+    '''
+
+    p[0] = p[1] & p[3]
+
+
+def p_valid_bit_xor(p: yacc.YaccProduction) -> yacc.YaccProduction:
+    '''
+    valid_expr : valid_expr '^' valid_expr
+    '''
+
+    p[0] = p[1] ^ p[3]
+
+
+def p_valid_bit_lshift(p: yacc.YaccProduction) -> yacc.YaccProduction:
+    '''
+    valid_expr : valid_expr L_SHIFT valid_expr
+    '''
+
+    p[0] = p[1] << p[3]
+
+
+def p_valid_bit_rshift(p: yacc.YaccProduction) -> yacc.YaccProduction:
+    '''
+    valid_expr : valid_expr R_SHIFT valid_expr
+    '''
+
+    p[0] = p[1] >> p[3]
+
+
+def p_valid_logic_or(p: yacc.YaccProduction) -> yacc.YaccProduction:
+    '''
+    valid_expr : valid_expr BOOL_OR valid_expr
+    '''
+
+    p[0] = bool(p[1] or p[3])
+
+
+def p_valid_logic_and(p: yacc.YaccProduction) -> yacc.YaccProduction:
+    '''
+    valid_expr : valid_expr BOOL_AND valid_expr
+    '''
+
+    p[0] = bool(p[1] and p[3])
+
+
+def p_valid_logic_not(p: yacc.YaccProduction) -> yacc.YaccProduction:
+    '''
+    valid_expr : spaces '!' spaces valid_expr
+    '''
+
+    p[0] = (not p[4] ) == True
+
+
+def p_valid_logic_lt(p: yacc.YaccProduction) -> yacc.YaccProduction:
+    '''
+    valid_expr : valid_expr '<' valid_expr
+    '''
+    p[0] = p[1] < p[3]
+
+
+def p_valid_logic_le(p: yacc.YaccProduction) -> yacc.YaccProduction:
+    '''
+    valid_expr : valid_expr COMP_LTE valid_expr
+    '''
+    p[0] = p[1] <= p[3]
+
+
+def p_valid_logic_gt(p: yacc.YaccProduction) -> yacc.YaccProduction:
+    '''
+    valid_expr : valid_expr '>' valid_expr
+    '''
+    p[0] = p[1] > p[3]
+
+
+def p_valid_logic_ge(p: yacc.YaccProduction) -> yacc.YaccProduction:
+    '''
+    valid_expr : valid_expr COMP_GTE valid_expr
+    '''
+    p[0] = p[1] >= p[3]
+
+
+def p_valid_equal(p: yacc.YaccProduction) -> yacc.YaccProduction:
+    '''
+    valid_expr : valid_expr COMP_EQU valid_expr
+    '''
+    p[0] = p[1]  == p[3]
+
+
+def p_valid_nequal(p: yacc.YaccProduction) -> yacc.YaccProduction:
+    '''
+    valid_expr : valid_expr COMP_NEQU valid_expr
+    '''
+    p[0] = p[1] != p[3]
+
+
+def p_valid_ternary(p: yacc.YaccProduction) -> yacc.YaccProduction:
+    '''
+    valid_expr : valid_expr spaces '?' spaces valid_expr ':' valid_expr
+    '''
+    p[0] = p[5] if p[1] else p[7]
+
+
+def p_if_expression(p: yacc.YaccProduction) -> yacc.YaccProduction:
+    """
+    if_expression : PREPROCESSING_KEYWORD_IF WHITESPACE valid_expr
+    """
+    symtable.IF_COUNT += 1
+
+    symtable.IF_STACK.append((str(symtable.IF_COUNT), True))
+    p[0] = ast.StringLiteralNode([f"// if expression result: { int(p[3]) }"])
+
+
+def p_no_space(p: yacc.YaccProduction) -> yacc.YaccProduction:
+    '''
+    spaces :
+    '''
+
+    p[0] = None
+
+
+def p_spaces(p: yacc.YaccProduction) -> yacc.YaccProduction:
+    '''
+    spaces : WHITESPACE spaces
+    '''
+
+    p[0] = ast.WhiteSpaceNode([p[1]])
+
+# TODO: make nodes instead that have the appropriate children and evaluated expression?
+####### DONE
 
 
 def p_ifdef_expression(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     ifdef_expression : PREPROCESSING_KEYWORD_IFDEF WHITESPACE IDENTIFIER
     """
-    if p[3] in symtable.TABLE.keys():
-        symtable.IFDEF_STACK.append((p[3], True))
-    else:
-        symtable.IFDEF_STACK.append((p[3], False))
+    symtable.IF_STACK.append((p[3], p[3] in symtable.TABLE))
 
     p[0] = ast.StringLiteralNode([f"// ifdef expression {p[3]}"])
 
@@ -101,10 +423,7 @@ def p_ifndef_expression(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     ifndef_expression : PREPROCESSING_KEYWORD_IFNDEF WHITESPACE IDENTIFIER
     """
-    if p[3] in symtable.TABLE.keys():
-        symtable.IFDEF_STACK.append((p[3], False))
-    else:
-        symtable.IFDEF_STACK.append((p[3], True))
+    symtable.IF_STACK.append((p[3], p[3] not in symtable.TABLE))
 
     p[0] = ast.StringLiteralNode([f"// ifndef expression {p[3]}"])
 
@@ -113,7 +432,7 @@ def p_else_expression(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     else_expression : PREPROCESSING_KEYWORD_ELSE
     """
-    symtable.IFDEF_STACK[-1] = (symtable.IFDEF_STACK[-1][0], not symtable.IFDEF_STACK[-1][1])
+    symtable.IF_STACK[-1] = (symtable.IF_STACK[-1][0], not symtable.IF_STACK[-1][1])
     p[0] = ast.StringLiteralNode([f"// else expression "])
 
 
@@ -121,7 +440,7 @@ def p_endif_expression(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     endif_expression : PREPROCESSING_KEYWORD_ENDIF
     """
-    symtable.IFDEF_STACK.pop()
+    symtable.IF_STACK.pop()
     p[0] = ast.StringLiteralNode([f"// endif expression "])
 
 
@@ -347,8 +666,25 @@ def p_safe_code_expressions_ascii_literal(p: yacc.YaccProduction) -> yacc.YaccPr
               | '.'
               | '?'
               | '~'
+              | '/'
     """
     p[0] = ast.ASCIILiteralNode(p[1])
+
+
+# distinction is ascii literals to preprocessor issues (2 character operators)
+def p_safe_code_expression_operator(p: yacc.YaccProduction) -> yacc.YaccProduction:
+    '''
+    safe_code_expression : COMP_LTE
+                        |   COMP_GTE
+                        |   COMP_EQU
+                        |   COMP_NEQU
+                        |   BOOL_AND
+                        |   BOOL_OR
+                        |   L_SHIFT
+                        |   R_SHIFT
+    '''
+
+    p[0] = ast.OperatorNode([p[1]])
 
 
 def p_statement_to_ascii_literal(p: yacc.YaccProduction) -> yacc.YaccProduction:
@@ -366,6 +702,20 @@ def p_statement_to_preprocessing_number(p: yacc.YaccProduction) -> yacc.YaccProd
     safe_code_expression : PREPROCESSING_NUMBER
     """
     p[0] = ast.PreprocessingNumberNode([p[1]])
+
+
+def p_statement_to_int(p: yacc.YaccProduction) -> yacc.YaccProduction:
+    """
+    safe_code_expression : INT_LITERAL
+    """
+    p[0] = ast.PreprocessingNumberNode([p[1]])
+
+
+def p_statement_to_char(p: yacc.YaccProduction) -> yacc.YaccProduction:
+    """
+    safe_code_expression : CHAR_LITERAL
+    """
+    p[0] = ast.StringLiteralNode([p[1]])
 
 
 def p_error(p: yacc.YaccProduction) -> yacc.YaccProduction:
