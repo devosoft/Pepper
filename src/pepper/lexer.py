@@ -40,6 +40,7 @@ PREPROCESSING_KEYWORDS = [
     'else',
     'if',
     'py',
+    'error'
 ]
 
 tokens = [
@@ -115,6 +116,11 @@ def t_PREPROCESSING_KEYWORD_INCLUDE(t: lex.LexToken) -> lex.LexToken:
 
 def t_PREPROCESSING_KEYWORD_DEFINE(t: lex.LexToken) -> lex.LexToken:
     r'\#define\b'
+    return t
+
+
+def t_PREPROCESSING_KEYWORD_ERROR(t: lex.LexToken) -> lex.LexToken:
+    r'\#error\b'
     return t
 
 
