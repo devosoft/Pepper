@@ -29,7 +29,8 @@ EXPANDED_MACRO = False
 TRIGGER_INTERNAL_ERROR = False
 #: Count of if directive calls
 IF_COUNT = 0
-
+#: Global Line Count
+LINE_COUNT = 0
 def build_default_include_lists() -> List[str]:
     p = subprocess.run(["cpp", "-v", "/dev/null", "-o", "/dev/null"],
                        stdout=subprocess.PIPE,

@@ -16,7 +16,6 @@ import os
 import pepper.symbol_table as symtable
 from pathlib import Path
 from typing import Optional
-from pepper.abstract_symbol_tree import PreprocessorErrorNode
 
 def get_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()

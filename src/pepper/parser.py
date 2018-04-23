@@ -724,13 +724,15 @@ def p_error_directive(p: yacc.YaccProduction) ->yacc.YaccProduction:
     """
     error_directive : PREPROCESSING_KEYWORD_ERROR spaces STRING_LITERAL
     """
-    p[0] = ast.PreprocessorErrorNode([ast.StringLiteralNode([p[3]])], str(p.lineno))
+    p[0] = ast.PreprocessorErrorNode( [p[3]], symtable.LINE_COUNT, symtable.FILE_STACK[-1].name)
+
 
 def p_warning_directive(p: yacc.YaccProduction) ->yacc.YaccProduction:
     """
     warning_directive : PREPROCESSING_KEYWORD_WARNING spaces STRING_LITERAL
     """
-    p[0] = ast.PreprocessorWarningNode([ast.StringLiteralNode([p[3]])], p.lineno)
+    p[0] = ast.PreprocessorWarningNode([p[3]], symtable.LINE_COUNT, symtable.FILE_STACK[-1].name)
+
 
 def p_error(p: yacc.YaccProduction) -> yacc.YaccProduction:
     print(f"ERROR(line {p.lineno}): syntax error")

@@ -225,6 +225,7 @@ def t_comment_ignore_anything_else(t: lex.LexToken) -> lex.LexToken:
 def t_comment_NEWLINE(t: lex.LexToken) -> lex.LexToken:
     r'\n'
     t.lexer.lineno += 1  # the lexer doesn't know what consistutes a 'line' unless we tell it
+    symtable.LINE_COUNT += 1
     return t
 
 
@@ -237,6 +238,7 @@ def t_NEWLINE(t: lex.LexToken) -> lex.LexToken:
     r"\n"
     t.type = 'NEWLINE'
     t.lexer.lineno += 1  # the lexer doesn't know what consistutes a 'line' unless we tell it
+    symtable.LINE_COUNT += 1
     return t
 
 
