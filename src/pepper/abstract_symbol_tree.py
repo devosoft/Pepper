@@ -73,6 +73,30 @@ class PreprocessorIncludeNode(Node):
 
         return 'static_assert(0, "include node not properly implemented")'
 
+class PreprocessorErrorNode(Node):
+
+    class PepperCompileError(Exception):
+        def __init__(self, msg: str="") -> None:
+            self.msg = msg
+
+    def __init__(self, children: List[Node] = [], line_no: int = 0) -> None:
+        super(PreprocessorErrorNode, self).__init__("PreprocessorError", children)
+        self.line_no = line_no
+
+    def preprocess(self, lines: Optional[List[str]] = None) -> None:
+        error_message = f"{self.line_no} error: " + self.children[0].children[0]
+        raise self.PepperCompileError(error_message)
+
+
+class PreprocessorWarningNode(Node):
+    def __init__(self, children: List[Node] = [], line_no: int = 0) -> None:
+        super(PreprocessorWarningNode, self).__init__("PreprocessorWarning", children)
+        self.line_no = line_no
+
+    def preprocess(self, lines: Optional[List[str]] = None) -> None:
+        warning_message = f"{self.line_no} warning: " + self.children[0].children[0]
+        print(warning_message)
+
 
 class IdentifierNode(Node):
 

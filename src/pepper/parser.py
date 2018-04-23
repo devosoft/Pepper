@@ -86,6 +86,8 @@ def p_statement_to_code_expression(p: yacc.YaccProduction) -> yacc.YaccProductio
 def p_pepper_directive(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     pepper_directive : preprocessor_expression
+                     | error_directive
+                     | warning_directive
     """
     p[0] = p[1]
 
@@ -717,6 +719,18 @@ def p_statement_to_char(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     p[0] = ast.StringLiteralNode([p[1]])
 
+
+def p_error_directive(p: yacc.YaccProduction) ->yacc.YaccProduction:
+    """
+    error_directive : PREPROCESSING_KEYWORD_ERROR spaces STRING_LITERAL
+    """
+    p[0] = ast.PreprocessorErrorNode([ast.StringLiteralNode([p[3]])], str(p.lineno))
+
+def p_warning_directive(p: yacc.YaccProduction) ->yacc.YaccProduction:
+    """
+    warning_directive : PREPROCESSING_KEYWORD_WARNING spaces STRING_LITERAL
+    """
+    p[0] = ast.PreprocessorWarningNode([ast.StringLiteralNode([p[3]])], p.lineno)
 
 def p_error(p: yacc.YaccProduction) -> yacc.YaccProduction:
     print(f"ERROR(line {p.lineno}): syntax error")
