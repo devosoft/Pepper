@@ -12,7 +12,7 @@ import pepper.symbol_table as symtable
 from pepper.symbol_table import Node
 import os
 from typing import List, Optional, cast
-
+from sys import stderr
 from pathlib import Path
 
 
@@ -97,9 +97,13 @@ class PreprocessorWarningNode(Node):
         self.file = file
 
     def preprocess(self, lines: Optional[List[str]] = None) -> None:
-        warning_message = f"\n{self.file}:{self.line_no} warning: " + cast(str, self.children[0])
-        print(warning_message)
+        relative = self.file.rfind("/")
+        file_name = self.file if relative == -1 else self.file[relative +1 :]
 
+        warning_message = f"\n{file_name}:{self.line_no} warning: " + cast(str, self.children[0])
+
+
+        print(warning_message, file = stderr)
 
 class IdentifierNode(Node):
 
