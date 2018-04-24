@@ -86,24 +86,22 @@ class PreprocessorErrorNode(Node):
         self.file = file
 
     def preprocess(self, lines: Optional[List[str]] = None) -> None:
-        error_message = f"\n{self.file}:{self.line_no} error: " +  cast(str, self.children[0])
+        error_message = f"\n{self.file}:{self.line_no} error: " + cast(str, self.children[0])
         raise self.PepperCompileError(error_message)
 
 
 class PreprocessorWarningNode(Node):
-    def __init__(self, children: List[str] = [], line_no: int = 0, file : str = "") -> None:
+    def __init__(self, children: List[str] = [], line_no: int = 0, file: str = "") -> None:
         super(PreprocessorWarningNode, self).__init__("PreprocessorWarning", children)
         self.line_no = line_no
         self.file = file
 
     def preprocess(self, lines: Optional[List[str]] = None) -> None:
         relative = self.file.rfind("/")
-        file_name = self.file if relative == -1 else self.file[relative +1 :]
+        file_name = self.file if relative == -1 else self.file[relative + 1:]
 
         warning_message = f"\n{file_name}:{self.line_no} warning: " + cast(str, self.children[0])
-
-
-        print(warning_message, file = stderr)
+        print(warning_message, file=stderr)
 
 class IdentifierNode(Node):
 

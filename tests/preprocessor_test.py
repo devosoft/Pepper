@@ -97,7 +97,6 @@ def preprocess_and_compare(source, reference, tmpdir, supportfiles=[], optional_
     call = ["Pepper"] + optional_args + [f"{test_dir.realpath()}/{source}"]
 
     process = subprocess.run(call, timeout=2, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    #out, err = process.communicate()
     assert(process.returncode == 0)
     with open(f'{EXAMPLE_OUTPUT_DIRECTORY}{reference}', 'r') as expected_file:
         with open(f"{test_dir.realpath()}/{source}.preprocessed.cc") as outfile:
@@ -322,17 +321,15 @@ class TestUnit:
         reference = source + ".preprocessed.cc"
         shutil.copy(SOURCE_FILE_DIRECTORY + source, test_dir.realpath())
 
-
         call = ["Pepper"] + [f"{test_dir.realpath()}/{source}"]
-
         process = subprocess.run(call, timeout=2, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
         assert(process.returncode == 0)
+
         with open(f'{EXAMPLE_OUTPUT_DIRECTORY}{reference}', 'r') as expected_file:
             with open(f"{test_dir.realpath()}/{source}.preprocessed.cc") as outfile:
                 assert(outfile.read() == expected_file.read())
 
-        assert(process.stderr == b'\nwarning.cpp:4 warning: "This warning should appear"\n')
+        assert(process.stderr == b'\nwarning.cpp:4 warning: "WARNING"\n\nwarning.cpp:8 warning: "WARNING"\n')
 
     def test_warning_directive_not_raised(self, tmpdir):
         preprocess_and_compare("no_warning.cpp", "no_warning.cpp.preprocessed.cc",

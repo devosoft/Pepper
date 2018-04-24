@@ -389,7 +389,7 @@ def p_if_expression(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     symtable.IF_COUNT += 1
 
-    symtable.IF_STACK.append((str(symtable.IF_COUNT), True))
+    symtable.IF_STACK.append((str(symtable.IF_COUNT), p[3]))
     p[0] = ast.StringLiteralNode([f"// if expression result: { int(p[3]) }"])
 
 

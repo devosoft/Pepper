@@ -4,6 +4,9 @@
 
 // endif expression 
 
+// ifdef expression __M__
+
+// endif expression 
 
 int main()
 {
