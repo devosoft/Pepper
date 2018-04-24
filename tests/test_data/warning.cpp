@@ -1,11 +1,11 @@
 #define __M__ 0
 
 #if defined(__M__) || defined(__X__)
-#warning "WARNING"
+#warning "WARN"
 #endif
 
 #ifdef __M__
-#warning "WARNING"
+#warning "WARN"
 #endif
 
 int main()

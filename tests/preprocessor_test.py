@@ -329,7 +329,8 @@ class TestUnit:
             with open(f"{test_dir.realpath()}/{source}.preprocessed.cc") as outfile:
                 assert(outfile.read() == expected_file.read())
 
-        assert(process.stderr == b'\nwarning.cpp:4 warning: "WARNING"\n\nwarning.cpp:8 warning: "WARNING"\n')
+        assert(process.stderr ==
+               b'\nwarning.cpp:4 warning: "WARN"\n\nwarning.cpp:8 warning: "WARN"\n')
 
     def test_warning_directive_not_raised(self, tmpdir):
         preprocess_and_compare("no_warning.cpp", "no_warning.cpp.preprocessed.cc",

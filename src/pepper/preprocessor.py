@@ -16,6 +16,7 @@ import os
 import pepper.symbol_table as symtable
 from pathlib import Path
 from typing import Optional
+import pepper.abstract_symbol_tree as ast
 
 def get_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
@@ -86,14 +87,18 @@ def main(args: Optional[argparse.Namespace]=None) -> None:
                 print(f"{parser_input}")
                 raise err
             if len(symtable.IF_STACK) == 0 or symtable.IF_STACK[-1][1]:
-                #try:
-                output = tree.preprocess(preprocessed_lines)
-                #except Exception as err:
-                #    print("An internal error occured while processing a line:")
-                #    print(f"{parser_input}")
-                #    print("Please report this error: https://github.com/devosoft/Pepper/issues")
-                #    print(f"{err}")
-                #    raise symtable.PepperInternalError()
+                try:
+                    output = tree.preprocess(preprocessed_lines)
+                except ast.PreprocessorErrorNode.PepperCompileError as compile_err:
+                    # store stack trace
+                    # stack_trace = sys.exc_info()
+                    raise compile_err
+                except Exception as err:
+                    print("An internal error occured while processing a line:")
+                    print(f"{parser_input}")
+                    print("Please report this error: https://github.com/devosoft/Pepper/issues")
+                    print(f"{err}")
+                    raise symtable.PepperInternalError()
             else:
                 pass  # toss the line, we're in a 'deny' ifdef
             parser_input = ""
