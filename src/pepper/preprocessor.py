@@ -16,7 +16,7 @@ import os
 import pepper.symbol_table as symtable
 from pathlib import Path
 from typing import Optional
-
+import pepper.abstract_symbol_tree as ast
 
 def get_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
@@ -89,6 +89,10 @@ def main(args: Optional[argparse.Namespace]=None) -> None:
             if len(symtable.IF_STACK) == 0 or symtable.IF_STACK[-1][1]:
                 try:
                     output = tree.preprocess(preprocessed_lines)
+                except ast.PreprocessorErrorNode.PepperCompileError as compile_err:
+                    # store stack trace
+                    # stack_trace = sys.exc_info()
+                    raise compile_err
                 except Exception as err:
                     print("An internal error occured while processing a line:")
                     print(f"{parser_input}")

@@ -12,7 +12,7 @@ import pepper.symbol_table as symtable
 from pepper.symbol_table import Node
 import os
 from typing import List, Optional, cast
-
+from sys import stderr
 from pathlib import Path
 
 
@@ -73,6 +73,36 @@ class PreprocessorIncludeNode(Node):
 
         return 'static_assert(0, "include node not properly implemented")'
 
+
+class PreprocessorErrorNode(Node):
+
+    class PepperCompileError(Exception):
+        def __init__(self, msg: str="") -> None:
+            self.msg = msg
+
+    def __init__(self, children: List[str] = [], line_no: int = 0, file: str = "") -> None:
+        super(PreprocessorErrorNode, self).__init__("PreprocessorError", children)
+        self.line_no = line_no
+        self.file = file
+
+    def preprocess(self, lines: Optional[List[str]] = None) -> str:
+        error_message = f"\n{self.file}:{self.line_no} error: " + cast(str, self.children[0])
+        raise self.PepperCompileError(error_message)
+
+
+class PreprocessorWarningNode(Node):
+    def __init__(self, children: List[str] = [], line_no: int = 0, file: str = "") -> None:
+        super(PreprocessorWarningNode, self).__init__("PreprocessorWarning", children)
+        self.line_no = line_no
+        self.file = file
+
+    def preprocess(self, lines: Optional[List[str]] = None) -> str:
+        relative = self.file.rfind("/")
+        file_name = self.file if relative == -1 else self.file[relative + 1:]
+
+        warning_message = f"\n{file_name}:{self.line_no} warning: " + cast(str, self.children[0])
+        print(warning_message, file=stderr)
+        return ""  # statisfies typing
 
 class IdentifierNode(Node):
 

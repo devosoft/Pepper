@@ -96,13 +96,13 @@ def preprocess_and_compare(source, reference, tmpdir, supportfiles=[], optional_
 
     call = ["Pepper"] + optional_args + [f"{test_dir.realpath()}/{source}"]
 
-    process = subprocess.run(call, timeout=2, stdout=sys.stdout, stderr=sys.stderr)
-    # out, err = process.communicate()
+    process = subprocess.run(call, timeout=2, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     assert(process.returncode == 0)
     with open(f'{EXAMPLE_OUTPUT_DIRECTORY}{reference}', 'r') as expected_file:
         with open(f"{test_dir.realpath()}/{source}.preprocessed.cc") as outfile:
             assert(outfile.read() == expected_file.read())
 
+    assert(not process.stderr)
 
 class TestUnit:
     def setup_method(self, method):
@@ -277,6 +277,64 @@ class TestUnit:
 
         assert(exception_raised)
 
+    def test_error_directive_raised(self, tmpdir):
+        in_contents = [
+            "#ifndef __M1__\n",
+            '#error "This constant should be present!"\n',
+            "#endif"
+        ]
+
+        expected = [""]
+
+        args = FakeArgs()
+        args.input_file = FakeFile("macro_error.cc", in_contents)
+        expected_file = FakeFile("whatever", expected)
+
+        exception_raised = False
+        try:
+            # doesn't actually matter what the reference is
+            preprocess_and_compare_functionally(None, expected_file, args)
+            assert(False and "Should have had an exception thrown!")
+        except ast.PreprocessorErrorNode.PepperCompileError as err:
+            exception_raised = True
+
+        assert(exception_raised)
+
+    def test_error_directive_not_raised(self, tmpdir):
+        in_contents = [
+            "#ifdef __M1__\n",
+            '#error "This constant shouldnt be present!"\n',
+            "#endif"
+        ]
+
+        expected = ["// endif expression ", ""]
+
+        args = FakeArgs()
+        args.input_file = FakeFile("macro_error.cc", in_contents)
+        expected_file = FakeFile("whatever", expected)
+
+        preprocess_and_compare_functionally(None, expected_file, args)
+
+    def test_warning_directive_raised(self, tmpdir):
+        test_dir = tmpdir.mkdir('preprocessor')
+        source = "warning.cpp"
+        reference = source + ".preprocessed.cc"
+        shutil.copy(SOURCE_FILE_DIRECTORY + source, test_dir.realpath())
+
+        call = ["Pepper"] + [f"{test_dir.realpath()}/{source}"]
+        process = subprocess.run(call, timeout=2, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        assert(process.returncode == 0)
+
+        with open(f'{EXAMPLE_OUTPUT_DIRECTORY}{reference}', 'r') as expected_file:
+            with open(f"{test_dir.realpath()}/{source}.preprocessed.cc") as outfile:
+                assert(outfile.read() == expected_file.read())
+
+        assert(process.stderr ==
+               b'\nwarning.cpp:4 warning: "WARN"\n\nwarning.cpp:8 warning: "WARN"\n')
+
+    def test_warning_directive_not_raised(self, tmpdir):
+        preprocess_and_compare("no_warning.cpp", "no_warning.cpp.preprocessed.cc",
+                               tmpdir)
 
 
 class TestSystem:

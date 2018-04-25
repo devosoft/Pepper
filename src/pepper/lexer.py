@@ -40,6 +40,8 @@ PREPROCESSING_KEYWORDS = [
     'else',
     'if',
     'py',
+    'error',
+    'warning'
 ]
 
 tokens = [
@@ -115,6 +117,16 @@ def t_PREPROCESSING_KEYWORD_INCLUDE(t: lex.LexToken) -> lex.LexToken:
 
 def t_PREPROCESSING_KEYWORD_DEFINE(t: lex.LexToken) -> lex.LexToken:
     r'\#define\b'
+    return t
+
+
+def t_PREPROCESSING_KEYWORD_ERROR(t: lex.LexToken) -> lex.LexToken:
+    r'\#error\b'
+    return t
+
+
+def t_PREPROCESSING_KEYWORD_WARNING(t: lex.LexToken) -> lex.LexToken:
+    r'\#warning\b'
     return t
 
 
@@ -213,6 +225,7 @@ def t_comment_ignore_anything_else(t: lex.LexToken) -> lex.LexToken:
 def t_comment_NEWLINE(t: lex.LexToken) -> lex.LexToken:
     r'\n'
     t.lexer.lineno += 1  # the lexer doesn't know what consistutes a 'line' unless we tell it
+    symtable.LINE_COUNT += 1
     return t
 
 
@@ -225,6 +238,7 @@ def t_NEWLINE(t: lex.LexToken) -> lex.LexToken:
     r"\n"
     t.type = 'NEWLINE'
     t.lexer.lineno += 1  # the lexer doesn't know what consistutes a 'line' unless we tell it
+    symtable.LINE_COUNT += 1
     return t
 
 

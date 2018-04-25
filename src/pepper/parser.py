@@ -86,6 +86,8 @@ def p_statement_to_code_expression(p: yacc.YaccProduction) -> yacc.YaccProductio
 def p_pepper_directive(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     pepper_directive : preprocessor_expression
+                     | error_directive
+                     | warning_directive
     """
     p[0] = p[1]
 
@@ -387,7 +389,7 @@ def p_if_expression(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     symtable.IF_COUNT += 1
 
-    symtable.IF_STACK.append((str(symtable.IF_COUNT), True))
+    symtable.IF_STACK.append((str(symtable.IF_COUNT), p[3]))
     p[0] = ast.StringLiteralNode([f"// if expression result: { int(p[3]) }"])
 
 
@@ -716,6 +718,20 @@ def p_statement_to_char(p: yacc.YaccProduction) -> yacc.YaccProduction:
     safe_code_expression : CHAR_LITERAL
     """
     p[0] = ast.StringLiteralNode([p[1]])
+
+
+def p_error_directive(p: yacc.YaccProduction) ->yacc.YaccProduction:
+    """
+    error_directive : PREPROCESSING_KEYWORD_ERROR spaces STRING_LITERAL
+    """
+    p[0] = ast.PreprocessorErrorNode( [p[3]], symtable.LINE_COUNT, symtable.FILE_STACK[-1].name)
+
+
+def p_warning_directive(p: yacc.YaccProduction) ->yacc.YaccProduction:
+    """
+    warning_directive : PREPROCESSING_KEYWORD_WARNING spaces STRING_LITERAL
+    """
+    p[0] = ast.PreprocessorWarningNode([p[3]], symtable.LINE_COUNT, symtable.FILE_STACK[-1].name)
 
 
 def p_error(p: yacc.YaccProduction) -> yacc.YaccProduction:
