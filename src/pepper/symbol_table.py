@@ -31,8 +31,11 @@ TRIGGER_INTERNAL_ERROR = False
 IF_COUNT = 0
 #: Global Line Count
 LINE_COUNT = 0
+
+
 def build_default_include_lists() -> List[str]:
-    p = subprocess.run(["cpp", "-v", "/dev/null", "-o", "/dev/null"],
+    # gcc -print-prog-name=cc1plus` -v /dev/null
+    p = subprocess.run(["echo", "|", "gcc", "-E", "-Wp,-v", "-"],
                        stdout=subprocess.PIPE,
                        stderr=subprocess.PIPE)
     output_lines = p.stderr.decode('utf-8').split("\n")
