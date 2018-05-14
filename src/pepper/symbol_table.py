@@ -35,7 +35,7 @@ LINE_COUNT = 0
 
 def build_default_include_lists() -> List[str]:
     # gcc -print-prog-name=cc1plus` -v /dev/null
-    p = subprocess.run(["echo", "|", "gcc", "-E", "-Wp,-v", "-"],
+    p = subprocess.run(["gcc", "-xc++", "-E", "-v", "/dev/null"],
                        stdout=subprocess.PIPE,
                        stderr=subprocess.PIPE)
     output_lines = p.stderr.decode('utf-8').split("\n")
