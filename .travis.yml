@@ -18,7 +18,7 @@ before_install:
   - uname -a
   - lsb_release -a
 install:
-  - pip install -e .
+  - pip install -e . .\[develop\]
   - pip install tox diff_cover pytest pytest-cov flake8 mypy
   - virtualenv --version
   - easy_install --version
