@@ -54,19 +54,19 @@ setup(
         # eg: 'keyword1', 'keyword2', 'keyword3',
     ],
     install_requires=[
-        'diff_cover',
-        'flake8',
-        'ply>=3.10',
-        'pytest-cov',
-        'pytest',
-        'sphinx>=1.6.3',
-        'tox',
         'versioneer',
-        'wheel',
         # eg: 'aspectlib==1.1.1', 'six>=1.7',
     ],
     extras_require={
         'develop': [
+            'diff_cover',
+            'flake8',
+            'ply>=3.10',
+            'pytest-cov',
+            'pytest',
+            'sphinx>=1.6.3',
+            'tox',
+            'wheel',
              ]
         # eg:
         #   'rst': ['docutils>=0.11'],

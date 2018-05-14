@@ -33,7 +33,11 @@ The preprocessor will also implement all existing functionality within the C Pre
 
 ## Dependencies
 
-Dependencies are auto-installed with pip-based installation.
+To install dev dependencies in an editable pip install, use the command:
+
+```
+$ pip install -e . .[develop]
+```
 
 System-level prerequisites are Python 3.6 and pip.
 
