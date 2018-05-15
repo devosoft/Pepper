@@ -140,6 +140,11 @@ def t_SYSTEM_INCLUDE_LITERAL(t: lex.LexToken) -> lex.LexToken:
     return t
 
 
+def t_PREPROCESSING_NUMBER(t: lex.LexToken) -> lex.LexToken:
+    r'\.?[0-9]([0-9]|(e\+)|(e\-)|(E\+)|(E\-)|(p\+)|(p\-)|(P\+)|(P\-)|[a-zA-Z])*'
+    return t
+
+
 def t_IDENTIFIER(t: lex.LexToken) -> lex.LexToken:
     r'([_a-zA-Z][_a-zA-Z0-9]*(\.\.\.)?)|(\.\.\.)'
     return t
@@ -147,11 +152,6 @@ def t_IDENTIFIER(t: lex.LexToken) -> lex.LexToken:
 
 def t_INT_LITERAL(t: lex.LexToken) -> lex.LexToken:
     r'[0-9]+'
-    return t
-
-
-def t_PREPROCESSING_NUMBER(t: lex.LexToken) -> lex.LexToken:
-    r'\.?[0-9]([0-9]|(e\+)|(e\-)|(E\+)|(E\-)|(p\+)|(p\-)|(P\+)|(P\-)|[a-zA-Z])*'
     return t
 
 
