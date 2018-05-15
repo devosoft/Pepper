@@ -5,7 +5,10 @@
 import subprocess
 import shutil
 import sys
+import pytest
 from pathlib import Path
+from bunch import Bunch
+from unittest.mock import MagicMock
 
 import pepper.symbol_table as symtable
 import pepper.abstract_symbol_tree as ast
@@ -85,6 +88,7 @@ def reset_state():
     symtable.EXPANDED_MACRO = False
     symtable.TRIGGER_INTERNAL_ERROR = False
     symtable.IF_COUNT = 0
+    symtable.IGNORED_FILE_PATHS = set()
 
 def preprocess_and_compare(source, reference, tmpdir, supportfiles=[], optional_args=[]):
     test_dir = tmpdir.mkdir('preprocessor')
@@ -178,7 +182,7 @@ class TestUnit:
         symtable.SYSTEM_INCLUDE_PATHS.append(str(test_dir.realpath()))
 
         found = ast.PreprocessorIncludeNode.search_system_includes('SomeFile.h')
-        expected = Path(f"{test_dir.realpath()}/{'SomeFile.h'}")
+        expected = str(Path(f"{test_dir.realpath()}/{'SomeFile.h'}"))
 
         assert(found and (found == expected))
 
@@ -335,6 +339,59 @@ class TestUnit:
     def test_warning_directive_not_raised(self, tmpdir):
         preprocess_and_compare("no_warning.cpp", "no_warning.cpp.preprocessed.cc",
                                tmpdir)
+
+    def test_pragma_once_handler(self, tmpdir):
+        assert "once" in symtable.PRAGMA_HANDLERS
+
+        # should techincally be 'r' but then it'd fail
+        symtable.FILE_STACK.append(open('./SomeFile.h', 'w'))
+        symtable.PRAGMA_HANDLERS["once"]()
+
+        assert "./SomeFile.h" in symtable.IGNORED_FILE_PATHS
+        symtable.FILE_STACK = [Bunch(name="BaseFile.h")]
+
+        include_node = ast.PreprocessorIncludeNode(["'SomeFile.h'"], False)
+        include_node.preprocess()
+
+        assert len(symtable.FILE_STACK) == 1
+
+    def test_pragma_with_arguments(self, tmpdir):
+        mock_handler = MagicMock()
+        symtable.PRAGMA_HANDLERS['test'] = mock_handler
+
+        in_contents = [
+            "#pragma test ('ragnlebalrgle testing wooo')"
+        ]
+
+        expected = ["", ""]
+
+        args = FakeArgs()
+        args.input_file = FakeFile("arged_pragma.cc", in_contents)
+        expected_file = FakeFile("whatever", expected)
+
+        preprocess_and_compare_functionally(None, expected_file, args)
+
+        assert len(mock_handler.mock_calls) == 1
+
+    def test_unknown_pragma(self, tmpdir):
+
+        in_contents = [
+            "#pragma unknwon ('ragnlebalrgle testing wooo')"
+        ]
+
+        expected = ["", ""]
+
+        args = FakeArgs()
+        args.input_file = FakeFile("arged_pragma.cc", in_contents)
+        expected_file = FakeFile("whatever", expected)
+
+        with pytest.raises(symtable.PepperInternalError):
+            preprocess_and_compare_functionally(None, expected_file, args)
+
+    def test_pragma_preprocessor(self, tmpdir):
+        preprocess_and_compare("pragma_base.cc", "pragma_base.cc.preprocessed.cc",
+                               tmpdir,
+                               ['pragma_include.h'])
 
 
 class TestSystem:

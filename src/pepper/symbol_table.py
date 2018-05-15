@@ -9,14 +9,17 @@ import sys
 import re  # because we need more performance issues
 import subprocess
 from typing import (
-    Dict,
-    TextIO,
-    List,
-    Tuple,
     Any,
+    cast,
+    Dict,
+    List,
     Optional,
+    Set,
+    TextIO,
+    Tuple,
     Union,
-    cast)
+    Callable,
+)
 
 #: The stack of files we're reading from
 FILE_STACK: List[TextIO] = []
@@ -31,6 +34,10 @@ TRIGGER_INTERNAL_ERROR = False
 IF_COUNT = 0
 #: Global Line Count
 LINE_COUNT = 0
+#: Files that now get ignored when included
+IGNORED_FILE_PATHS: Set[str] = set()
+#: Dictionary of pragma handlers
+PRAGMA_HANDLERS: Dict[str, Callable] = dict()
 
 
 def build_default_include_lists() -> List[str]:
@@ -83,6 +90,7 @@ class PepperSyntaxError(Exception):
 class PepperInternalError(Exception):
     def __init__(self, msg: str="") -> None:
         self.msg = msg
+
 
 class MacroExpansion():
     "Expands an identifier into a macro expansion, possibly with arguments"
@@ -181,4 +189,13 @@ class MacroExpansion():
         return f"Macro {self.name} with args {self.args} expanding to '{self.expansion}'"
 
 
+def register_default_pragmas() -> None:
+
+    def pragma_once() -> None:
+        IGNORED_FILE_PATHS.add(FILE_STACK[-1].name)
+
+    PRAGMA_HANDLERS['once'] = pragma_once
+
+
+register_default_pragmas()
 TABLE: Dict[str, MacroExpansion] = dict()

@@ -32,6 +32,29 @@ class LinesNode(Node):
         return result
 
 
+class PragmaHandlerNode(Node):
+    def __init__(self, children: List[str] = []) -> None:
+        super(PragmaHandlerNode, self).__init__("PragmaHandler", children)
+        self.pragma_name = children[0]
+        self.pragma_args: Optional[str] = None
+        try:
+            self.pragma_args = children[1]
+        except IndexError:
+            pass
+
+    def preprocess(self, lines: Optional[List[str]] = None) -> str:
+        if self.pragma_name in symtable.PRAGMA_HANDLERS:
+            if self.pragma_args is not None:
+                symtable.PRAGMA_HANDLERS[str(self.pragma_name)](self.pragma_args)
+            else:
+                symtable.PRAGMA_HANDLERS[str(self.pragma_name)]()
+
+        else:
+            raise symtable.PepperInternalError(f"Unknown pragma {self.pragma_name}")
+
+        return f"// ran pragma handler for {self.pragma_name} with args {self.pragma_args}"
+
+
 class PreprocessorDirectiveNode(Node):
 
     def __init__(self, children: List[Node] = []) -> None:
@@ -49,11 +72,11 @@ class PreprocessorIncludeNode(Node):
         return f"{self.name}: {self.children[0]}"
 
     @staticmethod
-    def search_system_includes(filename: str) -> Path:
+    def search_system_includes(filename: str) -> str:
         for system_path in symtable.SYSTEM_INCLUDE_PATHS:
             candidate = Path(f"{system_path}/{filename}")
             if candidate.exists() and candidate.is_file():
-                return candidate
+                return str(candidate)
 
         raise OSError(f"Could not find file {filename} in defined system include paths: "
                       f"{symtable.SYSTEM_INCLUDE_PATHS}")
@@ -61,17 +84,21 @@ class PreprocessorIncludeNode(Node):
     def preprocess(self, lines: Optional[List[str]] = None) -> str:
         "This will be a lie for a while. I'll have to fix it later."
 
-        if lines:
-            lines[-1] = lines[-1] + 'static_assert(0, "include node not properly implemented")'
+        base = os.path.split(symtable.FILE_STACK[-1].name)[0]
+
+        if len(base) == 0:
+            base = '.'
+
+        target = base + '/' + self.target
+
         if self.system_include:
             found_path = PreprocessorIncludeNode.search_system_includes(self.target)
-            symtable.FILE_STACK.append(open(found_path, 'r'))
+            target = found_path
 
-        else:
-            symtable.FILE_STACK.append(open(os.path.split(symtable.FILE_STACK[-1].name)[0]
-                                            + '/' + self.target, 'r'))
+        if target not in symtable.IGNORED_FILE_PATHS:
+            symtable.FILE_STACK.append(open(target, 'r'))
 
-        return 'static_assert(0, "include node not properly implemented")'
+        return f'#included {target}'
 
 
 class PreprocessorErrorNode(Node):

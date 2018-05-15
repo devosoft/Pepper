@@ -96,11 +96,12 @@ def p_include_expression(p: yacc.YaccProduction) -> yacc.YaccProduction:
     """
     preprocessor_expression : include_expression
                             | define_expression
+                            | else_expression
+                            | endif_expression
+                            | if_expression
                             | ifdef_expression
                             | ifndef_expression
-                            | endif_expression
-                            | else_expression
-                            | if_expression
+                            | pragma_expression
     """
     p[0] = p[1]
 
@@ -428,6 +429,20 @@ def p_ifndef_expression(p: yacc.YaccProduction) -> yacc.YaccProduction:
     symtable.IF_STACK.append((p[3], p[3] not in symtable.TABLE))
 
     p[0] = ast.StringLiteralNode([f"// ifndef expression {p[3]}"])
+
+
+def p_pragma(p: yacc.YaccProduction) -> yacc.YaccProduction:
+    """
+    pragma_expression : PREPROCESSING_KEYWORD_PRAGMA WHITESPACE IDENTIFIER WHITESPACE macro_expansion
+    """
+    p[0] = ast.PragmaHandlerNode([p[3], p[5]])
+
+
+def p_pragma_no_args(p: yacc.YaccProduction) -> yacc.YaccProduction:
+    """
+    pragma_expression : PREPROCESSING_KEYWORD_PRAGMA WHITESPACE IDENTIFIER
+    """
+    p[0] = ast.PragmaHandlerNode([p[3]])
 
 
 def p_else_expression(p: yacc.YaccProduction) -> yacc.YaccProduction:

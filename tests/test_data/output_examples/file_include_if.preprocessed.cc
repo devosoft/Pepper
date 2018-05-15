@@ -1,5 +1,5 @@
-static_assert(0, "include node not properly implemented")
-static_assert(0, "include node not properly implemented")
+
+
 
 
 bool ExpandTheMacro() {
