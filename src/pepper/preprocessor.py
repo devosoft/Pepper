@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import Optional
 import pepper.abstract_symbol_tree as ast
 
+
 def get_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
 

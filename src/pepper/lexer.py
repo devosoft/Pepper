@@ -41,31 +41,32 @@ PREPROCESSING_KEYWORDS = [
     'if',
     'py',
     'error',
-    'warning'
+    'warning',
+    'pragma'
 ]
 
 tokens = [
-    'IDENTIFIER',
-    'NEWLINE',
-    'OTHER',
-    'INT_LITERAL',
-    'PREPROCESSING_NUMBER',
-    'PUNCTUATOR',
-    'COMP_LTE',
-    'COMP_GTE',
-    'COMP_EQU',
-    'COMP_NEQU',
     'BOOL_AND',
     'BOOL_OR',
-    'L_SHIFT',
-    'R_SHIFT',
-    'DEFINED',
     'CHAR_LITERAL',
-    # 'SKIPPED_LINE',
-    'STRING_LITERAL',
-    'WHITESPACE',
+    'COMP_EQU',
+    'COMP_GTE',
+    'COMP_LTE',
+    'COMP_NEQU',
+    'DEFINED',
+    'IDENTIFIER',
+    'INT_LITERAL',
+    'L_SHIFT',
     'LONG_COMMENT',
-    'SYSTEM_INCLUDE_LITERAL'
+    'NEWLINE',
+    'OTHER',
+    'PREPROCESSING_NUMBER',
+    'PUNCTUATOR',
+    'R_SHIFT',
+    'STRING_LITERAL',
+    'SYSTEM_INCLUDE_LITERAL',
+    'WHITESPACE',
+    # 'SKIPPED_LINE',
 ]
 
 tokens.extend([f"PREPROCESSING_KEYWORD_{i.upper()}" for i in PREPROCESSING_KEYWORDS])
@@ -105,6 +106,7 @@ def t_PREPROCESSING_KEYWORD_IF(t: lex.LexToken) -> lex.LexToken:
     r'\#if\b'
     return t
 
+
 def t_PREPROCESSING_KEYWORD_ELSE(t: lex.LexToken) -> lex.LexToken:
     r'\#else\b'
     return t
@@ -122,6 +124,11 @@ def t_PREPROCESSING_KEYWORD_DEFINE(t: lex.LexToken) -> lex.LexToken:
 
 def t_PREPROCESSING_KEYWORD_ERROR(t: lex.LexToken) -> lex.LexToken:
     r'\#error\b'
+    return t
+
+
+def t_PREPROCESSING_KEYWORD_PRAGMA(t: lex.LexToken) -> lex.LexToken:
+    r'\#pragma\b'
     return t
 
 

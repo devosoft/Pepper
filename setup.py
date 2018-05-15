@@ -59,6 +59,7 @@ setup(
     ],
     extras_require={
         'develop': [
+            'bunch',
             'diff_cover',
             'flake8',
             'ply>=3.10',
