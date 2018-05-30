@@ -2,13 +2,13 @@
 # (C) Michigan State University, under the MIT License
 # See LICENSE.txt for more information
 
-import subprocess
-import shutil
-import sys
-import pytest
-from pathlib import Path
 from bunch import Bunch
+from pathlib import Path
 from unittest.mock import MagicMock
+import os
+import pytest
+import shutil
+import subprocess
 
 import pepper.symbol_table as symtable
 import pepper.abstract_symbol_tree as ast
@@ -354,6 +354,10 @@ class TestUnit:
         include_node.preprocess()
 
         assert len(symtable.FILE_STACK) == 1
+
+        # Teardown
+
+        os.remove('./SomeFile.h')
 
     def test_pragma_with_arguments(self, tmpdir):
         mock_handler = MagicMock()
