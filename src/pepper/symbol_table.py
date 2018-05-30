@@ -194,7 +194,11 @@ def register_default_pragmas() -> None:
     def pragma_once() -> None:
         IGNORED_FILE_PATHS.add(FILE_STACK[-1].name)
 
+    def pragma_gcc(*args) -> None:
+        print("Warning: pragma GCC called, not being passed on to file...")
+
     PRAGMA_HANDLERS['once'] = pragma_once
+    PRAGMA_HANDLERS['GCC'] = pragma_gcc
 
 
 register_default_pragmas()
