@@ -103,7 +103,7 @@ def t_PREPROCESSING_KEYWORD_ENDIF(t: lex.LexToken) -> lex.LexToken:
 
 
 def t_PREPROCESSING_KEYWORD_IF(t: lex.LexToken) -> lex.LexToken:
-    r'\#if\b'
+    r'\#\s?if\b'
     return t
 
 
@@ -153,7 +153,9 @@ def t_IDENTIFIER(t: lex.LexToken) -> lex.LexToken:
 
 
 def t_INT_LITERAL(t: lex.LexToken) -> lex.LexToken:
-    r'[0-9]+'
+    r'[0-9]+L?'
+    if t.value[-1] == 'L':
+        t.value = t.value[:-1]
     return t
 
 
